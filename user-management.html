@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>用户管理 - 企业管理系统</title>
+  <link rel="stylesheet" href="common.css" />
+</head>
+<body>
+  <!-- 顶部栏 -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-wrap">
+        <div class="logo-bg"><div class="logo-icon"></div></div>
+      </div>
+      <div>
+        <div class="system-name">企业管理系统</div>
+      </div>
+      <input class="search-box" placeholder="搜索功能、数据、用户..." />
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" title="通知">🔔<span class="badge">3</span></button>
+      <button class="icon-btn" title="帮助">❓</button>
+      <div class="user-menu">
+        <div class="avatar">肖</div>
+        <span class="user-name">肖先生</span>
+        <span style="color:var(--muted)">▼</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 侧边栏 -->
+  <aside class="sidebar">
+    <div class="nav-section">
+      <div class="nav-title">工作台</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span><span>首页概览</span></a>
+      <a class="nav-item"><span class="nav-icon">📊</span><span>数据报表</span></a>
+      <a class="nav-item"><span class="nav-icon">📋</span><span>待办事项</span></a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-title">组织管理</div>
+      <a class="nav-item" href="user-management.html"><span class="nav-icon">👥</span><span>用户管理</span></a>
+      <a class="nav-item" href="department.html"><span class="nav-icon">🏢</span><span>部门架构</span></a>
+      <a class="nav-item" href="role-permission.html"><span class="nav-icon">🔐</span><span>角色权限</span></a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-title">系统管理</div>
+      <a class="nav-item"><span class="nav-icon">⚙️</span><span>系统设置</span></a>
+      <a class="nav-item"><span class="nav-icon">📜</span><span>操作日志</span></a>
+      <a class="nav-item"><span class="nav-icon">🔒</span><span>安全审计</span></a>
+    </div>
+  </aside>
+
+  <!-- 主内容区 -->
+  <main class="main">
+    <!-- 页面头部 -->
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb">组织管理 / <span>用户管理</span></div>
+        <div class="page-title">用户管理</div>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('add')">+ 新增用户</button>
+    </div>
+
+    <!-- 筛选区 -->
+    <div class="filter-bar">
+      <div class="filter-row">
+        <div class="filter-item" style="flex:1;min-width:200px">
+          <label class="filter-label">关键词搜索</label>
+          <input class="filter-input" id="searchKeyword" placeholder="姓名/账号/手机号/邮箱" />
+        </div>
+        <div class="filter-item">
+          <label class="filter-label">部门</label>
+          <select class="filter-select" id="filterDept">
+            <option value="">全部部门</option>
+            <option value="tech">技术部</option>
+            <option value="product">产品部</option>
+            <option value="design">设计部</option>
+            <option value="hr">人力资源部</option>
+            <option value="finance">财务部</option>
+            <option value="sales">销售部</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <label class="filter-label">角色</label>
+          <select class="filter-select" id="filterRole">
+            <option value="">全部角色</option>
+            <option value="admin">管理员</option>
+            <option value="manager">部门经理</option>
+            <option value="user">普通用户</option>
+            <option value="guest">访客</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <label class="filter-label">状态</label>
+          <select class="filter-select" id="filterStatus">
+            <option value="">全部状态</option>
+            <option value="active">正常</option>
+            <option value="disabled">禁用</option>
+            <option value="pending">待激活</option>
+          </select>
+        </div>
+        <div class="filter-item" style="margin-top:auto">
+          <button class="btn btn-primary" style="height:36px" onclick="handleSearch()">🔍 搜索</button>
+        </div>
+        <div class="filter-item" style="margin-top:auto">
+          <button class="btn btn-outline" style="height:36px" onclick="handleReset()">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 批量操作栏 -->
+    <div class="batch-bar" id="batchBar" style="display:none">
+      <span class="batch-info">已选择 <strong id="selectedCount">0</strong> 个用户</span>
+      <div class="batch-actions">
+        <button class="btn btn-sm btn-outline" onclick="batchAction('启用')">批量启用</button>
+        <button class="btn btn-sm btn-outline" onclick="batchAction('禁用')">批量禁用</button>
+        <button class="btn btn-sm btn-danger" onclick="batchAction('删除')">批量删除</button>
+        <button class="btn btn-sm btn-outline" onclick="showToast('导出成功')">导出选中</button>
+      </div>
+    </div>
+
+    <!-- 表格 -->
+    <div class="table-card">
+      <div class="table-wrap">
+        <table id="userTable">
+          <thead>
+            <tr>
+              <th style="width:50px"><input type="checkbox" class="checkbox" id="selectAll" /></th>
+              <th>用户信息</th>
+              <th>部门</th>
+              <th>角色</th>
+              <th>状态</th>
+              <th>最后登录</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody">
+            <!-- 数据由 JS 渲染 -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 分页 -->
+      <div class="pagination">
+        <div class="page-info">共 <strong id="totalCount">2,847</strong> 条记录</div>
+        <div class="page-controls">
+          <span style="font-size:13px;color:var(--muted)">每页</span>
+          <select class="page-size" id="pageSize" onchange="changePageSize()">
+            <option>10</option>
+            <option selected>20</option>
+            <option>50</option>
+            <option>100</option>
+          </select>
+          <button class="page-btn" onclick="goToPage(1)" id="btnFirst">◀</button>
+          <button class="page-btn" onclick="prevPage()" id="btnPrev">&lt;</button>
+          <span id="pageNumbers"></span>
+          <button class="page-btn" onclick="nextPage()" id="btnNext">&gt;</button>
+          <button class="page-btn" onclick="goToPage(totalPages)" id="btnLast">▶</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 新增/编辑用户弹窗 -->
+  <div class="modal-overlay" id="userModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">新增用户</div>
+        <button class="modal-close" onclick="closeModal('userModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="userForm">
+          <input type="hidden" id="userId" />
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">姓名</label>
+              <input class="form-input" id="userName" placeholder="请输入姓名" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label required">账号</label>
+              <input class="form-input" id="userAccount" placeholder="请输入账号（英文/数字）" required />
+            </div>
+          </div>
+          <div class="form-row" id="passwordRow">
+            <div class="form-group">
+              <label class="form-label required">密码</label>
+              <input class="form-input" type="password" id="userPassword" placeholder="请输入密码" />
+              <div class="form-hint">至少 8 位，含大小写字母和数字</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">确认密码</label>
+              <input class="form-input" type="password" id="userPasswordConfirm" placeholder="请再次输入密码" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">手机号</label>
+              <input class="form-input" id="userPhone" placeholder="请输入手机号" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">邮箱</label>
+              <input class="form-input" type="email" id="userEmail" placeholder="请输入邮箱" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">部门</label>
+              <select class="form-select" id="userDept" required>
+                <option value="">请选择部门</option>
+                <option value="tech">技术部</option>
+                <option value="product">产品部</option>
+                <option value="design">设计部</option>
+                <option value="hr">人力资源部</option>
+                <option value="finance">财务部</option>
+                <option value="sales">销售部</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label required">角色</label>
+              <select class="form-select" id="userRole" required>
+                <option value="">请选择角色</option>
+                <option value="admin">管理员</option>
+                <option value="manager">部门经理</option>
+                <option value="user">普通用户</option>
+                <option value="guest">访客</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">状态</label>
+            <select class="form-select" id="userStatus">
+              <option value="active">正常</option>
+              <option value="disabled">禁用</option>
+              <option value="pending">待激活</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('userModal')">取消</button>
+        <button class="btn btn-primary" onclick="saveUser()">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 重置密码弹窗 -->
+  <div class="modal-overlay" id="resetModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">重置密码</div>
+        <button class="modal-close" onclick="closeModal('resetModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">用户</label>
+          <div style="font-size:14px;color:#fff;padding:10px 0" id="resetUserName">张三 (zhangsan)</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">新密码</label>
+          <input class="form-input" type="password" id="newPassword" placeholder="请输入新密码" />
+          <div class="form-hint">至少 8 位，含大小写字母和数字</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">确认新密码</label>
+          <input class="form-input" type="password" id="newPasswordConfirm" placeholder="请再次输入新密码" />
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer">
+            <input type="checkbox" id="sendEmail" /> 同时发送邮件通知用户
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('resetModal')">取消</button>
+        <button class="btn btn-primary" onclick="resetPassword()">确定重置</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    // 模拟用户数据
+    let users = [
+      { id: 1, name: '张三', account: 'zhangsan', dept: 'tech', role: 'admin', status: 'active', lastLogin: '2026-04-04 09:15', avatarColor: 'linear-gradient(135deg,#60A5FA,#3B82F6)' },
+      { id: 2, name: '李四', account: 'lisi', dept: 'product', role: 'manager', status: 'active', lastLogin: '2026-04-03 18:30', avatarColor: 'linear-gradient(135deg,#FBBF24,#F59E0B)' },
+      { id: 3, name: '王五', account: 'wangwu', dept: 'design', role: 'user', status: 'disabled', lastLogin: '2026-03-28 14:20', avatarColor: 'linear-gradient(135deg,#4ADE80,#22C55E)' },
+      { id: 4, name: '赵六', account: 'zhaoliu', dept: 'hr', role: 'user', status: 'pending', lastLogin: '从未登录', avatarColor: 'linear-gradient(135deg,#F87171,#EF4444)' },
+      { id: 5, name: '钱七', account: 'qianqi', dept: 'finance', role: 'manager', status: 'active', lastLogin: '2026-04-04 11:05', avatarColor: 'linear-gradient(135deg,#60A5FA,#3B82F6)' },
+      { id: 6, name: '孙八', account: 'sunba', dept: 'sales', role: 'user', status: 'active', lastLogin: '2026-04-02 16:40', avatarColor: 'linear-gradient(135deg,#A78BFA,#8B5CF6)' },
+      { id: 7, name: '周九', account: 'zhoujiu', dept: 'tech', role: 'user', status: 'active', lastLogin: '2026-04-04 08:50', avatarColor: 'linear-gradient(135deg,#FB7185,#F43F5E)' },
+      { id: 8, name: '吴十', account: 'wushi', dept: 'product', role: 'user', status: 'disabled', lastLogin: '2026-03-15 10:20', avatarColor: 'linear-gradient(135deg,#34D399,#10B981)' },
+      { id: 9, name: '郑十一', account: 'zhengshiyi', dept: 'design', role: 'user', status: 'active', lastLogin: '2026-04-01 15:30', avatarColor: 'linear-gradient(135deg,#60A5FA,#3B82F6)' },
+      { id: 10, name: '陈十二', account: 'chenshier', dept: 'hr', role: 'manager', status: 'active', lastLogin: '2026-04-04 10:20', avatarColor: 'linear-gradient(135deg,#FBBF24,#F59E0B)' },
+      { id: 11, name: '林十三', account: 'linshisan', dept: 'tech', role: 'user', status: 'pending', lastLogin: '从未登录', avatarColor: 'linear-gradient(135deg,#4ADE80,#22C55E)' },
+      { id: 12, name: '黄十四', account: 'huangshisi', dept: 'sales', role: 'admin', status: 'active', lastLogin: '2026-04-03 17:45', avatarColor: 'linear-gradient(135deg,#F87171,#EF4444)' }
+    ];
+
+    // 部门/角色/状态映射
+    const deptMap = { tech: '技术部', product: '产品部', design: '设计部', hr: '人力资源部', finance: '财务部', sales: '销售部' };
+    const roleMap = { admin: '管理员', manager: '部门经理', user: '普通用户', guest: '访客' };
+    const statusMap = { active: { text: '正常', class: 'status-active' }, disabled: { text: '禁用', class: 'status-disabled' }, pending: { text: '待激活', class: 'status-pending' } };
+
+    // 分页状态
+    let currentPage = 1;
+    let pageSize = 20;
+    let filteredUsers = [...users];
+    let editingUserId = null;
+    let resettingUserId = null;
+
+    // 渲染表格
+    function renderTable() {
+      const tbody = document.getElementById('userTableBody');
+      const start = (currentPage - 1) * pageSize;
+      const end = start + pageSize;
+      const pageData = filteredUsers.slice(start, end);
+
+      tbody.innerHTML = pageData.map(user => {
+        const status = statusMap[user.status];
+        return `
+          <tr data-id="${user.id}">
+            <td><input type="checkbox" class="checkbox user-checkbox" value="${user.id}" /></td>
+            <td>
+              <div class="user-cell">
+                <div class="user-avatar" style="background:${user.avatarColor}">${user.name[0]}</div>
+                <div class="user-info">
+                  <span class="user-name-cell">${user.name}</span>
+                  <span class="user-account">${user.account}</span>
+                </div>
+              </div>
+            </td>
+            <td>${deptMap[user.dept]}</td>
+            <td>${roleMap[user.role]}</td>
+            <td><span class="status-badge ${status.class}">${status.text}</span></td>
+            <td>${user.lastLogin}</td>
+            <td>
+              <div class="action-btns">
+                <a class="action-link" onclick="editUser(${user.id})">编辑</a>
+                <a class="action-link" onclick="openResetModal(${user.id})">重置密码</a>
+                <a class="action-link danger" onclick="deleteUser(${user.id})">删除</a>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // 重新绑定复选框事件
+      document.querySelectorAll('.user-checkbox').forEach(cb => {
+        cb.addEventListener('change', () => TableBatch.updateBatchBar());
+      });
+
+      updatePagination();
+    }
+
+    // 更新分页
+    function updatePagination() {
+      const totalPages = Math.ceil(filteredUsers.length / pageSize) || 1;
+      document.getElementById('totalCount').textContent = filteredUsers.length.toLocaleString();
+      
+      // 更新按钮状态
+      document.getElementById('btnFirst').disabled = currentPage === 1;
+      document.getElementById('btnPrev').disabled = currentPage === 1;
+      document.getElementById('btnNext').disabled = currentPage === totalPages;
+      document.getElementById('btnLast').disabled = currentPage === totalPages;
+
+      // 生成页码
+      let html = '';
+      const maxVisible = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+      
+      if (endPage - startPage < maxVisible - 1) {
+        startPage = Math.max(1, endPage - maxVisible + 1);
+      }
+
+      if (startPage > 1) {
+        html += `<button class="page-btn ${1 === currentPage ? 'active' : ''}" onclick="goToPage(1)">1</button>`;
+        if (startPage > 2) html += `<span style="color:var(--muted);padding:0 4px">...</span>`;
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) html += `<span style="color:var(--muted);padding:0 4px">...</span>`;
+        html += `<button class="page-btn ${totalPages === currentPage ? 'active' : ''}" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+      }
+
+      document.getElementById('pageNumbers').innerHTML = html;
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      renderTable();
+    }
+
+    function prevPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    }
+
+    function nextPage() {
+      const totalPages = Math.ceil(filteredUsers.length / pageSize);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
+      }
+    }
+
+    function changePageSize() {
+      pageSize = parseInt(document.getElementById('pageSize').value);
+      currentPage = 1;
+      renderTable();
+    }
+
+    // 搜索
+    function handleSearch() {
+      const keyword = document.getElementById('searchKeyword').value.toLowerCase();
+      const dept = document.getElementById('filterDept').value;
+      const role = document.getElementById('filterRole').value;
+      const status = document.getElementById('filterStatus').value;
+
+      filteredUsers = users.filter(user => {
+        const matchKeyword = !keyword || 
+          user.name.toLowerCase().includes(keyword) || 
+          user.account.toLowerCase().includes(keyword);
+        const matchDept = !dept || user.dept === dept;
+        const matchRole = !role || user.role === role;
+        const matchStatus = !status || user.status === status;
+        return matchKeyword && matchDept && matchRole && matchStatus;
+      });
+
+      currentPage = 1;
+      renderTable();
+      showToast(`搜索完成，共找到 ${filteredUsers.length} 条记录`);
+    }
+
+    function handleReset() {
+      document.getElementById('searchKeyword').value = '';
+      document.getElementById('filterDept').value = '';
+      document.getElementById('filterRole').value = '';
+      document.getElementById('filterStatus').value = '';
+      filteredUsers = [...users];
+      currentPage = 1;
+      renderTable();
+      showToast('筛选已重置');
+    }
+
+    // 新增/编辑用户
+    function editUser(id) {
+      const user = users.find(u => u.id === id);
+      if (!user) return;
+
+      editingUserId = id;
+      document.getElementById('modalTitle').textContent = '编辑用户';
+      document.getElementById('userId').value = user.id;
+      document.getElementById('userName').value = user.name;
+      document.getElementById('userAccount').value = user.account;
+      document.getElementById('userDept').value = user.dept;
+      document.getElementById('userRole').value = user.role;
+      document.getElementById('userStatus').value = user.status;
+      document.getElementById('passwordRow').style.display = 'none';
+
+      ModalManager.open('userModal');
+    }
+
+    // 覆盖全局 openModal
+    window.openModal = function(type) {
+      if (type === 'add') {
+        editingUserId = null;
+        document.getElementById('modalTitle').textContent = '新增用户';
+        document.getElementById('userForm').reset();
+        document.getElementById('userId').value = '';
+        document.getElementById('passwordRow').style.display = 'flex';
+        ModalManager.open('userModal');
+      }
+    };
+
+    function saveUser() {
+      const name = document.getElementById('userName').value.trim();
+      const account = document.getElementById('userAccount').value.trim();
+      const dept = document.getElementById('userDept').value;
+      const role = document.getElementById('userRole').value;
+      const status = document.getElementById('userStatus').value;
+
+      if (!name || !account || !dept || !role) {
+        showToast('请填写必填项', 'error');
+        return;
+      }
+
+      if (editingUserId) {
+        // 编辑
+        const user = users.find(u => u.id === editingUserId);
+        if (user) {
+          user.name = name;
+          user.account = account;
+          user.dept = dept;
+          user.role = role;
+          user.status = status;
+          showToast('用户更新成功');
+        }
+      } else {
+        // 新增
+        const password = document.getElementById('userPassword').value;
+        const passwordConfirm = document.getElementById('userPasswordConfirm').value;
+        
+        if (!password || password.length < 8) {
+          showToast('密码至少 8 位', 'error');
+          return;
+        }
+        if (password !== passwordConfirm) {
+          showToast('两次输入的密码不一致', 'error');
+          return;
+        }
+
+        const colors = [
+          'linear-gradient(135deg,#60A5FA,#3B82F6)',
+          'linear-gradient(135deg,#FBBF24,#F59E0B)',
+          'linear-gradient(135deg,#4ADE80,#22C55E)',
+          'linear-gradient(135deg,#F87171,#EF4444)',
+          'linear-gradient(135deg,#A78BFA,#8B5CF6)',
+          'linear-gradient(135deg,#FB7185,#F43F5E)',
+          'linear-gradient(135deg,#34D399,#10B981)'
+        ];
+
+        const newUser = {
+          id: Date.now(),
+          name,
+          account,
+          dept,
+          role,
+          status,
+          lastLogin: '从未登录',
+          avatarColor: colors[Math.floor(Math.random() * colors.length)]
+        };
+        users.unshift(newUser);
+        filteredUsers = [...users];
+        showToast('用户创建成功');
+      }
+
+      closeModal('userModal');
+      renderTable();
+    }
+
+    // 删除用户
+    function deleteUser(id) {
+      confirmAction('删除该用户', () => {
+        users = users.filter(u => u.id !== id);
+        filteredUsers = filteredUsers.filter(u => u.id !== id);
+        renderTable();
+        showToast('删除成功');
+      });
+    }
+
+    // 重置密码
+    function openResetModal(id) {
+      const user = users.find(u => u.id === id);
+      if (!user) return;
+      
+      resettingUserId = id;
+      document.getElementById('resetUserName').textContent = `${user.name} (${user.account})`;
+      document.getElementById('newPassword').value = '';
+      document.getElementById('newPasswordConfirm').value = '';
+      document.getElementById('sendEmail').checked = false;
+      ModalManager.open('resetModal');
+    }
+
+    function resetPassword() {
+      const password = document.getElementById('newPassword').value;
+      const passwordConfirm = document.getElementById('newPasswordConfirm').value;
+
+      if (!password || password.length < 8) {
+        showToast('密码至少 8 位', 'error');
+        return;
+      }
+      if (password !== passwordConfirm) {
+        showToast('两次输入的密码不一致', 'error');
+        return;
+      }
+
+      closeModal('resetModal');
+      const sendEmail = document.getElementById('sendEmail').checked;
+      showToast(sendEmail ? '密码已重置，邮件通知已发送' : '密码重置成功');
+    }
+
+    // 批量操作
+    function batchAction(action) {
+      const selected = TableBatch.getSelected();
+      if (selected.length === 0) {
+        showToast('请先选择用户', 'warning');
+        return;
+      }
+      
+      confirmAction(`${action}选中的 ${selected.length} 个用户`, () => {
+        const selectedIds = Array.from(document.querySelectorAll('.user-checkbox:checked')).map(cb => parseInt(cb.value));
+        
+        if (action === '删除') {
+          users = users.filter(u => !selectedIds.includes(u.id));
+        } else if (action === '启用') {
+          users.forEach(u => { if (selectedIds.includes(u.id)) u.status = 'active'; });
+        } else if (action === '禁用') {
+          users.forEach(u => { if (selectedIds.includes(u.id)) u.status = 'disabled'; });
+        }
+        
+        filteredUsers = [...users];
+        renderTable();
+        document.getElementById('batchBar').style.display = 'none';
+        document.getElementById('selectAll').checked = false;
+        showToast(`批量${action}成功`);
+      });
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTable();
+    });
+  </script>
+</body>
+</html>

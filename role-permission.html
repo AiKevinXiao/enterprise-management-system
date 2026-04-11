@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>角色权限 - 企业管理系统</title>
+  <link rel="stylesheet" href="common.css" />
+  <style>
+    /* 角色权限专用样式 */
+    .role-layout{
+      display:grid;grid-template-columns:320px 1fr;gap:20px;
+    }
+    .role-list-card{
+      background:var(--bg-elev);border:1px solid var(--border);
+      border-radius:var(--radius);overflow:hidden;
+    }
+    .list-header{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:16px;border-bottom:1px solid var(--border);
+    }
+    .list-title{font-size:15px;font-weight:600;color:#fff}
+    .role-list{list-style:none;max-height:calc(100vh - 200px);overflow-y:auto}
+    .role-item{
+      padding:14px 16px;border-bottom:1px solid var(--border);
+      cursor:pointer;transition:.15s;
+    }
+    .role-item:hover{background:var(--bg-hover)}
+    .role-item.active{background:var(--primary-light);border-left:3px solid var(--primary)}
+    .role-name{font-size:14px;font-weight:500;color:#fff;margin-bottom:6px}
+    .role-desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:8px}
+    .role-meta{display:flex;justify-content:space-between;align-items:center}
+    .role-count{font-size:11px;color:var(--muted);background:var(--bg-hover);padding:2px 8px;border-radius:10px}
+    .role-time{font-size:11px;color:var(--muted)}
+
+    .permission-card{
+      background:var(--bg-elev);border:1px solid var(--border);
+      border-radius:var(--radius);overflow:hidden;
+    }
+    .perm-header{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:20px;border-bottom:1px solid var(--border);
+    }
+    .perm-title-wrap{display:flex;align-items:center;gap:12px}
+    .perm-badge{
+      padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;
+      background:var(--primary-light);color:var(--primary);
+    }
+    .perm-title{font-size:18px;font-weight:600;color:#fff}
+    .perm-subtitle{font-size:13px;color:var(--muted);margin-top:4px}
+    .perm-actions{display:flex;gap:10px}
+
+    .perm-body{padding:20px}
+    .perm-info-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;
+    }
+    .perm-info-item{
+      background:var(--bg);border:1px solid var(--border);
+      border-radius:10px;padding:16px;text-align:center;
+    }
+    .perm-info-num{font-size:24px;font-weight:600;color:var(--primary);margin-bottom:4px}
+    .perm-info-label{font-size:12px;color:var(--muted)}
+
+    .perm-module{
+      background:var(--bg);border:1px solid var(--border);
+      border-radius:10px;margin-bottom:16px;overflow:hidden;
+    }
+    .module-header{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:14px 16px;border-bottom:1px solid var(--border);
+      cursor:pointer;transition:.15s;
+    }
+    .module-header:hover{background:var(--bg-hover)}
+    .module-title{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:#fff}
+    .module-icon{font-size:16px}
+    .module-actions{display:flex;align-items:center;gap:12px}
+    .module-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+    .module-check input{width:16px;height:16px;cursor:pointer}
+    .module-toggle{
+      width:24px;height:24px;border:none;border-radius:6px;
+      background:var(--bg-hover);color:var(--muted);
+      cursor:pointer;font-size:12px;transition:.15s;
+    }
+    .module-toggle:hover{color:var(--text)}
+    .module-permissions{
+      padding:12px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+    }
+    .module-permissions.collapsed{display:none}
+    .perm-item{
+      display:flex;align-items:center;gap:8px;
+      padding:8px 10px;border-radius:6px;
+      transition:.15s;
+    }
+    .perm-item:hover{background:var(--bg-hover)}
+    .perm-item input{width:16px;height:16px;cursor:pointer}
+    .perm-item label{font-size:13px;color:var(--text);cursor:pointer;flex:1}
+
+    .form-textarea{
+      width:100%;min-height:100px;border:1px solid var(--border);
+      border-radius:8px;padding:12px;font-size:14px;
+      outline:none;background:var(--bg);color:var(--text);resize:vertical;
+    }
+    .form-textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+
+    @media(max-width:1024px){
+      .role-layout{grid-template-columns:1fr}
+      .role-list-card{display:none}
+      .module-permissions{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:768px){
+      .perm-info-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部栏 -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-wrap"><div class="logo-bg"><div class="logo-icon"></div></div></div>
+      <div><div class="system-name">企业管理系统</div></div>
+      <input class="search-box" placeholder="搜索功能、数据、用户..." />
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" title="通知">🔔<span class="badge">3</span></button>
+      <button class="icon-btn" title="帮助">❓</button>
+      <div class="user-menu">
+        <div class="avatar">肖</div>
+        <span class="user-name">肖先生</span>
+        <span style="color:var(--muted)">▼</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 侧边栏 -->
+  <aside class="sidebar">
+    <div class="nav-section">
+      <div class="nav-title">工作台</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span><span>首页概览</span></a>
+      <a class="nav-item"><span class="nav-icon">📊</span><span>数据报表</span></a>
+      <a class="nav-item"><span class="nav-icon">📋</span><span>待办事项</span></a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-title">组织管理</div>
+      <a class="nav-item" href="user-management.html"><span class="nav-icon">👥</span><span>用户管理</span></a>
+      <a class="nav-item" href="department.html"><span class="nav-icon">🏢</span><span>部门架构</span></a>
+      <a class="nav-item" href="role-permission.html"><span class="nav-icon">🔐</span><span>角色权限</span></a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-title">系统管理</div>
+      <a class="nav-item"><span class="nav-icon">⚙️</span><span>系统设置</span></a>
+      <a class="nav-item"><span class="nav-icon">📜</span><span>操作日志</span></a>
+      <a class="nav-item"><span class="nav-icon">🔒</span><span>安全审计</span></a>
+    </div>
+  </aside>
+
+  <!-- 主内容区 -->
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <div class="breadcrumb">组织管理 / <span>角色权限</span></div>
+        <div class="page-title">角色权限</div>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('add')">+ 新增角色</button>
+    </div>
+
+    <div class="role-layout">
+      <!-- 左侧角色列表 -->
+      <div class="role-list-card">
+        <div class="list-header">
+          <span class="list-title">角色列表</span>
+          <span style="font-size:12px;color:var(--muted)" id="roleCount">共 8 个角色</span>
+        </div>
+        <ul class="role-list" id="roleList"></ul>
+      </div>
+
+      <!-- 右侧权限配置 -->
+      <div class="permission-card">
+        <div class="perm-header">
+          <div class="perm-title-wrap">
+            <div class="perm-badge" id="roleType">系统内置</div>
+            <div>
+              <div class="perm-title" id="permTitle">超级管理员</div>
+              <div class="perm-subtitle" id="permSubtitle">拥有系统全部权限 · 3 人在用</div>
+            </div>
+          </div>
+          <div class="perm-actions">
+            <button class="btn btn-sm btn-outline" onclick="openModal('edit')">编辑角色</button>
+            <button class="btn btn-sm btn-outline" onclick="copyRole()">复制角色</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteRole()">删除角色</button>
+          </div>
+        </div>
+
+        <div class="perm-body">
+          <div class="perm-info-grid">
+            <div class="perm-info-item">
+              <div class="perm-info-num" id="moduleCount">8</div>
+              <div class="perm-info-label">权限模块</div>
+            </div>
+            <div class="perm-info-item">
+              <div class="perm-info-num" id="permItemCount">47</div>
+              <div class="perm-info-label">权限项</div>
+            </div>
+            <div class="perm-info-item">
+              <div class="perm-info-num" id="permPercent">100%</div>
+              <div class="perm-info-label">已授权</div>
+            </div>
+          </div>
+          <div id="permModules"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 新增/编辑角色弹窗 -->
+  <div class="modal-overlay" id="roleModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">新增角色</div>
+        <button class="modal-close" onclick="closeModal('roleModal')">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="roleForm">
+          <input type="hidden" id="roleId" />
+          <div class="form-group">
+            <label class="form-label required">角色名称</label>
+            <input class="form-input" id="roleName" placeholder="请输入角色名称" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">角色标识</label>
+            <input class="form-input" id="roleCode" placeholder="请输入角色标识（英文/下划线）" />
+          </div>
+          <div class="form-group">
+            <label class="form-label required">角色描述</label>
+            <textarea class="form-textarea" id="roleDesc" placeholder="请输入角色描述"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">数据权限范围</label>
+            <select class="form-select" id="roleDataScope">
+              <option value="all">全部数据</option>
+              <option value="dept">本部门及下级部门</option>
+              <option value="self">仅本人数据</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('roleModal')">取消</button>
+        <button class="btn btn-primary" onclick="saveRole()">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    // 角色数据
+    let roles = [
+      { id: 'admin', name: '👑 超级管理员', code: 'admin', desc: '拥有系统全部权限，可进行任何操作', type: 'system', userCount: 3, created: '2026-01-01' },
+      { id: 'dept-manager', name: '🏢 部门经理', code: 'dept_manager', desc: '管理部门成员，查看部门数据，审批流程', type: 'system', userCount: 12, created: '2026-01-15' },
+      { id: 'hr', name: '👥 人事专员', code: 'hr', desc: '管理员工档案、考勤、招聘等人事工作', type: 'system', userCount: 5, created: '2026-02-01' },
+      { id: 'finance', name: '💰 财务专员', code: 'finance', desc: '管理财务数据、报销审批、薪资核算', type: 'system', userCount: 4, created: '2026-02-01' },
+      { id: 'project-manager', name: '📋 项目经理', code: 'project_manager', desc: '管理项目进度、分配任务、查看项目报表', type: 'system', userCount: 8, created: '2026-02-10' },
+      { id: 'normal', name: '👤 普通员工', code: 'normal', desc: '基础办公权限，查看个人数据和公告', type: 'system', userCount: 156, created: '2026-01-01' },
+      { id: 'guest', name: '👁️ 访客', code: 'guest', desc: '仅可查看公开信息和公司简介', type: 'system', userCount: 2, created: '2026-03-01' },
+      { id: 'custom', name: '⚙️ 自定义角色', code: 'custom', desc: '根据需求灵活配置权限组合', type: 'custom', userCount: 0, created: '2026-03-15' }
+    ];
+
+    // 权限模块数据
+    const permModules = [
+      { id: 'dashboard', name: '首页概览', icon: '🏠', perms: [
+        { id: 'view-dashboard', name: '查看仪表盘' },
+        { id: 'view-stats', name: '查看统计数据' },
+        { id: 'export-dashboard', name: '导出报表' },
+        { id: 'config-dashboard', name: '配置仪表盘' }
+      ]},
+      { id: 'user', name: '用户管理', icon: '👥', perms: [
+        { id: 'user-view', name: '查看用户列表' },
+        { id: 'user-create', name: '新增用户' },
+        { id: 'user-edit', name: '编辑用户' },
+        { id: 'user-delete', name: '删除用户' },
+        { id: 'user-reset-pwd', name: '重置密码' },
+        { id: 'user-batch', name: '批量操作' },
+        { id: 'user-import', name: '导入用户' },
+        { id: 'user-export', name: '导出用户' }
+      ]},
+      { id: 'dept', name: '部门管理', icon: '🏢', perms: [
+        { id: 'dept-view', name: '查看部门架构' },
+        { id: 'dept-create', name: '新增部门' },
+        { id: 'dept-edit', name: '编辑部门' },
+        { id: 'dept-delete', name: '删除部门' },
+        { id: 'dept-export', name: '导出成员' }
+      ]},
+      { id: 'role', name: '角色权限', icon: '🔐', perms: [
+        { id: 'role-view', name: '查看角色列表' },
+        { id: 'role-create', name: '新增角色' },
+        { id: 'role-edit', name: '编辑角色' },
+        { id: 'role-delete', name: '删除角色' },
+        { id: 'role-assign', name: '分配权限' }
+      ]},
+      { id: 'report', name: '数据报表', icon: '📊', perms: [
+        { id: 'report-view', name: '查看报表' },
+        { id: 'report-create', name: '创建报表' },
+        { id: 'report-edit', name: '编辑报表' },
+        { id: 'report-export', name: '导出报表' },
+        { id: 'report-share', name: '分享报表' }
+      ]},
+      { id: 'system', name: '系统设置', icon: '⚙️', perms: [
+        { id: 'sys-view', name: '查看设置' },
+        { id: 'sys-edit', name: '修改设置' },
+        { id: 'sys-log', name: '查看日志' },
+        { id: 'sys-backup', name: '数据备份' },
+        { id: 'sys-restore', name: '数据恢复' }
+      ]}
+    ];
+
+    // 角色权限映射（简化版，实际应该每个角色有自己的权限配置）
+    let rolePermissions = {
+      admin: permModules.flatMap(m => m.perms.map(p => p.id)),
+      'dept-manager': ['view-dashboard', 'view-stats', 'user-view', 'dept-view', 'report-view', 'report-export'],
+      hr: ['view-dashboard', 'user-view', 'user-create', 'user-edit', 'dept-view'],
+      finance: ['view-dashboard', 'view-stats', 'report-view', 'report-export'],
+      'project-manager': ['view-dashboard', 'user-view', 'dept-view', 'report-view', 'report-create'],
+      normal: ['view-dashboard'],
+      guest: ['view-dashboard'],
+      custom: []
+    };
+
+    let currentRoleId = 'admin';
+    let editingRoleId = null;
+
+    // 渲染角色列表
+    function renderRoleList() {
+      const list = document.getElementById('roleList');
+      document.getElementById('roleCount').textContent = `共 ${roles.length} 个角色`;
+      
+      list.innerHTML = roles.map(role => `
+        <li class="role-item ${role.id === currentRoleId ? 'active' : ''}" onclick="selectRole('${role.id}')" data-id="${role.id}">
+          <div class="role-name">${role.name}</div>
+          <div class="role-desc">${role.desc}</div>
+          <div class="role-meta">
+            <span class="role-count">${role.userCount} 人</span>
+            <span class="role-time">${role.created}</span>
+          </div>
+        </li>
+      `).join('');
+    }
+
+    function selectRole(id) {
+      currentRoleId = id;
+      document.querySelectorAll('.role-item').forEach(i => i.classList.remove('active'));
+      const item = document.querySelector(`.role-item[data-id="${id}"]`);
+      if (item) item.classList.add('active');
+      renderPermissionPanel();
+    }
+
+    // 渲染权限面板
+    function renderPermissionPanel() {
+      const role = roles.find(r => r.id === currentRoleId);
+      if (!role) return;
+
+      document.getElementById('roleType').textContent = role.type === 'system' ? '系统内置' : '自定义';
+      document.getElementById('permTitle').textContent = role.name.replace(/^[^\s]+\s/, '');
+      document.getElementById('permSubtitle').textContent = `${role.desc} · ${role.userCount} 人在用`;
+
+      const perms = rolePermissions[currentRoleId] || [];
+      const totalPerms = permModules.reduce((sum, m) => sum + m.perms.length, 0);
+      
+      document.getElementById('moduleCount').textContent = permModules.length;
+      document.getElementById('permItemCount').textContent = totalPerms;
+      document.getElementById('permPercent').textContent = Math.round((perms.length / totalPerms) * 100) + '%';
+
+      document.getElementById('permModules').innerHTML = permModules.map((module, idx) => {
+        const moduleChecked = module.perms.every(p => perms.includes(p.id));
+        const modulePartial = module.perms.some(p => perms.includes(p.id)) && !moduleChecked;
+        
+        return `
+          <div class="perm-module">
+            <div class="module-header" onclick="toggleModule(this)">
+              <div class="module-title">
+                <span class="module-icon">${module.icon}</span>
+                <span>${module.name}</span>
+              </div>
+              <div class="module-actions">
+                <label class="module-check">
+                  <input type="checkbox" ${moduleChecked ? 'checked' : ''} ${modulePartial ? 'indeterminate' : ''} 
+                    onclick="event.stopPropagation();toggleAllInModule(this, '${module.id}')" />
+                  <span>全选</span>
+                </label>
+                <button class="module-toggle">▼</button>
+              </div>
+            </div>
+            <div class="module-permissions">
+              ${module.perms.map(p => `
+                <div class="perm-item">
+                  <input type="checkbox" id="${p.id}" ${perms.includes(p.id) ? 'checked' : ''} 
+                    onchange="updatePermission('${p.id}', this.checked)" />
+                  <label for="${p.id}">${p.name}</label>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleModule(header) {
+      const permissions = header.nextElementSibling;
+      const toggle = header.querySelector('.module-toggle');
+      const isCollapsed = permissions.classList.contains('collapsed');
+      permissions.classList.toggle('collapsed');
+      toggle.textContent = isCollapsed ? '▼' : '▲';
+    }
+
+    function toggleAllInModule(checkbox, moduleId) {
+      const module = permModules.find(m => m.id === moduleId);
+      if (!module) return;
+
+      const perms = rolePermissions[currentRoleId] || [];
+      if (checkbox.checked) {
+        module.perms.forEach(p => {
+          if (!perms.includes(p.id)) perms.push(p.id);
+        });
+      } else {
+        rolePermissions[currentRoleId] = perms.filter(id => !module.perms.some(p => p.id === id));
+      }
+      
+      renderPermissionPanel();
+      showToast(checkbox.checked ? '已全选该模块权限' : '已取消该模块权限');
+    }
+
+    function updatePermission(permId, checked) {
+      let perms = rolePermissions[currentRoleId] || [];
+      if (checked) {
+        if (!perms.includes(permId)) perms.push(permId);
+      } else {
+        perms = perms.filter(id => id !== permId);
+      }
+      rolePermissions[currentRoleId] = perms;
+      
+      // 更新百分比
+      const totalPerms = permModules.reduce((sum, m) => sum + m.perms.length, 0);
+      document.getElementById('permPercent').textContent = Math.round((perms.length / totalPerms) * 100) + '%';
+    }
+
+    // 弹窗
+    window.openModal = function(type) {
+      editingRoleId = type === 'edit' ? currentRoleId : null;
+      document.getElementById('modalTitle').textContent = type === 'add' ? '新增角色' : '编辑角色';
+      
+      if (type === 'edit') {
+        const role = roles.find(r => r.id === currentRoleId);
+        if (role) {
+          document.getElementById('roleName').value = role.name.replace(/^[^\s]+\s/, '');
+          document.getElementById('roleCode').value = role.code;
+          document.getElementById('roleDesc').value = role.desc;
+        }
+      } else {
+        document.getElementById('roleForm').reset();
+      }
+      
+      ModalManager.open('roleModal');
+    };
+
+    function saveRole() {
+      const name = document.getElementById('roleName').value.trim();
+      if (!name) {
+        showToast('请输入角色名称', 'error');
+        return;
+      }
+
+      if (editingRoleId) {
+        const role = roles.find(r => r.id === editingRoleId);
+        if (role) {
+          role.name = (role.name.match(/^[^\s]+/) || ['👤'])[0] + ' ' + name;
+          role.code = document.getElementById('roleCode').value;
+          role.desc = document.getElementById('roleDesc').value;
+          showToast('角色更新成功');
+        }
+      } else {
+        const newRole = {
+          id: 'role_' + Date.now(),
+          name: '👤 ' + name,
+          code: document.getElementById('roleCode').value || 'custom_' + Date.now(),
+          desc: document.getElementById('roleDesc').value || name,
+          type: 'custom',
+          userCount: 0,
+          created: new Date().toISOString().split('T')[0]
+        };
+        roles.push(newRole);
+        rolePermissions[newRole.id] = [];
+        currentRoleId = newRole.id;
+        showToast('角色创建成功');
+      }
+
+      closeModal('roleModal');
+      renderRoleList();
+      renderPermissionPanel();
+    }
+
+    function copyRole() {
+      const role = roles.find(r => r.id === currentRoleId);
+      if (!role) return;
+
+      const newRole = {
+        id: 'role_' + Date.now(),
+        name: role.name + ' (复制)',
+        code: role.code + '_copy',
+        desc: role.desc,
+        type: 'custom',
+        userCount: 0,
+        created: new Date().toISOString().split('T')[0]
+      };
+      roles.push(newRole);
+      rolePermissions[newRole.id] = [...(rolePermissions[currentRoleId] || [])];
+      currentRoleId = newRole.id;
+      
+      renderRoleList();
+      renderPermissionPanel();
+      showToast('角色已复制');
+    }
+
+    function deleteRole() {
+      const role = roles.find(r => r.id === currentRoleId);
+      if (!role) return;
+
+      if (role.type === 'system') {
+        showToast('系统内置角色不可删除', 'error');
+        return;
+      }
+      if (role.userCount > 0) {
+        showToast('该角色下还有用户，无法删除', 'error');
+        return;
+      }
+
+      confirmAction(`删除角色「${role.name}」`, () => {
+        roles = roles.filter(r => r.id !== currentRoleId);
+        delete rolePermissions[currentRoleId];
+        currentRoleId = roles[0]?.id || 'admin';
+        renderRoleList();
+        renderPermissionPanel();
+        showToast('角色已删除');
+      });
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      renderRoleList();
+      renderPermissionPanel();
+    });
+  </script>
+</body>
+</html>
