@@ -32,11 +32,11 @@ def main():
     print("="*50)
     print()
     
-    # Launch browser with isolated profile
+    # Launch browser with isolated profile and maximize
     print("Starting Edge browser...")
     launcher = BrowserLauncher()
     try:
-        cdp_url = launcher.launch(browser='edge', reuse_profile=False)
+        cdp_url = launcher.launch(browser='edge', reuse_profile=False, window_size='maximized')
     except BrowserNeedsCDPError as e:
         print(f"Error: {e}")
         return
@@ -59,6 +59,16 @@ def main():
         tab = client.create_tab('http://localhost:8888/login.html')
         client.attach(tab['id'])
         print("Created new tab")
+    
+    # Maximize window
+    print("Maximizing window...")
+    try:
+        client.send('Browser.setWindowBounds', {
+            'windowId': 1,
+            'bounds': {'windowState': 'maximized'}
+        })
+    except:
+        pass
     
     actions = BrowserActions(client, None)
     actions.wait_for_load()
