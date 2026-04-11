@@ -25,27 +25,23 @@ const RouteState = {
   // 初始化导航高亮
   initNav() {
     const currentPage = window.location.pathname.split('/').pop().replace('.html', '') || 'dashboard';
-    const savedPage = this.load();
-    
-    // 优先使用当前页面，其次使用保存的状态
-    const activePage = currentPage !== 'dashboard' || !savedPage ? currentPage : savedPage;
     
     document.querySelectorAll('.nav-item').forEach(item => {
       item.classList.remove('active');
       const href = item.getAttribute('href');
       if (href) {
         const pageName = href.replace('.html', '');
-        if (pageName === activePage || (activePage === 'dashboard' && pageName === 'dashboard')) {
+        if (pageName === currentPage) {
           item.classList.add('active');
         }
-      } else if (activePage === 'dashboard' && item.textContent.includes('首页概览')) {
-        // dashboard 页面特殊处理
+      } else if (currentPage === 'dashboard' && item.textContent.includes('首页概览')) {
+        // dashboard 页面特殊处理 - 匹配没有 href 的首页概览菜单项
         item.classList.add('active');
       }
     });
     
     // 保存当前页面状态
-    this.save(activePage);
+    this.save(currentPage);
   }
 };
 
