@@ -135,7 +135,7 @@ body{
 }
 .breadcrumb{font-size:13px;color:var(--muted);margin-bottom:6px}
 .breadcrumb span{color:var(--primary)}
-.page-title{font-size:22px;font-weight:600;color:#fff}
+.page-title{font-size:22px;font-weight:600;color:var(--text)}
 
 /* 按钮 */
 .btn{
@@ -167,7 +167,7 @@ body{
   display:flex;justify-content:space-between;align-items:center;
   margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);
 }
-.card-title{font-size:16px;font-weight:600;color:#fff}
+.card-title{font-size:16px;font-weight:600;color:var(--text)}
 
 /* 筛选区 */
 .filter-bar{
@@ -282,7 +282,7 @@ tr:hover{background:var(--bg-hover)}
   display:flex;justify-content:space-between;align-items:center;
   padding:20px;border-bottom:1px solid var(--border);
 }
-.modal-title{font-size:18px;font-weight:600;color:#fff}
+.modal-title{font-size:18px;font-weight:600;color:var(--text)}
 .modal-close{
   width:32px;height:32px;border:none;border-radius:8px;
   background:transparent;color:var(--muted);cursor:pointer;font-size:18px;
@@ -323,7 +323,7 @@ tr:hover{background:var(--bg-hover)}
   padding:20px;box-shadow:var(--shadow);
 }
 .stat-label{font-size:13px;color:var(--muted);margin-bottom:8px}
-.stat-value{font-size:28px;font-weight:600;color:#fff;margin-bottom:4px}
+.stat-value{font-size:28px;font-weight:600;color:var(--text);margin-bottom:4px}
 .stat-trend{font-size:12px;color:#4ADE80;display:flex;align-items:center;gap:4px}
 .stat-trend.down{color:#F87171}
 
