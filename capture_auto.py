@@ -25,14 +25,9 @@ Add-Type -AssemblyName System.Drawing
 $screens = [System.Windows.Forms.Screen]::AllScreens
 Write-Host "Found $($screens.Count) screens"
 
-# 使用第二个屏幕（副屏）
-if ($screens.Count -gt 1) {{
-    $targetScreen = $screens[1]
-    Write-Host "Using second screen: $($targetScreen.DeviceName)"
-}} else {{
-    $targetScreen = $screens[0]
-    Write-Host "Using primary screen"
-}}
+# 使用第一个屏幕（主屏）
+$targetScreen = $screens[0]
+Write-Host "Using primary screen: $($targetScreen.DeviceName)"
 
 $bounds = $targetScreen.Bounds
 Write-Host "Capture area: $($bounds.Width) x $($bounds.Height)"
