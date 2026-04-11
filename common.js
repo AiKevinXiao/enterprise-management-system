@@ -202,6 +202,84 @@ function showToast(message, type = 'success') {
 }
 
 /**
+ * 主题管理
+ */
+const ThemeManager = {
+  STORAGE_KEY: 'ems_theme',
+  
+  // 获取当前主题
+  getTheme() {
+    return localStorage.getItem(this.STORAGE_KEY) || 'dark';
+  },
+  
+  // 设置主题
+  setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem(this.STORAGE_KEY, theme);
+    this.updateThemeIcon(theme);
+  },
+  
+  // 切换主题
+  toggle() {
+    const current = this.getTheme();
+    const next = current === 'dark' ? 'light' : 'dark';
+    this.setTheme(next);
+    showToast(`已切换到${next === 'dark' ? '深色' : '浅色'}模式`);
+  },
+  
+  // 初始化主题
+  init() {
+    const theme = this.getTheme();
+    this.setTheme(theme);
+  },
+  
+  // 更新主题图标
+  updateThemeIcon(theme) {
+    const icon = document.getElementById('themeToggleIcon');
+    if (icon) {
+      icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+  }
+};
+
+/**
+ * 用户认证管理
+ */
+const AuthManager = {
+  // 检查是否已登录
+  isLoggedIn() {
+    return localStorage.getItem('ems_logged_in') === 'true';
+  },
+  
+  // 设置登录状态
+  setLoggedIn(username) {
+    localStorage.setItem('ems_logged_in', 'true');
+    localStorage.setItem('ems_username', username);
+  },
+  
+  // 退出登录
+  logout() {
+    if (confirm('确定要退出登录吗？')) {
+      localStorage.removeItem('ems_logged_in');
+      localStorage.removeItem('ems_username');
+      window.location.href = 'login.html';
+    }
+  },
+  
+  // 获取当前用户名
+  getUsername() {
+    return localStorage.getItem('ems_username') || '用户';
+  },
+  
+  // 检查登录状态（在需要登录的页面调用）
+  checkAuth() {
+    if (!this.isLoggedIn() && !window.location.pathname.includes('login.html')) {
+      window.location.href = 'login.html';
+    }
+  }
+};
+
+/**
  * 搜索防抖
  */
 function debounce(fn, delay = 300) {
@@ -216,6 +294,20 @@ function debounce(fn, delay = 300) {
  * 初始化所有功能
  */
 document.addEventListener('DOMContentLoaded', () => {
+  // 初始化主题
+  ThemeManager.init();
+  
+  // 检查登录状态（登录页除外）
+  if (!window.location.pathname.includes('login.html')) {
+    AuthManager.checkAuth();
+  }
+  
+  // 更新用户名显示
+  const usernameEl = document.getElementById('currentUsername');
+  if (usernameEl) {
+    usernameEl.textContent = AuthManager.getUsername();
+  }
+  
   // 初始化路由状态
   RouteState.initNav();
   
@@ -249,3 +341,5 @@ window.openModal = (type) => {
 window.closeModal = (id) => ModalManager.close(id);
 window.confirmAction = confirmAction;
 window.showToast = showToast;
+window.toggleTheme = () => ThemeManager.toggle();
+window.logout = () => AuthManager.logout();

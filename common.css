@@ -1,4 +1,6 @@
 /* 企业管理系统 - 公共样式 */
+
+/* 深色主题（默认） */
 :root{
   --primary:#3B82F6;
   --primary-dark:#2563EB;
@@ -15,6 +17,24 @@
   --success:#4ADE80;
   --warning:#FBBF24;
   --danger:#F87171;
+}
+
+/* 浅色主题 */
+[data-theme="light"]{
+  --primary:#2563EB;
+  --primary-dark:#1D4ED8;
+  --primary-light:rgba(37,99,235,.1);
+  --bg:#F8FAFC;
+  --bg-elev:#FFFFFF;
+  --bg-hover:#F1F5F9;
+  --sidebar:#FFFFFF;
+  --text:#1E293B;
+  --muted:#64748B;
+  --border:#E2E8F0;
+  --shadow:0 4px 12px rgba(0,0,0,.08);
+  --success:#16A34A;
+  --warning:#D97706;
+  --danger:#DC2626;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}

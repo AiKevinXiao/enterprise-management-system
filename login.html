@@ -744,6 +744,10 @@
           loginState.lockedUntil = null;
           saveLoginState();
           
+          // 设置登录状态
+          localStorage.setItem('ems_logged_in', 'true');
+          localStorage.setItem('ems_username', username);
+          
           // 记住我
           if (document.getElementById('rememberMe').checked) {
             localStorage.setItem('rememberedUsername', username);
