@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>登录 - 企业管理系统</title>
+  <link rel="stylesheet" href="common.css" />
+  <style>
+    /* 登录页专用样式 */
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 背景装饰 */
+    .login-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+    }
+    .login-bg::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+      animation: bgRotate 30s linear infinite;
+    }
+    @keyframes bgRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* 左侧品牌区 */
+    .login-brand {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px;
+      position: relative;
+      z-index: 1;
+    }
+    .brand-logo {
+      width: 120px;
+      height: 120px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, var(--primary), #60A5FA);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 20px 60px rgba(59, 130, 246, 0.4);
+      margin-bottom: 40px;
+    }
+    .brand-logo-icon {
+      width: 60px;
+      height: 60px;
+      background: #fff;
+      border-radius: 8px;
+      position: relative;
+    }
+    .brand-logo-icon::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 15px;
+      width: 30px;
+      height: 20px;
+      border: 3px solid var(--primary-dark);
+      border-bottom: none;
+    }
+    .brand-title {
+      font-size: 42px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .brand-subtitle {
+      font-size: 18px;
+      color: var(--muted);
+      text-align: center;
+      max-width: 400px;
+      line-height: 1.6;
+    }
+    .brand-features {
+      display: flex;
+      gap: 40px;
+      margin-top: 60px;
+    }
+    .brand-feature {
+      text-align: center;
+    }
+    .brand-feature-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .brand-feature-text {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* 右侧登录区 */
+    .login-form-wrap {
+      width: 480px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px;
+      position: relative;
+      z-index: 1;
+    }
+    .login-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .login-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .login-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* 登录方式切换 */
+    .login-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      padding: 4px;
+      background: var(--bg);
+      border-radius: 10px;
+    }
+    .login-tab {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .login-tab:hover {
+      color: var(--text);
+    }
+    .login-tab.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* 登录内容区 */
+    .login-content {
+      display: none;
+    }
+    .login-content.active {
+      display: block;
+    }
+
+    /* 表单样式 */
+    .login-form .form-group {
+      margin-bottom: 20px;
+    }
+    .login-form .form-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .login-form .form-input {
+      width: 100%;
+      height: 48px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 16px;
+      font-size: 15px;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      transition: all 0.2s;
+    }
+    .login-form .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+    .login-form .form-input.error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.2);
+    }
+    .login-form .form-input:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* 密码输入框 */
+    .password-wrap {
+      position: relative;
+    }
+    .password-toggle {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px;
+    }
+    .password-toggle:hover {
+      color: var(--text);
+    }
+
+    /* 记住密码 & 忘记密码 */
+    .login-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .remember-me input {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .forgot-password {
+      font-size: 13px;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+
+    /* 登录按钮 */
+    .login-btn {
+      width: 100%;
+      height: 48px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .login-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+    }
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .login-btn .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 错误提示 */
+    .error-message {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      border-radius: 8px;
+      color: var(--danger);
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .error-message.show {
+      display: flex;
+    }
+
+    /* 锁定提示 */
+    .lock-message {
+      display: none;
+      text-align: center;
+      padding: 24px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+    .lock-message.show {
+      display: block;
+    }
+    .lock-message-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    .lock-message-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--warning);
+      margin-bottom: 8px;
+    }
+    .lock-message-text {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .lock-countdown {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--warning);
+      font-family: monospace;
+    }
+
+    /* 微信扫码登录 */
+    .wechat-login {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .qrcode-wrap {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 24px;
+      padding: 16px;
+      background: #fff;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qrcode-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 12px;
+    }
+    .qrcode-placeholder-icon {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+    .wechat-tip {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .wechat-refresh {
+      font-size: 13px;
+      color: var(--primary);
+      cursor: pointer;
+    }
+    .wechat-refresh:hover {
+      text-decoration: underline;
+    }
+
+    /* 验证码输入 */
+    .captcha-wrap {
+      display: flex;
+      gap: 12px;
+    }
+    .captcha-wrap .form-input {
+      flex: 1;
+    }
+    .captcha-img {
+      width: 120px;
+      height: 48px;
+      border-radius: 10px;
+      background: var(--bg-hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 4px;
+      user-select: none;
+    }
+    .captcha-img:hover {
+      background: var(--border);
+    }
+
+    /* 注册链接 */
+    .login-footer {
+      text-align: center;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .login-footer-text {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .login-footer-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .login-footer-link:hover {
+      text-decoration: underline;
+    }
+
+    /* 响应式 */
+    @media (max-width: 1024px) {
+      .login-brand {
+        display: none;
+      }
+      .login-form-wrap {
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+    }
+  </style>
+</head>
+<body class="login-page">
+  <!-- 背景装饰 -->
+  <div class="login-bg"></div>
+
+  <!-- 左侧品牌区 -->
+  <div class="login-brand">
+    <div class="brand-logo">
+      <div class="brand-logo-icon"></div>
+    </div>
+    <h1 class="brand-title">企业管理系统</h1>
+    <p class="brand-subtitle">智能化企业管理平台，助力企业数字化转型，提升组织效能</p>
+    <div class="brand-features">
+      <div class="brand-feature">
+        <div class="brand-feature-icon">🔒</div>
+        <div class="brand-feature-text">安全可靠</div>
+      </div>
+      <div class="brand-feature">
+        <div class="brand-feature-icon">⚡</div>
+        <div class="brand-feature-text">高效便捷</div>
+      </div>
+      <div class="brand-feature">
+        <div class="brand-feature-icon">📊</div>
+        <div class="brand-feature-text">数据驱动</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧登录区 -->
+  <div class="login-form-wrap">
+    <div class="login-card">
+      <div class="login-header">
+        <h2 class="login-title">欢迎登录</h2>
+        <p class="login-subtitle">请使用您的账号密码或微信扫码登录</p>
+      </div>
+
+      <!-- 登录方式切换 -->
+      <div class="login-tabs">
+        <button class="login-tab active" onclick="switchTab('password')">🔐 密码登录</button>
+        <button class="login-tab" onclick="switchTab('wechat')">💬 微信登录</button>
+      </div>
+
+      <!-- 错误提示 -->
+      <div class="error-message" id="errorMessage">
+        <span>⚠️</span>
+        <span id="errorText">用户名或密码错误</span>
+      </div>
+
+      <!-- 锁定提示 -->
+      <div class="lock-message" id="lockMessage">
+        <div class="lock-message-icon">🔒</div>
+        <div class="lock-message-title">登录已锁定</div>
+        <div class="lock-message-text">失败次数过多，请稍后再试</div>
+        <div class="lock-countdown" id="lockCountdown">05:00</div>
+      </div>
+
+      <!-- 密码登录 -->
+      <div class="login-content active" id="passwordLogin">
+        <form class="login-form" id="loginForm" onsubmit="return handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">用户名</label>
+            <input type="text" class="form-input" id="username" placeholder="请输入用户名/邮箱/手机号" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">密码</label>
+            <div class="password-wrap">
+              <input type="password" class="form-input" id="password" placeholder="请输入密码" required />
+              <button type="button" class="password-toggle" onclick="togglePassword()">👁️</button>
+            </div>
+          </div>
+          <div class="form-group" id="captchaGroup" style="display: none;">
+            <label class="form-label">验证码</label>
+            <div class="captcha-wrap">
+              <input type="text" class="form-input" id="captcha" placeholder="请输入验证码" maxlength="4" />
+              <div class="captcha-img" id="captchaImg" onclick="refreshCaptcha()">AB12</div>
+            </div>
+          </div>
+          <div class="login-options">
+            <label class="remember-me">
+              <input type="checkbox" id="rememberMe" />
+              <span>记住我</span>
+            </label>
+            <a href="#" class="forgot-password" onclick="showToast('请联系管理员重置密码')">忘记密码？</a>
+          </div>
+          <button type="submit" class="login-btn" id="loginBtn">
+            <span>登 录</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- 微信登录 -->
+      <div class="login-content" id="wechatLogin">
+        <div class="wechat-login">
+          <div class="qrcode-wrap">
+            <div class="qrcode-placeholder">
+              <div class="qrcode-placeholder-icon">📱</div>
+              <div>微信二维码</div>
+            </div>
+          </div>
+          <p class="wechat-tip">请使用微信扫一扫登录</p>
+          <p class="wechat-refresh" onclick="refreshQRCode()">刷新二维码</p>
+        </div>
+      </div>
+
+      <!-- 注册链接 -->
+      <div class="login-footer">
+        <p class="login-footer-text">
+          还没有账号？<a href="#" class="login-footer-link" onclick="showToast('请联系管理员开通账号')">联系管理员</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    // 登录安全配置
+    const SECURITY_CONFIG = {
+      MAX_ATTEMPTS: 5,        // 最大尝试次数
+      LOCKOUT_DURATION: 300,  // 锁定时间（秒）
+      CAPTCHA_THRESHOLD: 3    // 显示验证码阈值
+    };
+
+    // 登录状态管理
+    let loginState = {
+      attempts: 0,
+      lockedUntil: null,
+      captchaCode: 'AB12'
+    };
+
+    // 从 localStorage 恢复状态
+    function loadLoginState() {
+      const saved = localStorage.getItem('loginSecurityState');
+      if (saved) {
+        loginState = JSON.parse(saved);
+        // 检查是否还在锁定期间
+        if (loginState.lockedUntil && Date.now() < loginState.lockedUntil) {
+          showLockMessage();
+        }
+        // 恢复尝试次数显示
+        if (loginState.attempts >= SECURITY_CONFIG.CAPTCHA_THRESHOLD) {
+          document.getElementById('captchaGroup').style.display = 'block';
+        }
+      }
+    }
+
+    // 保存登录状态
+    function saveLoginState() {
+      localStorage.setItem('loginSecurityState', JSON.stringify(loginState));
+    }
+
+    // 切换登录方式
+    function switchTab(type) {
+      document.querySelectorAll('.login-tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.login-content').forEach(content => content.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(type + 'Login').classList.add('active');
+    }
+
+    // 切换密码显示
+    function togglePassword() {
+      const passwordInput = document.getElementById('password');
+      const toggleBtn = event.target;
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleBtn.textContent = '🙈';
+      } else {
+        passwordInput.type = 'password';
+        toggleBtn.textContent = '👁️';
+      }
+    }
+
+    // 刷新验证码
+    function refreshCaptcha() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = '';
+      for (let i = 0; i < 4; i++) {
+        code += chars[Math.floor(Math.random() * chars.length)];
+      }
+      loginState.captchaCode = code;
+      document.getElementById('captchaImg').textContent = code;
+      saveLoginState();
+    }
+
+    // 刷新二维码
+    function refreshQRCode() {
+      showToast('二维码已刷新');
+      // 实际项目中这里调用微信接口获取新二维码
+    }
+
+    // 显示错误信息
+    function showError(message) {
+      const errorEl = document.getElementById('errorMessage');
+      document.getElementById('errorText').textContent = message;
+      errorEl.classList.add('show');
+      setTimeout(() => errorEl.classList.remove('show'), 5000);
+    }
+
+    // 显示锁定信息
+    function showLockMessage() {
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('lockMessage').classList.add('show');
+      
+      const updateCountdown = () => {
+        const remaining = Math.ceil((loginState.lockedUntil - Date.now()) / 1000);
+        if (remaining <= 0) {
+          unlockLogin();
+          return;
+        }
+        const minutes = Math.floor(remaining / 60).toString().padStart(2, '0');
+        const seconds = (remaining % 60).toString().padStart(2, '0');
+        document.getElementById('lockCountdown').textContent = `${minutes}:${seconds}`;
+      };
+      
+      updateCountdown();
+      const timer = setInterval(() => {
+        if (!loginState.lockedUntil || Date.now() >= loginState.lockedUntil) {
+          clearInterval(timer);
+          unlockLogin();
+        } else {
+          updateCountdown();
+        }
+      }, 1000);
+    }
+
+    // 解锁登录
+    function unlockLogin() {
+      loginState.attempts = 0;
+      loginState.lockedUntil = null;
+      saveLoginState();
+      
+      document.getElementById('loginForm').style.display = 'block';
+      document.getElementById('lockMessage').classList.remove('show');
+      document.getElementById('captchaGroup').style.display = 'none';
+      
+      showToast('登录已解锁，请重试');
+    }
+
+    // 锁定登录
+    function lockLogin() {
+      loginState.lockedUntil = Date.now() + SECURITY_CONFIG.LOCKOUT_DURATION * 1000;
+      saveLoginState();
+      showLockMessage();
+    }
+
+    // 处理登录
+    function handleLogin(event) {
+      event.preventDefault();
+      
+      // 检查是否被锁定
+      if (loginState.lockedUntil && Date.now() < loginState.lockedUntil) {
+        showError('登录已锁定，请稍后再试');
+        return false;
+      }
+      
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const captcha = document.getElementById('captcha').value.toUpperCase();
+      const loginBtn = document.getElementById('loginBtn');
+      
+      // 验证验证码
+      if (loginState.attempts >= SECURITY_CONFIG.CAPTCHA_THRESHOLD) {
+        if (!captcha || captcha !== loginState.captchaCode) {
+          showError('验证码错误');
+          refreshCaptcha();
+          return false;
+        }
+      }
+      
+      // 显示加载状态
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<div class="spinner"></div><span>登录中...</span>';
+      
+      // 模拟登录请求（实际项目中这里调用后端 API）
+      setTimeout(() => {
+        // 模拟验证（实际项目中这里验证后端返回）
+        const validCredentials = username === 'admin' && password === 'admin123';
+        
+        if (validCredentials) {
+          // 登录成功
+          loginState.attempts = 0;
+          loginState.lockedUntil = null;
+          saveLoginState();
+          
+          // 记住我
+          if (document.getElementById('rememberMe').checked) {
+            localStorage.setItem('rememberedUsername', username);
+          } else {
+            localStorage.removeItem('rememberedUsername');
+          }
+          
+          showToast('登录成功，正在跳转...');
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1000);
+        } else {
+          // 登录失败
+          loginState.attempts++;
+          saveLoginState();
+          
+          // 显示验证码
+          if (loginState.attempts >= SECURITY_CONFIG.CAPTCHA_THRESHOLD) {
+            document.getElementById('captchaGroup').style.display = 'block';
+            refreshCaptcha();
+          }
+          
+          // 检查是否达到最大尝试次数
+          if (loginState.attempts >= SECURITY_CONFIG.MAX_ATTEMPTS) {
+            lockLogin();
+          } else {
+            const remaining = SECURITY_CONFIG.MAX_ATTEMPTS - loginState.attempts;
+            showError(`用户名或密码错误，还剩 ${remaining} 次机会`);
+          }
+          
+          // 恢复按钮状态
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = '<span>登 录</span>';
+        }
+      }, 1000);
+      
+      return false;
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      loadLoginState();
+      
+      // 恢复记住的用户名
+      const remembered = localStorage.getItem('rememberedUsername');
+      if (remembered) {
+        document.getElementById('username').value = remembered;
+        document.getElementById('rememberMe').checked = true;
+      }
+    });
+  </script>
+</body>
+</html>
