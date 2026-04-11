@@ -36,7 +36,7 @@ def main():
     print("Starting Edge browser...")
     launcher = BrowserLauncher()
     try:
-        cdp_url = launcher.launch(browser='edge', reuse_profile=False, window_size='maximized')
+        cdp_url = launcher.launch(browser='edge', reuse_profile=False)
     except BrowserNeedsCDPError as e:
         print(f"Error: {e}")
         return
