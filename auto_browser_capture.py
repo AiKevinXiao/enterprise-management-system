@@ -60,15 +60,37 @@ def main():
         client.attach(tab['id'])
         print("Created new tab")
     
-    # Maximize window
+    # Maximize window and check state
     print("Maximizing window...")
     try:
+        # Get window list
+        windows = client.send('Browser.getWindowForTarget', {})
+        window_id = windows.get('windowId', 1)
+        print(f"Window ID: {window_id}")
+        
+        # Get window info
+        window_info = client.send('Browser.getWindowBounds', {'windowId': window_id})
+        state_before = window_info.get('bounds', {}).get('windowState', 'unknown')
+        print(f"Window state before: {state_before}")
+        
+        # Set maximized
         client.send('Browser.setWindowBounds', {
-            'windowId': 1,
+            'windowId': window_id,
             'bounds': {'windowState': 'maximized'}
         })
-    except:
-        pass
+        time.sleep(1)
+        
+        # Check again
+        window_info = client.send('Browser.getWindowBounds', {'windowId': window_id})
+        state_after = window_info.get('bounds', {}).get('windowState', 'unknown')
+        print(f"Window state after: {state_after}")
+        
+        if state_after == 'maximized':
+            print("✓ Window maximized successfully")
+        else:
+            print(f"! Window state: {state_after}")
+    except Exception as e:
+        print(f"Maximize error: {e}")
     
     actions = BrowserActions(client, None)
     actions.wait_for_load()
