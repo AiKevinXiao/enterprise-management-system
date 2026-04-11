@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Enterprise Management System - Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            background: #0F172A; 
+            color: #fff; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 { margin-bottom: 20px; font-size: 24px; }
+        .slideshow { 
+            max-width: 1200px; 
+            width: 100%;
+            background: #1E293B;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .slide { display: none; }
+        .slide.active { display: block; }
+        .slide img { width: 100%; display: block; }
+        .slide-title { 
+            padding: 16px 20px; 
+            font-size: 14px; 
+            color: #94A3B8;
+            border-top: 1px solid #334155;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #3B82F6;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn:hover { background: #2563EB; }
+        .progress {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #334155;
+            cursor: pointer;
+        }
+        .dot.active { background: #3B82F6; }
+        .auto-play {
+            padding: 10px 20px;
+            color: #94A3B8;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏢 Enterprise Management System Demo</h1>
+    <div class="slideshow">
+        <div class="slide active" data-index="0">
+            <img src="demo-gif/01_login_dark.png" alt="Login Dark">
+            <div class="slide-title">1. Login Page - Dark Mode</div>
+        </div>
+        <div class="slide" data-index="1">
+            <img src="demo-gif/02_login_light.png" alt="Login Light">
+            <div class="slide-title">2. Login Page - Light Mode</div>
+        </div>
+        <div class="slide" data-index="2">
+            <img src="demo-gif/03_login_form.png" alt="Login Form">
+            <div class="slide-title">3. Login Form</div>
+        </div>
+        <div class="slide" data-index="3">
+            <img src="demo-gif/04_dashboard.png" alt="Dashboard">
+            <div class="slide-title">4. Dashboard</div>
+        </div>
+        <div class="slide" data-index="4">
+            <img src="demo-gif/05_user_mgmt.png" alt="User Management">
+            <div class="slide-title">5. User Management</div>
+        </div>
+        <div class="slide" data-index="5">
+            <img src="demo-gif/06_user_add.png" alt="Add User">
+            <div class="slide-title">6. Add User Modal</div>
+        </div>
+        <div class="slide" data-index="6">
+            <img src="demo-gif/07_dept.png" alt="Department">
+            <div class="slide-title">7. Department Structure</div>
+        </div>
+        <div class="slide" data-index="7">
+            <img src="demo-gif/08_role.png" alt="Role Permission">
+            <div class="slide-title">8. Role & Permission</div>
+        </div>
+        <div class="slide" data-index="8">
+            <img src="demo-gif/09_logout.png" alt="Logout">
+            <div class="slide-title">9. Logout Menu</div>
+        </div>
+    </div>
+    <div class="progress">
+        <div class="dot active" onclick="showSlide(0)"></div>
+        <div class="dot" onclick="showSlide(1)"></div>
+        <div class="dot" onclick="showSlide(2)"></div>
+        <div class="dot" onclick="showSlide(3)"></div>
+        <div class="dot" onclick="showSlide(4)"></div>
+        <div class="dot" onclick="showSlide(5)"></div>
+        <div class="dot" onclick="showSlide(6)"></div>
+        <div class="dot" onclick="showSlide(7)"></div>
+        <div class="dot" onclick="showSlide(8)"></div>
+    </div>
+    <div class="controls">
+        <button class="btn" onclick="prevSlide()">◀ Previous</button>
+        <button class="btn" onclick="toggleAutoPlay()">⏯ Auto Play</button>
+        <button class="btn" onclick="nextSlide()">Next ▶</button>
+    </div>
+    <div class="auto-play" id="autoPlayStatus">Auto-play: OFF</div>
+    
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+        const totalSlides = slides.length;
+        let autoPlayInterval = null;
+        
+        function showSlide(index) {
+            slides.forEach(s => s.classList.remove('active'));
+            dots.forEach(d => d.classList.remove('active'));
+            slides[index].classList.add('active');
+            dots[index].classList.add('active');
+            currentSlide = index;
+        }
+        
+        function nextSlide() {
+            showSlide((currentSlide + 1) % totalSlides);
+        }
+        
+        function prevSlide() {
+            showSlide((currentSlide - 1 + totalSlides) % totalSlides);
+        }
+        
+        function toggleAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+                document.getElementById('autoPlayStatus').textContent = 'Auto-play: OFF';
+            } else {
+                autoPlayInterval = setInterval(nextSlide, 2000);
+                document.getElementById('autoPlayStatus').textContent = 'Auto-play: ON (2s)';
+            }
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+            if (e.key === ' ') toggleAutoPlay();
+        });
+    </script>
+</body>
+</html>
