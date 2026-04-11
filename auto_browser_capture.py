@@ -88,43 +88,43 @@ def main():
     actions.screenshot(os.path.join(output_dir, '01_login_dark.png'))
     time.sleep(1)
     
-    # Step 2: Switch to light mode
-    print("[2/10] Switching to light mode...")
-    try:
-        actions.evaluate("toggleTheme()")
-    except:
-        pass
-    time.sleep(1)
-    actions.screenshot(os.path.join(output_dir, '02_login_light.png'))
-    time.sleep(1)
-    
-    # Step 3: Enter credentials
-    print("[3/10] Entering credentials...")
+    # Step 2: Enter credentials
+    print("[2/10] Entering credentials...")
     try:
         actions.evaluate("document.getElementById('username').value = 'admin'")
         actions.evaluate("document.getElementById('password').value = 'admin123'")
     except:
         pass
     time.sleep(0.5)
-    actions.screenshot(os.path.join(output_dir, '03_login_input.png'))
+    actions.screenshot(os.path.join(output_dir, '02_login_input.png'))
     time.sleep(1)
     
-    # Step 4: Submit login
-    print("[4/10] Submitting login...")
+    # Step 3: Submit login
+    print("[3/10] Submitting login...")
     try:
         actions.evaluate("document.getElementById('loginForm').dispatchEvent(new Event('submit'))")
     except:
         pass
     time.sleep(2)
-    actions.screenshot(os.path.join(output_dir, '04_login_submit.png'))
+    actions.screenshot(os.path.join(output_dir, '03_login_submit.png'))
     time.sleep(2)
     
-    # Step 5: Dashboard
-    print("[5/10] Dashboard")
+    # Step 4: Dashboard (dark mode)
+    print("[4/10] Dashboard - Dark mode")
     actions.navigate('http://localhost:8888/dashboard.html')
     actions.wait_for_load()
     time.sleep(2)
-    actions.screenshot(os.path.join(output_dir, '05_dashboard.png'))
+    actions.screenshot(os.path.join(output_dir, '04_dashboard_dark.png'))
+    time.sleep(1)
+    
+    # Step 5: Switch to light mode
+    print("[5/10] Switching to light mode...")
+    try:
+        actions.evaluate("toggleTheme()")
+    except:
+        pass
+    time.sleep(1)
+    actions.screenshot(os.path.join(output_dir, '05_dashboard_light.png'))
     time.sleep(1)
     
     # Step 6: User Management
@@ -134,7 +134,7 @@ def main():
     time.sleep(2)
     actions.screenshot(os.path.join(output_dir, '06_user_mgmt.png'))
     time.sleep(1)
-    
+
     # Step 7: Open Add User modal
     print("[7/10] Opening Add User modal...")
     try:
@@ -144,7 +144,7 @@ def main():
     time.sleep(1)
     actions.screenshot(os.path.join(output_dir, '07_user_add_modal.png'))
     time.sleep(1)
-    
+
     # Step 8: Department
     print("[8/10] Navigating to Department...")
     actions.navigate('http://localhost:8888/department.html')
@@ -152,7 +152,7 @@ def main():
     time.sleep(2)
     actions.screenshot(os.path.join(output_dir, '08_dept.png'))
     time.sleep(1)
-    
+
     # Step 9: Role Permission
     print("[9/10] Navigating to Role Permission...")
     actions.navigate('http://localhost:8888/role-permission.html')
@@ -160,7 +160,7 @@ def main():
     time.sleep(2)
     actions.screenshot(os.path.join(output_dir, '09_role.png'))
     time.sleep(1)
-    
+
     # Step 10: User menu
     print("[10/10] Opening user menu...")
     try:
