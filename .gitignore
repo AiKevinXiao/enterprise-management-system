@@ -1,6 +1,10 @@
 # Dependencies
 node_modules/
+package-lock.json
+
+# Logs
 *.log
+npm-debug.log*
 
 # IDE
 .vscode/
@@ -15,8 +19,18 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
-http-server.ps1
 
 # Build output
 dist/
 build/
+
+# Environment
+.env
+.env.local
+
+# Database
+*.db
+*.sqlite
+
+# Uploads
+uploads/
