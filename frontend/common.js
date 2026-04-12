@@ -239,32 +239,65 @@ const ThemeManager = {
 };
 
 /**
+ * API 配置
+ */
+const API_BASE = 'http://localhost:3000/api';
+
+/**
  * 用户认证管理
  */
 const AuthManager = {
   // 检查是否已登录
   isLoggedIn() {
-    return localStorage.getItem('ems_logged_in') === 'true';
+    return !!localStorage.getItem('ems_token');
   },
   
-  // 设置登录状态
-  setLoggedIn(username) {
-    localStorage.setItem('ems_logged_in', 'true');
-    localStorage.setItem('ems_username', username);
+  // 获取 token
+  getToken() {
+    return localStorage.getItem('ems_token');
+  },
+  
+  // 获取当前用户信息
+  getUser() {
+    const user = localStorage.getItem('ems_user');
+    return user ? JSON.parse(user) : null;
   },
   
   // 退出登录
-  logout() {
+  async logout() {
     if (confirm('确定要退出登录吗？')) {
-      localStorage.removeItem('ems_logged_in');
+      // 可选：调用后端登出接口
+      try {
+        await fetch(`${API_BASE}/auth/logout`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.getToken()}`
+          }
+        });
+      } catch (e) {
+        console.log('Logout API error:', e);
+      }
+      
+      localStorage.removeItem('ems_token');
+      localStorage.removeItem('ems_user');
       localStorage.removeItem('ems_username');
+      localStorage.removeItem('ems_logged_in');
+      localStorage.removeItem('loginSecurityState');
       window.location.href = 'login.html';
     }
   },
   
   // 获取当前用户名
   getUsername() {
-    return localStorage.getItem('ems_username') || '用户';
+    const user = this.getUser();
+    return user ? user.name : localStorage.getItem('ems_username') || '用户';
+  },
+  
+  // 获取当前用户名（账号）
+  getAccount() {
+    const user = this.getUser();
+    return user ? user.username : localStorage.getItem('ems_username') || '';
   },
   
   // 检查登录状态（在需要登录的页面调用）
@@ -272,6 +305,30 @@ const AuthManager = {
     if (!this.isLoggedIn() && !window.location.pathname.includes('login.html')) {
       window.location.href = 'login.html';
     }
+  },
+  
+  // API 请求封装（带 token）
+  async api(url, options = {}) {
+    const token = this.getToken();
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...options.headers
+    };
+    
+    const response = await fetch(`${API_BASE}${url}`, {
+      ...options,
+      headers
+    });
+    
+    if (response.status === 401) {
+      // Token 过期，跳转登录
+      showToast('登录已过期，请重新登录', 'error');
+      this.logout();
+      throw new Error('Unauthorized');
+    }
+    
+    return response;
   }
 };
 
