@@ -1,12 +1,12 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>部门架构 - 企业管理系统</title>
-  <link rel="stylesheet" href="common.css" />
+  <title>閮ㄩ棬鏋舵瀯 - 浼佷笟绠＄悊绯荤粺</title>
+  <link rel="stylesheet" href="common.v2.css" />
   <style>
-    /* 部门架构专用样式 */
+    /* 閮ㄩ棬鏋舵瀯涓撶敤鏍峰紡 */
     .dept-layout{
       display:grid;grid-template-columns:320px 1fr;gap:20px;
     }
@@ -139,83 +139,83 @@
   </style>
 </head>
 <body>
-  <!-- 顶部栏 -->
+  <!-- 椤堕儴鏍?-->
   <header class="header">
     <div class="header-left">
       <div class="logo-wrap"><div class="logo-bg"><div class="logo-icon"></div></div></div>
-      <div><div class="system-name">企业管理系统</div></div>
-      <input class="search-box" placeholder="搜索功能、数据、用户..." />
+      <div><div class="system-name">浼佷笟绠＄悊绯荤粺</div></div>
+      <input class="search-box" placeholder="鎼滅储鍔熻兘銆佹暟鎹€佺敤鎴?.." />
     </div>
     <div class="header-right">
-      <button class="icon-btn" title="切换主题" onclick="toggleTheme()">
-        <span id="themeToggleIcon">☀️</span>
+      <button class="icon-btn" title="鍒囨崲涓婚" onclick="toggleTheme()">
+        <span id="themeToggleIcon">鈽€锔?/span>
       </button>
-      <button class="icon-btn" title="通知">🔔<span class="badge">3</span></button>
-      <button class="icon-btn" title="帮助">❓</button>
+      <button class="icon-btn" title="閫氱煡">馃敂<span class="badge">3</span></button>
+      <button class="icon-btn" title="甯姪">鉂?/button>
       <div class="user-menu" onclick="showLogoutMenu()">
-        <div class="avatar" id="userAvatar">肖</div>
-        <span class="user-name" id="currentUsername">肖先生</span>
-        <span style="color:var(--muted)">▼</span>
+        <div class="avatar" id="userAvatar">鑲?/div>
+        <span class="user-name" id="currentUsername">鑲栧厛鐢?/span>
+        <span style="color:var(--muted)">鈻?/span>
       </div>
     </div>
   </header>
 
-  <!-- 侧边栏 -->
+  <!-- 渚ц竟鏍?-->
   <aside class="sidebar">
     <div class="nav-section">
-      <div class="nav-title">工作台</div>
-      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span><span>首页概览</span></a>
-      <a class="nav-item"><span class="nav-icon">📊</span><span>数据报表</span></a>
-      <a class="nav-item"><span class="nav-icon">📋</span><span>待办事项</span></a>
+      <div class="nav-title">宸ヤ綔鍙?/div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">馃彔</span><span>棣栭〉姒傝</span></a>
+      <a class="nav-item"><span class="nav-icon">馃搳</span><span>鏁版嵁鎶ヨ〃</span></a>
+      <a class="nav-item"><span class="nav-icon">馃搵</span><span>寰呭姙浜嬮」</span></a>
     </div>
     <div class="nav-section">
-      <div class="nav-title">组织管理</div>
-      <a class="nav-item" href="user-management.html"><span class="nav-icon">👥</span><span>用户管理</span></a>
-      <a class="nav-item" href="department.html"><span class="nav-icon">🏢</span><span>部门架构</span></a>
-      <a class="nav-item" href="role-permission.html"><span class="nav-icon">🔐</span><span>角色权限</span></a>
+      <div class="nav-title">缁勭粐绠＄悊</div>
+      <a class="nav-item" href="user-management.html"><span class="nav-icon">馃懃</span><span>鐢ㄦ埛绠＄悊</span></a>
+      <a class="nav-item" href="department.html"><span class="nav-icon">馃彚</span><span>閮ㄩ棬鏋舵瀯</span></a>
+      <a class="nav-item" href="role-permission.html"><span class="nav-icon">馃攼</span><span>瑙掕壊鏉冮檺</span></a>
     </div>
     <div class="nav-section">
-      <div class="nav-title">系统管理</div>
-      <a class="nav-item"><span class="nav-icon">⚙️</span><span>系统设置</span></a>
-      <a class="nav-item"><span class="nav-icon">📜</span><span>操作日志</span></a>
-      <a class="nav-item"><span class="nav-icon">🔒</span><span>安全审计</span></a>
+      <div class="nav-title">绯荤粺绠＄悊</div>
+      <a class="nav-item"><span class="nav-icon">鈿欙笍</span><span>绯荤粺璁剧疆</span></a>
+      <a class="nav-item"><span class="nav-icon">馃摐</span><span>鎿嶄綔鏃ュ織</span></a>
+      <a class="nav-item"><span class="nav-icon">馃敀</span><span>瀹夊叏瀹¤</span></a>
     </div>
   </aside>
 
-  <!-- 主内容区 -->
+  <!-- 涓诲唴瀹瑰尯 -->
   <main class="main">
     <div class="page-header">
       <div>
-        <div class="breadcrumb">组织管理 / <span>部门架构</span></div>
-        <div class="page-title">部门架构</div>
+        <div class="breadcrumb">缁勭粐绠＄悊 / <span>閮ㄩ棬鏋舵瀯</span></div>
+        <div class="page-title">閮ㄩ棬鏋舵瀯</div>
       </div>
-      <button class="btn btn-primary" onclick="openModal('add')">+ 新增部门</button>
+      <button class="btn btn-primary" onclick="openModal('add')">+ 鏂板閮ㄩ棬</button>
     </div>
 
     <div class="dept-layout">
-      <!-- 左侧树形结构 -->
+      <!-- 宸︿晶鏍戝舰缁撴瀯 -->
       <div class="dept-tree-card">
         <div class="tree-header">
-          <span class="tree-title">组织架构</span>
-          <button class="btn btn-sm btn-outline" onclick="expandAll()">全部展开</button>
+          <span class="tree-title">缁勭粐鏋舵瀯</span>
+          <button class="btn btn-sm btn-outline" onclick="expandAll()">鍏ㄩ儴灞曞紑</button>
         </div>
         <ul class="tree" id="deptTree"></ul>
       </div>
 
-      <!-- 右侧详情区 -->
+      <!-- 鍙充晶璇︽儏鍖?-->
       <div class="dept-detail-card" id="deptDetail">
         <div class="detail-header">
           <div class="detail-title-wrap">
-            <div class="detail-icon" id="detailIcon">💻</div>
+            <div class="detail-icon" id="detailIcon">馃捇</div>
             <div>
-              <div class="detail-title" id="detailTitle">技术部</div>
-              <div class="detail-subtitle" id="detailSubtitle">技术研发中心 · 成立于 2020 年 3 月</div>
+              <div class="detail-title" id="detailTitle">鎶€鏈儴</div>
+              <div class="detail-subtitle" id="detailSubtitle">鎶€鏈爺鍙戜腑蹇?路 鎴愮珛浜?2020 骞?3 鏈?/div>
             </div>
           </div>
           <div class="detail-actions">
-            <button class="btn btn-sm btn-outline" onclick="openModal('edit')">编辑部门</button>
-            <button class="btn btn-sm btn-outline" onclick="showToast('成员列表已导出')">导出成员</button>
-            <button class="btn btn-sm btn-danger" onclick="deleteDept()">删除部门</button>
+            <button class="btn btn-sm btn-outline" onclick="openModal('edit')">缂栬緫閮ㄩ棬</button>
+            <button class="btn btn-sm btn-outline" onclick="showToast('鎴愬憳鍒楄〃宸插鍑?)">瀵煎嚭鎴愬憳</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteDept()">鍒犻櫎閮ㄩ棬</button>
           </div>
         </div>
 
@@ -228,69 +228,68 @@
     </div>
   </main>
 
-  <!-- 新增/编辑部门弹窗 -->
+  <!-- 鏂板/缂栬緫閮ㄩ棬寮圭獥 -->
   <div class="modal-overlay" id="deptModal">
     <div class="modal">
       <div class="modal-header">
-        <div class="modal-title" id="modalTitle">新增部门</div>
-        <button class="modal-close" onclick="closeModal('deptModal')">×</button>
+        <div class="modal-title" id="modalTitle">鏂板閮ㄩ棬</div>
+        <button class="modal-close" onclick="closeModal('deptModal')">脳</button>
       </div>
       <div class="modal-body">
         <form id="deptForm">
           <input type="hidden" id="deptId" />
           <div class="form-group">
-            <label class="form-label required">部门名称</label>
-            <input class="form-input" id="deptName" placeholder="请输入部门名称" required />
+            <label class="form-label required">閮ㄩ棬鍚嶇О</label>
+            <input class="form-input" id="deptName" placeholder="璇疯緭鍏ラ儴闂ㄥ悕绉? required />
           </div>
           <div class="form-group">
-            <label class="form-label">部门编号</label>
-            <input class="form-input" id="deptCode" placeholder="请输入部门编号（如：DEPT-001）" />
+            <label class="form-label">閮ㄩ棬缂栧彿</label>
+            <input class="form-input" id="deptCode" placeholder="璇疯緭鍏ラ儴闂ㄧ紪鍙凤紙濡傦細DEPT-001锛? />
           </div>
           <div class="form-group">
-            <label class="form-label required">上级部门</label>
+            <label class="form-label required">涓婄骇閮ㄩ棬</label>
             <select class="form-select" id="deptParent" required>
-              <option value="">请选择上级部门</option>
+              <option value="">璇烽€夋嫨涓婄骇閮ㄩ棬</option>
             </select>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">部门负责人</label>
+              <label class="form-label">閮ㄩ棬璐熻矗浜?/label>
               <select class="form-select" id="deptManager">
-                <option value="">请选择负责人</option>
+                <option value="">璇烽€夋嫨璐熻矗浜?/option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">成立时间</label>
+              <label class="form-label">鎴愮珛鏃堕棿</label>
               <input class="form-input" type="date" id="deptCreated" />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">人员编制</label>
-              <input class="form-input" type="number" id="deptQuota" placeholder="请输入编制人数" />
+              <label class="form-label">浜哄憳缂栧埗</label>
+              <input class="form-input" type="number" id="deptQuota" placeholder="璇疯緭鍏ョ紪鍒朵汉鏁? />
             </div>
             <div class="form-group">
-              <label class="form-label">办公地点</label>
-              <input class="form-input" id="deptLocation" placeholder="请输入办公地点" />
+              <label class="form-label">鍔炲叕鍦扮偣</label>
+              <input class="form-input" id="deptLocation" placeholder="璇疯緭鍏ュ姙鍏湴鐐? />
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">部门描述</label>
-            <textarea class="form-textarea" id="deptDesc" placeholder="请输入部门描述"></textarea>
+            <label class="form-label">閮ㄩ棬鎻忚堪</label>
+            <textarea class="form-textarea" id="deptDesc" placeholder="璇疯緭鍏ラ儴闂ㄦ弿杩?></textarea>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('deptModal')">取消</button>
-        <button class="btn btn-primary" onclick="saveDept()">确定</button>
+        <button class="btn btn-outline" onclick="closeModal('deptModal')">鍙栨秷</button>
+        <button class="btn btn-primary" onclick="saveDept()">纭畾</button>
       </div>
     </div>
   </div>
 
-  <script src="common.js"></script>
+  <script src="common.v2.js"></script>
   <script>
-    // 显示退出菜单
-    function showLogoutMenu() {
+    // 鏄剧ず閫€鍑鸿彍鍗?    function showLogoutMenu() {
       const menu = document.createElement('div');
       menu.className = 'logout-menu';
       menu.style.cssText = `
@@ -301,7 +300,7 @@
       `;
       menu.innerHTML = `
         <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);">
-          当前用户
+          褰撳墠鐢ㄦ埛
         </div>
         <div style="padding:12px 16px;font-size:14px;color:var(--text);font-weight:500;" id="menuUsername">
           ${document.getElementById('currentUsername').textContent}
@@ -309,8 +308,7 @@
         <div style="padding:8px;border-top:1px solid var(--border);">
           <button onclick="logout();document.querySelector('.logout-menu').remove();" 
             style="width:100%;padding:10px;border:none;border-radius:6px;background:transparent;color:var(--danger);font-size:13px;cursor:pointer;text-align:left;">
-            🚪 退出登录
-          </button>
+            馃毆 閫€鍑虹櫥褰?          </button>
         </div>
       `;
       document.body.appendChild(menu);
@@ -326,27 +324,27 @@
     }
   </script>
   <script>
-    // 部门数据
+    // 閮ㄩ棬鏁版嵁
     let depts = [
-      { id: 'root', name: '集团公司', code: 'DEPT-ROOT', parent: null, manager: '肖先生', created: '2018-01-01', quota: 200, location: '总部大厦', desc: '集团总部', icon: '🏢', memberCount: 156 },
-      { id: 'tech', name: '技术部', code: 'DEPT-TECH', parent: 'root', manager: '张三', created: '2020-03-15', quota: 50, location: 'A座8层', desc: '负责公司核心产品的技术研发工作', icon: '💻', memberCount: 45 },
-      { id: 'frontend', name: '前端开发组', code: 'DEPT-FE', parent: 'tech', manager: '李四', created: '2020-03-15', quota: 15, location: 'A座8层', desc: 'Web前端开发', icon: '📁', memberCount: 12 },
-      { id: 'backend', name: '后端开发组', code: 'DEPT-BE', parent: 'tech', manager: '王五', created: '2020-03-15', quota: 20, location: 'A座8层', desc: '服务端开发', icon: '📁', memberCount: 18 },
-      { id: 'qa', name: '测试组', code: 'DEPT-QA', parent: 'tech', manager: '赵六', created: '2020-06-01', quota: 10, location: 'A座8层', desc: '质量保障', icon: '📁', memberCount: 8 },
-      { id: 'devops', name: '运维组', code: 'DEPT-OPS', parent: 'tech', manager: '钱七', created: '2020-06-01', quota: 8, location: 'A座8层', desc: '系统运维', icon: '📁', memberCount: 7 },
-      { id: 'product', name: '产品部', code: 'DEPT-PM', parent: 'root', manager: '孙八', created: '2019-05-20', quota: 25, location: 'A座7层', desc: '产品规划与设计', icon: '📦', memberCount: 22 },
-      { id: 'pm', name: '产品组', code: 'DEPT-PMG', parent: 'product', manager: '周九', created: '2019-05-20', quota: 18, location: 'A座7层', desc: '产品经理团队', icon: '📁', memberCount: 15 },
-      { id: 'design', name: '设计组', code: 'DEPT-DES', parent: 'product', manager: '吴十', created: '2019-05-20', quota: 8, location: 'A座7层', desc: 'UI/UX设计', icon: '📁', memberCount: 7 },
-      { id: 'sales', name: '销售部', code: 'DEPT-SALES', parent: 'root', manager: '郑十一', created: '2018-03-01', quota: 50, location: 'B座3层', desc: '销售业务', icon: '💼', memberCount: 38 },
-      { id: 'hr', name: '人力资源部', code: 'DEPT-HR', parent: 'root', manager: '陈十二', created: '2018-01-01', quota: 15, location: 'A座6层', desc: '人事管理', icon: '👥', memberCount: 12 },
-      { id: 'finance', name: '财务部', code: 'DEPT-FIN', parent: 'root', manager: '林十三', created: '2018-01-01', quota: 12, location: 'A座6层', desc: '财务管理', icon: '💰', memberCount: 10 },
-      { id: 'admin', name: '行政部', code: 'DEPT-ADM', parent: 'root', manager: '黄十四', created: '2018-01-01', quota: 10, location: 'A座6层', desc: '行政事务', icon: '📋', memberCount: 8 }
+      { id: 'root', name: '闆嗗洟鍏徃', code: 'DEPT-ROOT', parent: null, manager: '鑲栧厛鐢?, created: '2018-01-01', quota: 200, location: '鎬婚儴澶у帵', desc: '闆嗗洟鎬婚儴', icon: '馃彚', memberCount: 156 },
+      { id: 'tech', name: '鎶€鏈儴', code: 'DEPT-TECH', parent: 'root', manager: '寮犱笁', created: '2020-03-15', quota: 50, location: 'A搴?灞?, desc: '璐熻矗鍏徃鏍稿績浜у搧鐨勬妧鏈爺鍙戝伐浣?, icon: '馃捇', memberCount: 45 },
+      { id: 'frontend', name: '鍓嶇寮€鍙戠粍', code: 'DEPT-FE', parent: 'tech', manager: '鏉庡洓', created: '2020-03-15', quota: 15, location: 'A搴?灞?, desc: 'Web鍓嶇寮€鍙?, icon: '馃搧', memberCount: 12 },
+      { id: 'backend', name: '鍚庣寮€鍙戠粍', code: 'DEPT-BE', parent: 'tech', manager: '鐜嬩簲', created: '2020-03-15', quota: 20, location: 'A搴?灞?, desc: '鏈嶅姟绔紑鍙?, icon: '馃搧', memberCount: 18 },
+      { id: 'qa', name: '娴嬭瘯缁?, code: 'DEPT-QA', parent: 'tech', manager: '璧靛叚', created: '2020-06-01', quota: 10, location: 'A搴?灞?, desc: '璐ㄩ噺淇濋殰', icon: '馃搧', memberCount: 8 },
+      { id: 'devops', name: '杩愮淮缁?, code: 'DEPT-OPS', parent: 'tech', manager: '閽变竷', created: '2020-06-01', quota: 8, location: 'A搴?灞?, desc: '绯荤粺杩愮淮', icon: '馃搧', memberCount: 7 },
+      { id: 'product', name: '浜у搧閮?, code: 'DEPT-PM', parent: 'root', manager: '瀛欏叓', created: '2019-05-20', quota: 25, location: 'A搴?灞?, desc: '浜у搧瑙勫垝涓庤璁?, icon: '馃摝', memberCount: 22 },
+      { id: 'pm', name: '浜у搧缁?, code: 'DEPT-PMG', parent: 'product', manager: '鍛ㄤ節', created: '2019-05-20', quota: 18, location: 'A搴?灞?, desc: '浜у搧缁忕悊鍥㈤槦', icon: '馃搧', memberCount: 15 },
+      { id: 'design', name: '璁捐缁?, code: 'DEPT-DES', parent: 'product', manager: '鍚村崄', created: '2019-05-20', quota: 8, location: 'A搴?灞?, desc: 'UI/UX璁捐', icon: '馃搧', memberCount: 7 },
+      { id: 'sales', name: '閿€鍞儴', code: 'DEPT-SALES', parent: 'root', manager: '閮戝崄涓€', created: '2018-03-01', quota: 50, location: 'B搴?灞?, desc: '閿€鍞笟鍔?, icon: '馃捈', memberCount: 38 },
+      { id: 'hr', name: '浜哄姏璧勬簮閮?, code: 'DEPT-HR', parent: 'root', manager: '闄堝崄浜?, created: '2018-01-01', quota: 15, location: 'A搴?灞?, desc: '浜轰簨绠＄悊', icon: '馃懃', memberCount: 12 },
+      { id: 'finance', name: '璐㈠姟閮?, code: 'DEPT-FIN', parent: 'root', manager: '鏋楀崄涓?, created: '2018-01-01', quota: 12, location: 'A搴?灞?, desc: '璐㈠姟绠＄悊', icon: '馃挵', memberCount: 10 },
+      { id: 'admin', name: '琛屾斂閮?, code: 'DEPT-ADM', parent: 'root', manager: '榛勫崄鍥?, created: '2018-01-01', quota: 10, location: 'A搴?灞?, desc: '琛屾斂浜嬪姟', icon: '馃搵', memberCount: 8 }
     ];
 
     let currentDeptId = 'tech';
     let editingDeptId = null;
 
-    // 渲染树形结构
+    // 娓叉煋鏍戝舰缁撴瀯
     function renderTree() {
       const tree = document.getElementById('deptTree');
       tree.innerHTML = renderTreeNode('root');
@@ -367,10 +365,10 @@
         html += `
           <li class="tree-node">
             <div class="tree-item ${dept.id === currentDeptId ? 'active' : ''}" onclick="selectDept('${dept.id}')" data-id="${dept.id}">
-              ${hasSub ? `<button class="tree-toggle" onclick="toggleNode(event,this)">${isExpanded ? '▼' : '▶'}</button>` : '<span style="width:20px"></span>'}
+              ${hasSub ? `<button class="tree-toggle" onclick="toggleNode(event,this)">${isExpanded ? '鈻? : '鈻?}</button>` : '<span style="width:20px"></span>'}
               <span class="tree-icon">${dept.icon}</span>
               <span class="tree-label">${dept.name}</span>
-              <span class="tree-count">${dept.memberCount} 人</span>
+              <span class="tree-count">${dept.memberCount} 浜?/span>
             </div>
             ${hasSub ? `<ul class="tree-children ${isExpanded ? 'expanded' : ''}">${renderTreeNode(dept.id, level + 1)}</ul>` : ''}
           </li>
@@ -381,15 +379,15 @@
 
     function toggleNode(event, btn) {
       event.stopPropagation();
-      const isExpanded = btn.textContent === '▼';
-      btn.textContent = isExpanded ? '▶' : '▼';
+      const isExpanded = btn.textContent === '鈻?;
+      btn.textContent = isExpanded ? '鈻? : '鈻?;
       const children = btn.closest('.tree-node').querySelector('.tree-children');
       if (children) children.classList.toggle('expanded');
     }
 
     function expandAll() {
       document.querySelectorAll('.tree-children').forEach(c => c.classList.add('expanded'));
-      document.querySelectorAll('.tree-toggle').forEach(t => t.textContent = '▼');
+      document.querySelectorAll('.tree-toggle').forEach(t => t.textContent = '鈻?);
     }
 
     function selectDept(id) {
@@ -400,37 +398,36 @@
       renderDetail();
     }
 
-    // 渲染详情
+    // 娓叉煋璇︽儏
     function renderDetail() {
       const dept = depts.find(d => d.id === currentDeptId);
       if (!dept) return;
 
       document.getElementById('detailIcon').textContent = dept.icon;
       document.getElementById('detailTitle').textContent = dept.name;
-      document.getElementById('detailSubtitle').textContent = `${dept.desc} · 成立于 ${dept.created}`;
+      document.getElementById('detailSubtitle').textContent = `${dept.desc} 路 鎴愮珛浜?${dept.created}`;
 
-      const parentName = dept.parent ? depts.find(d => d.id === dept.parent)?.name : '无';
+      const parentName = dept.parent ? depts.find(d => d.id === dept.parent)?.name : '鏃?;
       document.getElementById('infoGrid').innerHTML = `
-        <div class="info-item"><div class="info-label">部门编号</div><div class="info-value">${dept.code}</div></div>
-        <div class="info-item"><div class="info-label">部门负责人</div><div class="info-value">${dept.manager}</div></div>
-        <div class="info-item"><div class="info-label">上级部门</div><div class="info-value">${parentName}</div></div>
-        <div class="info-item"><div class="info-label">成立时间</div><div class="info-value">${dept.created}</div></div>
-        <div class="info-item"><div class="info-label">人员编制</div><div class="info-value">${dept.memberCount} 人 / ${dept.quota} 人</div></div>
-        <div class="info-item"><div class="info-label">办公地点</div><div class="info-value">${dept.location}</div></div>
+        <div class="info-item"><div class="info-label">閮ㄩ棬缂栧彿</div><div class="info-value">${dept.code}</div></div>
+        <div class="info-item"><div class="info-label">閮ㄩ棬璐熻矗浜?/div><div class="info-value">${dept.manager}</div></div>
+        <div class="info-item"><div class="info-label">涓婄骇閮ㄩ棬</div><div class="info-value">${parentName}</div></div>
+        <div class="info-item"><div class="info-label">鎴愮珛鏃堕棿</div><div class="info-value">${dept.created}</div></div>
+        <div class="info-item"><div class="info-label">浜哄憳缂栧埗</div><div class="info-value">${dept.memberCount} 浜?/ ${dept.quota} 浜?/div></div>
+        <div class="info-item"><div class="info-label">鍔炲叕鍦扮偣</div><div class="info-value">${dept.location}</div></div>
       `;
 
-      // 子部门
-      const subDepts = depts.filter(d => d.parent === dept.id);
+      // 瀛愰儴闂?      const subDepts = depts.filter(d => d.parent === dept.id);
       document.getElementById('subDeptSection').innerHTML = subDepts.length > 0 ? `
         <div class="sub-dept-section">
-          <div class="section-title">下级部门（${subDepts.length}）</div>
+          <div class="section-title">涓嬬骇閮ㄩ棬锛?{subDepts.length}锛?/div>
           <div class="sub-dept-grid">
             ${subDepts.map(d => `
               <div class="sub-dept-card" onclick="selectDept('${d.id}')">
                 <div class="sub-dept-icon">${d.icon}</div>
                 <div class="sub-dept-info">
                   <div class="sub-dept-name">${d.name}</div>
-                  <div class="sub-dept-count">${d.memberCount} 人</div>
+                  <div class="sub-dept-count">${d.memberCount} 浜?/div>
                 </div>
               </div>
             `).join('')}
@@ -438,11 +435,11 @@
         </div>
       ` : '';
 
-      // 成员列表（模拟）
+      // 鎴愬憳鍒楄〃锛堟ā鎷燂級
       const members = generateMembers(dept.memberCount);
       document.getElementById('memberSection').innerHTML = `
         <div class="sub-dept-section">
-          <div class="section-title">部门成员（${dept.memberCount}）</div>
+          <div class="section-title">閮ㄩ棬鎴愬憳锛?{dept.memberCount}锛?/div>
           <div class="member-list">
             ${members.slice(0, 9).map(m => `
               <div class="member-card">
@@ -452,19 +449,19 @@
                   <div class="member-role">${m.role}</div>
                 </div>
                 <div class="member-actions">
-                  <button class="member-more" onclick="showToast('${m.name} - ${m.role}')">⋯</button>
+                  <button class="member-more" onclick="showToast('${m.name} - ${m.role}')">鈰?/button>
                 </div>
               </div>
             `).join('')}
           </div>
-          ${dept.memberCount > 9 ? `<div style="text-align:center;margin-top:20px"><button class="btn btn-sm btn-outline">查看全部 ${dept.memberCount} 人</button></div>` : ''}
+          ${dept.memberCount > 9 ? `<div style="text-align:center;margin-top:20px"><button class="btn btn-sm btn-outline">鏌ョ湅鍏ㄩ儴 ${dept.memberCount} 浜?/button></div>` : ''}
         </div>
       `;
     }
 
     function generateMembers(count) {
-      const names = ['张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十', '郑十一', '陈十二', '林十三', '黄十四', '刘一', '陈二', '杨三'];
-      const roles = ['部门经理', '技术专家', '高级工程师', '工程师', '助理工程师', '实习生'];
+      const names = ['寮犱笁', '鏉庡洓', '鐜嬩簲', '璧靛叚', '閽变竷', '瀛欏叓', '鍛ㄤ節', '鍚村崄', '閮戝崄涓€', '闄堝崄浜?, '鏋楀崄涓?, '榛勫崄鍥?, '鍒樹竴', '闄堜簩', '鏉ㄤ笁'];
+      const roles = ['閮ㄩ棬缁忕悊', '鎶€鏈笓瀹?, '楂樼骇宸ョ▼甯?, '宸ョ▼甯?, '鍔╃悊宸ョ▼甯?, '瀹炰範鐢?];
       const colors = ['linear-gradient(135deg,#60A5FA,#3B82F6)', 'linear-gradient(135deg,#FBBF24,#F59E0B)', 'linear-gradient(135deg,#4ADE80,#22C55E)', 'linear-gradient(135deg,#F87171,#EF4444)', 'linear-gradient(135deg,#A78BFA,#8B5CF6)', 'linear-gradient(135deg,#FB7185,#F43F5E)', 'linear-gradient(135deg,#34D399,#10B981)'];
       
       return Array.from({ length: count }, (_, i) => ({
@@ -474,14 +471,14 @@
       }));
     }
 
-    // 弹窗
+    // 寮圭獥
     window.openModal = function(type) {
       editingDeptId = type === 'edit' ? currentDeptId : null;
-      document.getElementById('modalTitle').textContent = type === 'add' ? '新增部门' : '编辑部门';
+      document.getElementById('modalTitle').textContent = type === 'add' ? '鏂板閮ㄩ棬' : '缂栬緫閮ㄩ棬';
       
-      // 填充上级部门选项
+      // 濉厖涓婄骇閮ㄩ棬閫夐」
       const parentSelect = document.getElementById('deptParent');
-      parentSelect.innerHTML = '<option value="">请选择上级部门</option>' + 
+      parentSelect.innerHTML = '<option value="">璇烽€夋嫨涓婄骇閮ㄩ棬</option>' + 
         depts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
 
       if (type === 'edit') {
@@ -508,7 +505,7 @@
       const parent = document.getElementById('deptParent').value;
       
       if (!name || !parent) {
-        showToast('请填写必填项', 'error');
+        showToast('璇峰～鍐欏繀濉」', 'error');
         return;
       }
 
@@ -523,7 +520,7 @@
           dept.quota = parseInt(document.getElementById('deptQuota').value) || 0;
           dept.location = document.getElementById('deptLocation').value;
           dept.desc = document.getElementById('deptDesc').value;
-          showToast('部门更新成功');
+          showToast('閮ㄩ棬鏇存柊鎴愬姛');
         }
       } else {
         const newDept = {
@@ -531,16 +528,16 @@
           name,
           code: document.getElementById('deptCode').value || 'DEPT-' + Date.now(),
           parent,
-          manager: document.getElementById('deptManager').value || '待分配',
+          manager: document.getElementById('deptManager').value || '寰呭垎閰?,
           created: document.getElementById('deptCreated').value || new Date().toISOString().split('T')[0],
           quota: parseInt(document.getElementById('deptQuota').value) || 0,
-          location: document.getElementById('deptLocation').value || '待分配',
+          location: document.getElementById('deptLocation').value || '寰呭垎閰?,
           desc: document.getElementById('deptDesc').value || name,
-          icon: '📁',
+          icon: '馃搧',
           memberCount: 0
         };
         depts.push(newDept);
-        showToast('部门创建成功');
+        showToast('閮ㄩ棬鍒涘缓鎴愬姛');
       }
 
       closeModal('deptModal');
@@ -554,21 +551,20 @@
       
       const hasChildren = depts.some(d => d.parent === currentDeptId);
       if (hasChildren) {
-        showToast('该部门下有子部门，无法删除', 'error');
+        showToast('璇ラ儴闂ㄤ笅鏈夊瓙閮ㄩ棬锛屾棤娉曞垹闄?, 'error');
         return;
       }
 
-      confirmAction(`删除部门「${dept.name}」`, () => {
+      confirmAction(`鍒犻櫎閮ㄩ棬銆?{dept.name}銆峘, () => {
         depts = depts.filter(d => d.id !== currentDeptId);
         currentDeptId = 'root';
         renderTree();
         selectDept('root');
-        showToast('部门已删除');
+        showToast('閮ㄩ棬宸插垹闄?);
       });
     }
 
-    // 初始化
-    document.addEventListener('DOMContentLoaded', () => {
+    // 鍒濆鍖?    document.addEventListener('DOMContentLoaded', () => {
       renderTree();
       renderDetail();
     });

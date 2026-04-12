@@ -1,290 +1,289 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>用户管理 - 企业管理系统</title>
-  <link rel="stylesheet" href="common.css" />
+  <title>鐢ㄦ埛绠＄悊 - 浼佷笟绠＄悊绯荤粺</title>
+  <link rel="stylesheet" href="common.v2.css" />
 </head>
 <body>
-  <!-- 顶部栏 -->
+  <!-- 椤堕儴鏍?-->
   <header class="header">
     <div class="header-left">
       <div class="logo-wrap">
         <div class="logo-bg"><div class="logo-icon"></div></div>
       </div>
       <div>
-        <div class="system-name">企业管理系统</div>
+        <div class="system-name">浼佷笟绠＄悊绯荤粺</div>
       </div>
-      <input class="search-box" placeholder="搜索功能、数据、用户..." />
+      <input class="search-box" placeholder="鎼滅储鍔熻兘銆佹暟鎹€佺敤鎴?.." />
     </div>
     <div class="header-right">
-      <button class="icon-btn" title="切换主题" onclick="toggleTheme()">
-        <span id="themeToggleIcon">☀️</span>
+      <button class="icon-btn" title="鍒囨崲涓婚" onclick="toggleTheme()">
+        <span id="themeToggleIcon">鈽€锔?/span>
       </button>
-      <button class="icon-btn" title="通知">🔔<span class="badge">3</span></button>
-      <button class="icon-btn" title="帮助">❓</button>
+      <button class="icon-btn" title="閫氱煡">馃敂<span class="badge">3</span></button>
+      <button class="icon-btn" title="甯姪">鉂?/button>
       <div class="user-menu" onclick="showLogoutMenu()">
-        <div class="avatar" id="userAvatar">肖</div>
-        <span class="user-name" id="currentUsername">肖先生</span>
-        <span style="color:var(--muted)">▼</span>
+        <div class="avatar" id="userAvatar">鑲?/div>
+        <span class="user-name" id="currentUsername">鑲栧厛鐢?/span>
+        <span style="color:var(--muted)">鈻?/span>
       </div>
     </div>
   </header>
 
-  <!-- 侧边栏 -->
+  <!-- 渚ц竟鏍?-->
   <aside class="sidebar">
     <div class="nav-section">
-      <div class="nav-title">工作台</div>
-      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span><span>首页概览</span></a>
-      <a class="nav-item"><span class="nav-icon">📊</span><span>数据报表</span></a>
-      <a class="nav-item"><span class="nav-icon">📋</span><span>待办事项</span></a>
+      <div class="nav-title">宸ヤ綔鍙?/div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">馃彔</span><span>棣栭〉姒傝</span></a>
+      <a class="nav-item"><span class="nav-icon">馃搳</span><span>鏁版嵁鎶ヨ〃</span></a>
+      <a class="nav-item"><span class="nav-icon">馃搵</span><span>寰呭姙浜嬮」</span></a>
     </div>
     <div class="nav-section">
-      <div class="nav-title">组织管理</div>
-      <a class="nav-item" href="user-management.html"><span class="nav-icon">👥</span><span>用户管理</span></a>
-      <a class="nav-item" href="department.html"><span class="nav-icon">🏢</span><span>部门架构</span></a>
-      <a class="nav-item" href="role-permission.html"><span class="nav-icon">🔐</span><span>角色权限</span></a>
+      <div class="nav-title">缁勭粐绠＄悊</div>
+      <a class="nav-item" href="user-management.html"><span class="nav-icon">馃懃</span><span>鐢ㄦ埛绠＄悊</span></a>
+      <a class="nav-item" href="department.html"><span class="nav-icon">馃彚</span><span>閮ㄩ棬鏋舵瀯</span></a>
+      <a class="nav-item" href="role-permission.html"><span class="nav-icon">馃攼</span><span>瑙掕壊鏉冮檺</span></a>
     </div>
     <div class="nav-section">
-      <div class="nav-title">系统管理</div>
-      <a class="nav-item"><span class="nav-icon">⚙️</span><span>系统设置</span></a>
-      <a class="nav-item"><span class="nav-icon">📜</span><span>操作日志</span></a>
-      <a class="nav-item"><span class="nav-icon">🔒</span><span>安全审计</span></a>
+      <div class="nav-title">绯荤粺绠＄悊</div>
+      <a class="nav-item"><span class="nav-icon">鈿欙笍</span><span>绯荤粺璁剧疆</span></a>
+      <a class="nav-item"><span class="nav-icon">馃摐</span><span>鎿嶄綔鏃ュ織</span></a>
+      <a class="nav-item"><span class="nav-icon">馃敀</span><span>瀹夊叏瀹¤</span></a>
     </div>
   </aside>
 
-  <!-- 主内容区 -->
+  <!-- 涓诲唴瀹瑰尯 -->
   <main class="main">
-    <!-- 页面头部 -->
+    <!-- 椤甸潰澶撮儴 -->
     <div class="page-header">
       <div>
-        <div class="breadcrumb">组织管理 / <span>用户管理</span></div>
-        <div class="page-title">用户管理</div>
+        <div class="breadcrumb">缁勭粐绠＄悊 / <span>鐢ㄦ埛绠＄悊</span></div>
+        <div class="page-title">鐢ㄦ埛绠＄悊</div>
       </div>
-      <button class="btn btn-primary" onclick="openModal('add')">+ 新增用户</button>
+      <button class="btn btn-primary" onclick="openModal('add')">+ 鏂板鐢ㄦ埛</button>
     </div>
 
-    <!-- 筛选区 -->
+    <!-- 绛涢€夊尯 -->
     <div class="filter-bar">
       <div class="filter-row">
         <div class="filter-item" style="flex:1;min-width:200px">
-          <label class="filter-label">关键词搜索</label>
-          <input class="filter-input" id="searchKeyword" placeholder="姓名/账号/手机号/邮箱" />
+          <label class="filter-label">鍏抽敭璇嶆悳绱?/label>
+          <input class="filter-input" id="searchKeyword" placeholder="濮撳悕/璐﹀彿/鎵嬫満鍙?閭" />
         </div>
         <div class="filter-item">
-          <label class="filter-label">部门</label>
+          <label class="filter-label">閮ㄩ棬</label>
           <select class="filter-select" id="filterDept">
-            <option value="">全部部门</option>
-            <option value="tech">技术部</option>
-            <option value="product">产品部</option>
-            <option value="design">设计部</option>
-            <option value="hr">人力资源部</option>
-            <option value="finance">财务部</option>
-            <option value="sales">销售部</option>
+            <option value="">鍏ㄩ儴閮ㄩ棬</option>
+            <option value="tech">鎶€鏈儴</option>
+            <option value="product">浜у搧閮?/option>
+            <option value="design">璁捐閮?/option>
+            <option value="hr">浜哄姏璧勬簮閮?/option>
+            <option value="finance">璐㈠姟閮?/option>
+            <option value="sales">閿€鍞儴</option>
           </select>
         </div>
         <div class="filter-item">
-          <label class="filter-label">角色</label>
+          <label class="filter-label">瑙掕壊</label>
           <select class="filter-select" id="filterRole">
-            <option value="">全部角色</option>
-            <option value="admin">管理员</option>
-            <option value="manager">部门经理</option>
-            <option value="user">普通用户</option>
-            <option value="guest">访客</option>
+            <option value="">鍏ㄩ儴瑙掕壊</option>
+            <option value="admin">绠＄悊鍛?/option>
+            <option value="manager">閮ㄩ棬缁忕悊</option>
+            <option value="user">鏅€氱敤鎴?/option>
+            <option value="guest">璁垮</option>
           </select>
         </div>
         <div class="filter-item">
-          <label class="filter-label">状态</label>
+          <label class="filter-label">鐘舵€?/label>
           <select class="filter-select" id="filterStatus">
-            <option value="">全部状态</option>
-            <option value="active">正常</option>
-            <option value="disabled">禁用</option>
-            <option value="pending">待激活</option>
+            <option value="">鍏ㄩ儴鐘舵€?/option>
+            <option value="active">姝ｅ父</option>
+            <option value="disabled">绂佺敤</option>
+            <option value="pending">寰呮縺娲?/option>
           </select>
         </div>
         <div class="filter-item" style="margin-top:auto">
-          <button class="btn btn-primary" style="height:36px" onclick="handleSearch()">🔍 搜索</button>
+          <button class="btn btn-primary" style="height:36px" onclick="handleSearch()">馃攳 鎼滅储</button>
         </div>
         <div class="filter-item" style="margin-top:auto">
-          <button class="btn btn-outline" style="height:36px" onclick="handleReset()">重置</button>
+          <button class="btn btn-outline" style="height:36px" onclick="handleReset()">閲嶇疆</button>
         </div>
       </div>
     </div>
 
-    <!-- 批量操作栏 -->
+    <!-- 鎵归噺鎿嶄綔鏍?-->
     <div class="batch-bar" id="batchBar" style="display:none">
-      <span class="batch-info">已选择 <strong id="selectedCount">0</strong> 个用户</span>
+      <span class="batch-info">宸查€夋嫨 <strong id="selectedCount">0</strong> 涓敤鎴?/span>
       <div class="batch-actions">
-        <button class="btn btn-sm btn-outline" onclick="batchAction('启用')">批量启用</button>
-        <button class="btn btn-sm btn-outline" onclick="batchAction('禁用')">批量禁用</button>
-        <button class="btn btn-sm btn-danger" onclick="batchAction('删除')">批量删除</button>
-        <button class="btn btn-sm btn-outline" onclick="showToast('导出成功')">导出选中</button>
+        <button class="btn btn-sm btn-outline" onclick="batchAction('鍚敤')">鎵归噺鍚敤</button>
+        <button class="btn btn-sm btn-outline" onclick="batchAction('绂佺敤')">鎵归噺绂佺敤</button>
+        <button class="btn btn-sm btn-danger" onclick="batchAction('鍒犻櫎')">鎵归噺鍒犻櫎</button>
+        <button class="btn btn-sm btn-outline" onclick="showToast('瀵煎嚭鎴愬姛')">瀵煎嚭閫変腑</button>
       </div>
     </div>
 
-    <!-- 表格 -->
+    <!-- 琛ㄦ牸 -->
     <div class="table-card">
       <div class="table-wrap">
         <table id="userTable">
           <thead>
             <tr>
               <th style="width:50px"><input type="checkbox" class="checkbox" id="selectAll" /></th>
-              <th>用户信息</th>
-              <th>部门</th>
-              <th>角色</th>
-              <th>状态</th>
-              <th>最后登录</th>
-              <th>操作</th>
+              <th>鐢ㄦ埛淇℃伅</th>
+              <th>閮ㄩ棬</th>
+              <th>瑙掕壊</th>
+              <th>鐘舵€?/th>
+              <th>鏈€鍚庣櫥褰?/th>
+              <th>鎿嶄綔</th>
             </tr>
           </thead>
           <tbody id="userTableBody">
-            <!-- 数据由 JS 渲染 -->
+            <!-- 鏁版嵁鐢?JS 娓叉煋 -->
           </tbody>
         </table>
       </div>
 
-      <!-- 分页 -->
+      <!-- 鍒嗛〉 -->
       <div class="pagination">
-        <div class="page-info">共 <strong id="totalCount">2,847</strong> 条记录</div>
+        <div class="page-info">鍏?<strong id="totalCount">2,847</strong> 鏉¤褰?/div>
         <div class="page-controls">
-          <span style="font-size:13px;color:var(--muted)">每页</span>
+          <span style="font-size:13px;color:var(--muted)">姣忛〉</span>
           <select class="page-size" id="pageSize" onchange="changePageSize()">
             <option>10</option>
             <option selected>20</option>
             <option>50</option>
             <option>100</option>
           </select>
-          <button class="page-btn" onclick="goToPage(1)" id="btnFirst">◀</button>
+          <button class="page-btn" onclick="goToPage(1)" id="btnFirst">鈼€</button>
           <button class="page-btn" onclick="prevPage()" id="btnPrev">&lt;</button>
           <span id="pageNumbers"></span>
           <button class="page-btn" onclick="nextPage()" id="btnNext">&gt;</button>
-          <button class="page-btn" onclick="goToPage(totalPages)" id="btnLast">▶</button>
+          <button class="page-btn" onclick="goToPage(totalPages)" id="btnLast">鈻?/button>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- 新增/编辑用户弹窗 -->
+  <!-- 鏂板/缂栬緫鐢ㄦ埛寮圭獥 -->
   <div class="modal-overlay" id="userModal">
     <div class="modal">
       <div class="modal-header">
-        <div class="modal-title" id="modalTitle">新增用户</div>
-        <button class="modal-close" onclick="closeModal('userModal')">×</button>
+        <div class="modal-title" id="modalTitle">鏂板鐢ㄦ埛</div>
+        <button class="modal-close" onclick="closeModal('userModal')">脳</button>
       </div>
       <div class="modal-body">
         <form id="userForm">
           <input type="hidden" id="userId" />
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label required">姓名</label>
-              <input class="form-input" id="userName" placeholder="请输入姓名" required />
+              <label class="form-label required">濮撳悕</label>
+              <input class="form-input" id="userName" placeholder="璇疯緭鍏ュ鍚? required />
             </div>
             <div class="form-group">
-              <label class="form-label required">账号</label>
-              <input class="form-input" id="userAccount" placeholder="请输入账号（英文/数字）" required />
+              <label class="form-label required">璐﹀彿</label>
+              <input class="form-input" id="userAccount" placeholder="璇疯緭鍏ヨ处鍙凤紙鑻辨枃/鏁板瓧锛? required />
             </div>
           </div>
           <div class="form-row" id="passwordRow">
             <div class="form-group">
-              <label class="form-label required">密码</label>
-              <input class="form-input" type="password" id="userPassword" placeholder="请输入密码" />
-              <div class="form-hint">至少 8 位，含大小写字母和数字</div>
+              <label class="form-label required">瀵嗙爜</label>
+              <input class="form-input" type="password" id="userPassword" placeholder="璇疯緭鍏ュ瘑鐮? />
+              <div class="form-hint">鑷冲皯 8 浣嶏紝鍚ぇ灏忓啓瀛楁瘝鍜屾暟瀛?/div>
             </div>
             <div class="form-group">
-              <label class="form-label required">确认密码</label>
-              <input class="form-input" type="password" id="userPasswordConfirm" placeholder="请再次输入密码" />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">手机号</label>
-              <input class="form-input" id="userPhone" placeholder="请输入手机号" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">邮箱</label>
-              <input class="form-input" type="email" id="userEmail" placeholder="请输入邮箱" />
+              <label class="form-label required">纭瀵嗙爜</label>
+              <input class="form-input" type="password" id="userPasswordConfirm" placeholder="璇峰啀娆¤緭鍏ュ瘑鐮? />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label required">部门</label>
+              <label class="form-label">鎵嬫満鍙?/label>
+              <input class="form-input" id="userPhone" placeholder="璇疯緭鍏ユ墜鏈哄彿" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">閭</label>
+              <input class="form-input" type="email" id="userEmail" placeholder="璇疯緭鍏ラ偖绠? />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">閮ㄩ棬</label>
               <select class="form-select" id="userDept" required>
-                <option value="">请选择部门</option>
-                <option value="tech">技术部</option>
-                <option value="product">产品部</option>
-                <option value="design">设计部</option>
-                <option value="hr">人力资源部</option>
-                <option value="finance">财务部</option>
-                <option value="sales">销售部</option>
+                <option value="">璇烽€夋嫨閮ㄩ棬</option>
+                <option value="tech">鎶€鏈儴</option>
+                <option value="product">浜у搧閮?/option>
+                <option value="design">璁捐閮?/option>
+                <option value="hr">浜哄姏璧勬簮閮?/option>
+                <option value="finance">璐㈠姟閮?/option>
+                <option value="sales">閿€鍞儴</option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label required">角色</label>
+              <label class="form-label required">瑙掕壊</label>
               <select class="form-select" id="userRole" required>
-                <option value="">请选择角色</option>
-                <option value="admin">管理员</option>
-                <option value="manager">部门经理</option>
-                <option value="user">普通用户</option>
-                <option value="guest">访客</option>
+                <option value="">璇烽€夋嫨瑙掕壊</option>
+                <option value="admin">绠＄悊鍛?/option>
+                <option value="manager">閮ㄩ棬缁忕悊</option>
+                <option value="user">鏅€氱敤鎴?/option>
+                <option value="guest">璁垮</option>
               </select>
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">状态</label>
+            <label class="form-label">鐘舵€?/label>
             <select class="form-select" id="userStatus">
-              <option value="active">正常</option>
-              <option value="disabled">禁用</option>
-              <option value="pending">待激活</option>
+              <option value="active">姝ｅ父</option>
+              <option value="disabled">绂佺敤</option>
+              <option value="pending">寰呮縺娲?/option>
             </select>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('userModal')">取消</button>
-        <button class="btn btn-primary" onclick="saveUser()">确定</button>
+        <button class="btn btn-outline" onclick="closeModal('userModal')">鍙栨秷</button>
+        <button class="btn btn-primary" onclick="saveUser()">纭畾</button>
       </div>
     </div>
   </div>
 
-  <!-- 重置密码弹窗 -->
+  <!-- 閲嶇疆瀵嗙爜寮圭獥 -->
   <div class="modal-overlay" id="resetModal">
     <div class="modal">
       <div class="modal-header">
-        <div class="modal-title">重置密码</div>
-        <button class="modal-close" onclick="closeModal('resetModal')">×</button>
+        <div class="modal-title">閲嶇疆瀵嗙爜</div>
+        <button class="modal-close" onclick="closeModal('resetModal')">脳</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">用户</label>
-          <div style="font-size:14px;color:#fff;padding:10px 0" id="resetUserName">张三 (zhangsan)</div>
+          <label class="form-label">鐢ㄦ埛</label>
+          <div style="font-size:14px;color:#fff;padding:10px 0" id="resetUserName">寮犱笁 (zhangsan)</div>
         </div>
         <div class="form-group">
-          <label class="form-label required">新密码</label>
-          <input class="form-input" type="password" id="newPassword" placeholder="请输入新密码" />
-          <div class="form-hint">至少 8 位，含大小写字母和数字</div>
+          <label class="form-label required">鏂板瘑鐮?/label>
+          <input class="form-input" type="password" id="newPassword" placeholder="璇疯緭鍏ユ柊瀵嗙爜" />
+          <div class="form-hint">鑷冲皯 8 浣嶏紝鍚ぇ灏忓啓瀛楁瘝鍜屾暟瀛?/div>
         </div>
         <div class="form-group">
-          <label class="form-label required">确认新密码</label>
-          <input class="form-input" type="password" id="newPasswordConfirm" placeholder="请再次输入新密码" />
+          <label class="form-label required">纭鏂板瘑鐮?/label>
+          <input class="form-input" type="password" id="newPasswordConfirm" placeholder="璇峰啀娆¤緭鍏ユ柊瀵嗙爜" />
         </div>
         <div class="form-group">
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer">
-            <input type="checkbox" id="sendEmail" /> 同时发送邮件通知用户
+            <input type="checkbox" id="sendEmail" /> 鍚屾椂鍙戦€侀偖浠堕€氱煡鐢ㄦ埛
           </label>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('resetModal')">取消</button>
-        <button class="btn btn-primary" onclick="resetPassword()">确定重置</button>
+        <button class="btn btn-outline" onclick="closeModal('resetModal')">鍙栨秷</button>
+        <button class="btn btn-primary" onclick="resetPassword()">纭畾閲嶇疆</button>
       </div>
     </div>
   </div>
 
-  <script src="common.js"></script>
+  <script src="common.v2.js"></script>
   <script>
-    // 显示退出菜单
-    function showLogoutMenu() {
+    // 鏄剧ず閫€鍑鸿彍鍗?    function showLogoutMenu() {
       const menu = document.createElement('div');
       menu.className = 'logout-menu';
       menu.style.cssText = `
@@ -295,7 +294,7 @@
       `;
       menu.innerHTML = `
         <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);">
-          当前用户
+          褰撳墠鐢ㄦ埛
         </div>
         <div style="padding:12px 16px;font-size:14px;color:var(--text);font-weight:500;" id="menuUsername">
           ${document.getElementById('currentUsername').textContent}
@@ -303,8 +302,7 @@
         <div style="padding:8px;border-top:1px solid var(--border);">
           <button onclick="logout();document.querySelector('.logout-menu').remove();" 
             style="width:100%;padding:10px;border:none;border-radius:6px;background:transparent;color:var(--danger);font-size:13px;cursor:pointer;text-align:left;">
-            🚪 退出登录
-          </button>
+            馃毆 閫€鍑虹櫥褰?          </button>
         </div>
       `;
       document.body.appendChild(menu);
@@ -320,35 +318,33 @@
     }
   </script>
   <script>
-    // 模拟用户数据
+    // 妯℃嫙鐢ㄦ埛鏁版嵁
     let users = [
-      { id: 1, name: '张三', account: 'zhangsan', dept: 'tech', role: 'admin', status: 'active', lastLogin: '2026-04-04 09:15', avatarColor: 'linear-gradient(135deg,#60A5FA,#3B82F6)' },
-      { id: 2, name: '李四', account: 'lisi', dept: 'product', role: 'manager', status: 'active', lastLogin: '2026-04-03 18:30', avatarColor: 'linear-gradient(135deg,#FBBF24,#F59E0B)' },
-      { id: 3, name: '王五', account: 'wangwu', dept: 'design', role: 'user', status: 'disabled', lastLogin: '2026-03-28 14:20', avatarColor: 'linear-gradient(135deg,#4ADE80,#22C55E)' },
-      { id: 4, name: '赵六', account: 'zhaoliu', dept: 'hr', role: 'user', status: 'pending', lastLogin: '从未登录', avatarColor: 'linear-gradient(135deg,#F87171,#EF4444)' },
-      { id: 5, name: '钱七', account: 'qianqi', dept: 'finance', role: 'manager', status: 'active', lastLogin: '2026-04-04 11:05', avatarColor: 'linear-gradient(135deg,#60A5FA,#3B82F6)' },
-      { id: 6, name: '孙八', account: 'sunba', dept: 'sales', role: 'user', status: 'active', lastLogin: '2026-04-02 16:40', avatarColor: 'linear-gradient(135deg,#A78BFA,#8B5CF6)' },
-      { id: 7, name: '周九', account: 'zhoujiu', dept: 'tech', role: 'user', status: 'active', lastLogin: '2026-04-04 08:50', avatarColor: 'linear-gradient(135deg,#FB7185,#F43F5E)' },
-      { id: 8, name: '吴十', account: 'wushi', dept: 'product', role: 'user', status: 'disabled', lastLogin: '2026-03-15 10:20', avatarColor: 'linear-gradient(135deg,#34D399,#10B981)' },
-      { id: 9, name: '郑十一', account: 'zhengshiyi', dept: 'design', role: 'user', status: 'active', lastLogin: '2026-04-01 15:30', avatarColor: 'linear-gradient(135deg,#60A5FA,#3B82F6)' },
-      { id: 10, name: '陈十二', account: 'chenshier', dept: 'hr', role: 'manager', status: 'active', lastLogin: '2026-04-04 10:20', avatarColor: 'linear-gradient(135deg,#FBBF24,#F59E0B)' },
-      { id: 11, name: '林十三', account: 'linshisan', dept: 'tech', role: 'user', status: 'pending', lastLogin: '从未登录', avatarColor: 'linear-gradient(135deg,#4ADE80,#22C55E)' },
-      { id: 12, name: '黄十四', account: 'huangshisi', dept: 'sales', role: 'admin', status: 'active', lastLogin: '2026-04-03 17:45', avatarColor: 'linear-gradient(135deg,#F87171,#EF4444)' }
+      { id: 1, name: '寮犱笁', account: 'zhangsan', dept: 'tech', role: 'admin', status: 'active', lastLogin: '2026-04-04 09:15', avatarColor: 'linear-gradient(135deg,#60A5FA,#3B82F6)' },
+      { id: 2, name: '鏉庡洓', account: 'lisi', dept: 'product', role: 'manager', status: 'active', lastLogin: '2026-04-03 18:30', avatarColor: 'linear-gradient(135deg,#FBBF24,#F59E0B)' },
+      { id: 3, name: '鐜嬩簲', account: 'wangwu', dept: 'design', role: 'user', status: 'disabled', lastLogin: '2026-03-28 14:20', avatarColor: 'linear-gradient(135deg,#4ADE80,#22C55E)' },
+      { id: 4, name: '璧靛叚', account: 'zhaoliu', dept: 'hr', role: 'user', status: 'pending', lastLogin: '浠庢湭鐧诲綍', avatarColor: 'linear-gradient(135deg,#F87171,#EF4444)' },
+      { id: 5, name: '閽变竷', account: 'qianqi', dept: 'finance', role: 'manager', status: 'active', lastLogin: '2026-04-04 11:05', avatarColor: 'linear-gradient(135deg,#60A5FA,#3B82F6)' },
+      { id: 6, name: '瀛欏叓', account: 'sunba', dept: 'sales', role: 'user', status: 'active', lastLogin: '2026-04-02 16:40', avatarColor: 'linear-gradient(135deg,#A78BFA,#8B5CF6)' },
+      { id: 7, name: '鍛ㄤ節', account: 'zhoujiu', dept: 'tech', role: 'user', status: 'active', lastLogin: '2026-04-04 08:50', avatarColor: 'linear-gradient(135deg,#FB7185,#F43F5E)' },
+      { id: 8, name: '鍚村崄', account: 'wushi', dept: 'product', role: 'user', status: 'disabled', lastLogin: '2026-03-15 10:20', avatarColor: 'linear-gradient(135deg,#34D399,#10B981)' },
+      { id: 9, name: '閮戝崄涓€', account: 'zhengshiyi', dept: 'design', role: 'user', status: 'active', lastLogin: '2026-04-01 15:30', avatarColor: 'linear-gradient(135deg,#60A5FA,#3B82F6)' },
+      { id: 10, name: '闄堝崄浜?, account: 'chenshier', dept: 'hr', role: 'manager', status: 'active', lastLogin: '2026-04-04 10:20', avatarColor: 'linear-gradient(135deg,#FBBF24,#F59E0B)' },
+      { id: 11, name: '鏋楀崄涓?, account: 'linshisan', dept: 'tech', role: 'user', status: 'pending', lastLogin: '浠庢湭鐧诲綍', avatarColor: 'linear-gradient(135deg,#4ADE80,#22C55E)' },
+      { id: 12, name: '榛勫崄鍥?, account: 'huangshisi', dept: 'sales', role: 'admin', status: 'active', lastLogin: '2026-04-03 17:45', avatarColor: 'linear-gradient(135deg,#F87171,#EF4444)' }
     ];
 
-    // 部门/角色/状态映射
-    const deptMap = { tech: '技术部', product: '产品部', design: '设计部', hr: '人力资源部', finance: '财务部', sales: '销售部' };
-    const roleMap = { admin: '管理员', manager: '部门经理', user: '普通用户', guest: '访客' };
-    const statusMap = { active: { text: '正常', class: 'status-active' }, disabled: { text: '禁用', class: 'status-disabled' }, pending: { text: '待激活', class: 'status-pending' } };
+    // 閮ㄩ棬/瑙掕壊/鐘舵€佹槧灏?    const deptMap = { tech: '鎶€鏈儴', product: '浜у搧閮?, design: '璁捐閮?, hr: '浜哄姏璧勬簮閮?, finance: '璐㈠姟閮?, sales: '閿€鍞儴' };
+    const roleMap = { admin: '绠＄悊鍛?, manager: '閮ㄩ棬缁忕悊', user: '鏅€氱敤鎴?, guest: '璁垮' };
+    const statusMap = { active: { text: '姝ｅ父', class: 'status-active' }, disabled: { text: '绂佺敤', class: 'status-disabled' }, pending: { text: '寰呮縺娲?, class: 'status-pending' } };
 
-    // 分页状态
-    let currentPage = 1;
+    // 鍒嗛〉鐘舵€?    let currentPage = 1;
     let pageSize = 20;
     let filteredUsers = [...users];
     let editingUserId = null;
     let resettingUserId = null;
 
-    // 渲染表格
+    // 娓叉煋琛ㄦ牸
     function renderTable() {
       const tbody = document.getElementById('userTableBody');
       const start = (currentPage - 1) * pageSize;
@@ -375,16 +371,16 @@
             <td>${user.lastLogin}</td>
             <td>
               <div class="action-btns">
-                <a class="action-link" onclick="editUser(${user.id})">编辑</a>
-                <a class="action-link" onclick="openResetModal(${user.id})">重置密码</a>
-                <a class="action-link danger" onclick="deleteUser(${user.id})">删除</a>
+                <a class="action-link" onclick="editUser(${user.id})">缂栬緫</a>
+                <a class="action-link" onclick="openResetModal(${user.id})">閲嶇疆瀵嗙爜</a>
+                <a class="action-link danger" onclick="deleteUser(${user.id})">鍒犻櫎</a>
               </div>
             </td>
           </tr>
         `;
       }).join('');
 
-      // 重新绑定复选框事件
+      // 閲嶆柊缁戝畾澶嶉€夋浜嬩欢
       document.querySelectorAll('.user-checkbox').forEach(cb => {
         cb.addEventListener('change', () => TableBatch.updateBatchBar());
       });
@@ -392,18 +388,17 @@
       updatePagination();
     }
 
-    // 更新分页
+    // 鏇存柊鍒嗛〉
     function updatePagination() {
       const totalPages = Math.ceil(filteredUsers.length / pageSize) || 1;
       document.getElementById('totalCount').textContent = filteredUsers.length.toLocaleString();
       
-      // 更新按钮状态
-      document.getElementById('btnFirst').disabled = currentPage === 1;
+      // 鏇存柊鎸夐挳鐘舵€?      document.getElementById('btnFirst').disabled = currentPage === 1;
       document.getElementById('btnPrev').disabled = currentPage === 1;
       document.getElementById('btnNext').disabled = currentPage === totalPages;
       document.getElementById('btnLast').disabled = currentPage === totalPages;
 
-      // 生成页码
+      // 鐢熸垚椤电爜
       let html = '';
       const maxVisible = 5;
       let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
@@ -456,7 +451,7 @@
       renderTable();
     }
 
-    // 搜索
+    // 鎼滅储
     function handleSearch() {
       const keyword = document.getElementById('searchKeyword').value.toLowerCase();
       const dept = document.getElementById('filterDept').value;
@@ -475,7 +470,7 @@
 
       currentPage = 1;
       renderTable();
-      showToast(`搜索完成，共找到 ${filteredUsers.length} 条记录`);
+      showToast(`鎼滅储瀹屾垚锛屽叡鎵惧埌 ${filteredUsers.length} 鏉¤褰昤);
     }
 
     function handleReset() {
@@ -486,16 +481,16 @@
       filteredUsers = [...users];
       currentPage = 1;
       renderTable();
-      showToast('筛选已重置');
+      showToast('绛涢€夊凡閲嶇疆');
     }
 
-    // 新增/编辑用户
+    // 鏂板/缂栬緫鐢ㄦ埛
     function editUser(id) {
       const user = users.find(u => u.id === id);
       if (!user) return;
 
       editingUserId = id;
-      document.getElementById('modalTitle').textContent = '编辑用户';
+      document.getElementById('modalTitle').textContent = '缂栬緫鐢ㄦ埛';
       document.getElementById('userId').value = user.id;
       document.getElementById('userName').value = user.name;
       document.getElementById('userAccount').value = user.account;
@@ -507,11 +502,11 @@
       ModalManager.open('userModal');
     }
 
-    // 覆盖全局 openModal
+    // 瑕嗙洊鍏ㄥ眬 openModal
     window.openModal = function(type) {
       if (type === 'add') {
         editingUserId = null;
-        document.getElementById('modalTitle').textContent = '新增用户';
+        document.getElementById('modalTitle').textContent = '鏂板鐢ㄦ埛';
         document.getElementById('userForm').reset();
         document.getElementById('userId').value = '';
         document.getElementById('passwordRow').style.display = 'flex';
@@ -527,12 +522,12 @@
       const status = document.getElementById('userStatus').value;
 
       if (!name || !account || !dept || !role) {
-        showToast('请填写必填项', 'error');
+        showToast('璇峰～鍐欏繀濉」', 'error');
         return;
       }
 
       if (editingUserId) {
-        // 编辑
+        // 缂栬緫
         const user = users.find(u => u.id === editingUserId);
         if (user) {
           user.name = name;
@@ -540,19 +535,19 @@
           user.dept = dept;
           user.role = role;
           user.status = status;
-          showToast('用户更新成功');
+          showToast('鐢ㄦ埛鏇存柊鎴愬姛');
         }
       } else {
-        // 新增
+        // 鏂板
         const password = document.getElementById('userPassword').value;
         const passwordConfirm = document.getElementById('userPasswordConfirm').value;
         
         if (!password || password.length < 8) {
-          showToast('密码至少 8 位', 'error');
+          showToast('瀵嗙爜鑷冲皯 8 浣?, 'error');
           return;
         }
         if (password !== passwordConfirm) {
-          showToast('两次输入的密码不一致', 'error');
+          showToast('涓ゆ杈撳叆鐨勫瘑鐮佷笉涓€鑷?, 'error');
           return;
         }
 
@@ -573,29 +568,29 @@
           dept,
           role,
           status,
-          lastLogin: '从未登录',
+          lastLogin: '浠庢湭鐧诲綍',
           avatarColor: colors[Math.floor(Math.random() * colors.length)]
         };
         users.unshift(newUser);
         filteredUsers = [...users];
-        showToast('用户创建成功');
+        showToast('鐢ㄦ埛鍒涘缓鎴愬姛');
       }
 
       closeModal('userModal');
       renderTable();
     }
 
-    // 删除用户
+    // 鍒犻櫎鐢ㄦ埛
     function deleteUser(id) {
-      confirmAction('删除该用户', () => {
+      confirmAction('鍒犻櫎璇ョ敤鎴?, () => {
         users = users.filter(u => u.id !== id);
         filteredUsers = filteredUsers.filter(u => u.id !== id);
         renderTable();
-        showToast('删除成功');
+        showToast('鍒犻櫎鎴愬姛');
       });
     }
 
-    // 重置密码
+    // 閲嶇疆瀵嗙爜
     function openResetModal(id) {
       const user = users.find(u => u.id === id);
       if (!user) return;
@@ -613,35 +608,35 @@
       const passwordConfirm = document.getElementById('newPasswordConfirm').value;
 
       if (!password || password.length < 8) {
-        showToast('密码至少 8 位', 'error');
+        showToast('瀵嗙爜鑷冲皯 8 浣?, 'error');
         return;
       }
       if (password !== passwordConfirm) {
-        showToast('两次输入的密码不一致', 'error');
+        showToast('涓ゆ杈撳叆鐨勫瘑鐮佷笉涓€鑷?, 'error');
         return;
       }
 
       closeModal('resetModal');
       const sendEmail = document.getElementById('sendEmail').checked;
-      showToast(sendEmail ? '密码已重置，邮件通知已发送' : '密码重置成功');
+      showToast(sendEmail ? '瀵嗙爜宸查噸缃紝閭欢閫氱煡宸插彂閫? : '瀵嗙爜閲嶇疆鎴愬姛');
     }
 
-    // 批量操作
+    // 鎵归噺鎿嶄綔
     function batchAction(action) {
       const selected = TableBatch.getSelected();
       if (selected.length === 0) {
-        showToast('请先选择用户', 'warning');
+        showToast('璇峰厛閫夋嫨鐢ㄦ埛', 'warning');
         return;
       }
       
-      confirmAction(`${action}选中的 ${selected.length} 个用户`, () => {
+      confirmAction(`${action}閫変腑鐨?${selected.length} 涓敤鎴穈, () => {
         const selectedIds = Array.from(document.querySelectorAll('.user-checkbox:checked')).map(cb => parseInt(cb.value));
         
-        if (action === '删除') {
+        if (action === '鍒犻櫎') {
           users = users.filter(u => !selectedIds.includes(u.id));
-        } else if (action === '启用') {
+        } else if (action === '鍚敤') {
           users.forEach(u => { if (selectedIds.includes(u.id)) u.status = 'active'; });
-        } else if (action === '禁用') {
+        } else if (action === '绂佺敤') {
           users.forEach(u => { if (selectedIds.includes(u.id)) u.status = 'disabled'; });
         }
         
@@ -649,12 +644,11 @@
         renderTable();
         document.getElementById('batchBar').style.display = 'none';
         document.getElementById('selectAll').checked = false;
-        showToast(`批量${action}成功`);
+        showToast(`鎵归噺${action}鎴愬姛`);
       });
     }
 
-    // 初始化
-    document.addEventListener('DOMContentLoaded', () => {
+    // 鍒濆鍖?    document.addEventListener('DOMContentLoaded', () => {
       renderTable();
     });
   </script>

@@ -1,12 +1,12 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>角色权限 - 企业管理系统</title>
-  <link rel="stylesheet" href="common.css" />
+  <title>瑙掕壊鏉冮檺 - 浼佷笟绠＄悊绯荤粺</title>
+  <link rel="stylesheet" href="common.v2.css" />
   <style>
-    /* 角色权限专用样式 */
+    /* 瑙掕壊鏉冮檺涓撶敤鏍峰紡 */
     .role-layout{
       display:grid;grid-template-columns:320px 1fr;gap:20px;
     }
@@ -112,83 +112,83 @@
   </style>
 </head>
 <body>
-  <!-- 顶部栏 -->
+  <!-- 椤堕儴鏍?-->
   <header class="header">
     <div class="header-left">
       <div class="logo-wrap"><div class="logo-bg"><div class="logo-icon"></div></div></div>
-      <div><div class="system-name">企业管理系统</div></div>
-      <input class="search-box" placeholder="搜索功能、数据、用户..." />
+      <div><div class="system-name">浼佷笟绠＄悊绯荤粺</div></div>
+      <input class="search-box" placeholder="鎼滅储鍔熻兘銆佹暟鎹€佺敤鎴?.." />
     </div>
     <div class="header-right">
-      <button class="icon-btn" title="切换主题" onclick="toggleTheme()">
-        <span id="themeToggleIcon">☀️</span>
+      <button class="icon-btn" title="鍒囨崲涓婚" onclick="toggleTheme()">
+        <span id="themeToggleIcon">鈽€锔?/span>
       </button>
-      <button class="icon-btn" title="通知">🔔<span class="badge">3</span></button>
-      <button class="icon-btn" title="帮助">❓</button>
+      <button class="icon-btn" title="閫氱煡">馃敂<span class="badge">3</span></button>
+      <button class="icon-btn" title="甯姪">鉂?/button>
       <div class="user-menu" onclick="showLogoutMenu()">
-        <div class="avatar" id="userAvatar">肖</div>
-        <span class="user-name" id="currentUsername">肖先生</span>
-        <span style="color:var(--muted)">▼</span>
+        <div class="avatar" id="userAvatar">鑲?/div>
+        <span class="user-name" id="currentUsername">鑲栧厛鐢?/span>
+        <span style="color:var(--muted)">鈻?/span>
       </div>
     </div>
   </header>
 
-  <!-- 侧边栏 -->
+  <!-- 渚ц竟鏍?-->
   <aside class="sidebar">
     <div class="nav-section">
-      <div class="nav-title">工作台</div>
-      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span><span>首页概览</span></a>
-      <a class="nav-item"><span class="nav-icon">📊</span><span>数据报表</span></a>
-      <a class="nav-item"><span class="nav-icon">📋</span><span>待办事项</span></a>
+      <div class="nav-title">宸ヤ綔鍙?/div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">馃彔</span><span>棣栭〉姒傝</span></a>
+      <a class="nav-item"><span class="nav-icon">馃搳</span><span>鏁版嵁鎶ヨ〃</span></a>
+      <a class="nav-item"><span class="nav-icon">馃搵</span><span>寰呭姙浜嬮」</span></a>
     </div>
     <div class="nav-section">
-      <div class="nav-title">组织管理</div>
-      <a class="nav-item" href="user-management.html"><span class="nav-icon">👥</span><span>用户管理</span></a>
-      <a class="nav-item" href="department.html"><span class="nav-icon">🏢</span><span>部门架构</span></a>
-      <a class="nav-item" href="role-permission.html"><span class="nav-icon">🔐</span><span>角色权限</span></a>
+      <div class="nav-title">缁勭粐绠＄悊</div>
+      <a class="nav-item" href="user-management.html"><span class="nav-icon">馃懃</span><span>鐢ㄦ埛绠＄悊</span></a>
+      <a class="nav-item" href="department.html"><span class="nav-icon">馃彚</span><span>閮ㄩ棬鏋舵瀯</span></a>
+      <a class="nav-item" href="role-permission.html"><span class="nav-icon">馃攼</span><span>瑙掕壊鏉冮檺</span></a>
     </div>
     <div class="nav-section">
-      <div class="nav-title">系统管理</div>
-      <a class="nav-item"><span class="nav-icon">⚙️</span><span>系统设置</span></a>
-      <a class="nav-item"><span class="nav-icon">📜</span><span>操作日志</span></a>
-      <a class="nav-item"><span class="nav-icon">🔒</span><span>安全审计</span></a>
+      <div class="nav-title">绯荤粺绠＄悊</div>
+      <a class="nav-item"><span class="nav-icon">鈿欙笍</span><span>绯荤粺璁剧疆</span></a>
+      <a class="nav-item"><span class="nav-icon">馃摐</span><span>鎿嶄綔鏃ュ織</span></a>
+      <a class="nav-item"><span class="nav-icon">馃敀</span><span>瀹夊叏瀹¤</span></a>
     </div>
   </aside>
 
-  <!-- 主内容区 -->
+  <!-- 涓诲唴瀹瑰尯 -->
   <main class="main">
     <div class="page-header">
       <div>
-        <div class="breadcrumb">组织管理 / <span>角色权限</span></div>
-        <div class="page-title">角色权限</div>
+        <div class="breadcrumb">缁勭粐绠＄悊 / <span>瑙掕壊鏉冮檺</span></div>
+        <div class="page-title">瑙掕壊鏉冮檺</div>
       </div>
-      <button class="btn btn-primary" onclick="openModal('add')">+ 新增角色</button>
+      <button class="btn btn-primary" onclick="openModal('add')">+ 鏂板瑙掕壊</button>
     </div>
 
     <div class="role-layout">
-      <!-- 左侧角色列表 -->
+      <!-- 宸︿晶瑙掕壊鍒楄〃 -->
       <div class="role-list-card">
         <div class="list-header">
-          <span class="list-title">角色列表</span>
-          <span style="font-size:12px;color:var(--muted)" id="roleCount">共 8 个角色</span>
+          <span class="list-title">瑙掕壊鍒楄〃</span>
+          <span style="font-size:12px;color:var(--muted)" id="roleCount">鍏?8 涓鑹?/span>
         </div>
         <ul class="role-list" id="roleList"></ul>
       </div>
 
-      <!-- 右侧权限配置 -->
+      <!-- 鍙充晶鏉冮檺閰嶇疆 -->
       <div class="permission-card">
         <div class="perm-header">
           <div class="perm-title-wrap">
-            <div class="perm-badge" id="roleType">系统内置</div>
+            <div class="perm-badge" id="roleType">绯荤粺鍐呯疆</div>
             <div>
-              <div class="perm-title" id="permTitle">超级管理员</div>
-              <div class="perm-subtitle" id="permSubtitle">拥有系统全部权限 · 3 人在用</div>
+              <div class="perm-title" id="permTitle">瓒呯骇绠＄悊鍛?/div>
+              <div class="perm-subtitle" id="permSubtitle">鎷ユ湁绯荤粺鍏ㄩ儴鏉冮檺 路 3 浜哄湪鐢?/div>
             </div>
           </div>
           <div class="perm-actions">
-            <button class="btn btn-sm btn-outline" onclick="openModal('edit')">编辑角色</button>
-            <button class="btn btn-sm btn-outline" onclick="copyRole()">复制角色</button>
-            <button class="btn btn-sm btn-danger" onclick="deleteRole()">删除角色</button>
+            <button class="btn btn-sm btn-outline" onclick="openModal('edit')">缂栬緫瑙掕壊</button>
+            <button class="btn btn-sm btn-outline" onclick="copyRole()">澶嶅埗瑙掕壊</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteRole()">鍒犻櫎瑙掕壊</button>
           </div>
         </div>
 
@@ -196,15 +196,15 @@
           <div class="perm-info-grid">
             <div class="perm-info-item">
               <div class="perm-info-num" id="moduleCount">8</div>
-              <div class="perm-info-label">权限模块</div>
+              <div class="perm-info-label">鏉冮檺妯″潡</div>
             </div>
             <div class="perm-info-item">
               <div class="perm-info-num" id="permItemCount">47</div>
-              <div class="perm-info-label">权限项</div>
+              <div class="perm-info-label">鏉冮檺椤?/div>
             </div>
             <div class="perm-info-item">
               <div class="perm-info-num" id="permPercent">100%</div>
-              <div class="perm-info-label">已授权</div>
+              <div class="perm-info-label">宸叉巿鏉?/div>
             </div>
           </div>
           <div id="permModules"></div>
@@ -213,49 +213,48 @@
     </div>
   </main>
 
-  <!-- 新增/编辑角色弹窗 -->
+  <!-- 鏂板/缂栬緫瑙掕壊寮圭獥 -->
   <div class="modal-overlay" id="roleModal">
     <div class="modal">
       <div class="modal-header">
-        <div class="modal-title" id="modalTitle">新增角色</div>
-        <button class="modal-close" onclick="closeModal('roleModal')">×</button>
+        <div class="modal-title" id="modalTitle">鏂板瑙掕壊</div>
+        <button class="modal-close" onclick="closeModal('roleModal')">脳</button>
       </div>
       <div class="modal-body">
         <form id="roleForm">
           <input type="hidden" id="roleId" />
           <div class="form-group">
-            <label class="form-label required">角色名称</label>
-            <input class="form-input" id="roleName" placeholder="请输入角色名称" required />
+            <label class="form-label required">瑙掕壊鍚嶇О</label>
+            <input class="form-input" id="roleName" placeholder="璇疯緭鍏ヨ鑹插悕绉? required />
           </div>
           <div class="form-group">
-            <label class="form-label">角色标识</label>
-            <input class="form-input" id="roleCode" placeholder="请输入角色标识（英文/下划线）" />
+            <label class="form-label">瑙掕壊鏍囪瘑</label>
+            <input class="form-input" id="roleCode" placeholder="璇疯緭鍏ヨ鑹叉爣璇嗭紙鑻辨枃/涓嬪垝绾匡級" />
           </div>
           <div class="form-group">
-            <label class="form-label required">角色描述</label>
-            <textarea class="form-textarea" id="roleDesc" placeholder="请输入角色描述"></textarea>
+            <label class="form-label required">瑙掕壊鎻忚堪</label>
+            <textarea class="form-textarea" id="roleDesc" placeholder="璇疯緭鍏ヨ鑹叉弿杩?></textarea>
           </div>
           <div class="form-group">
-            <label class="form-label">数据权限范围</label>
+            <label class="form-label">鏁版嵁鏉冮檺鑼冨洿</label>
             <select class="form-select" id="roleDataScope">
-              <option value="all">全部数据</option>
-              <option value="dept">本部门及下级部门</option>
-              <option value="self">仅本人数据</option>
+              <option value="all">鍏ㄩ儴鏁版嵁</option>
+              <option value="dept">鏈儴闂ㄥ強涓嬬骇閮ㄩ棬</option>
+              <option value="self">浠呮湰浜烘暟鎹?/option>
             </select>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('roleModal')">取消</button>
-        <button class="btn btn-primary" onclick="saveRole()">确定</button>
+        <button class="btn btn-outline" onclick="closeModal('roleModal')">鍙栨秷</button>
+        <button class="btn btn-primary" onclick="saveRole()">纭畾</button>
       </div>
     </div>
   </div>
 
-  <script src="common.js"></script>
+  <script src="common.v2.js"></script>
   <script>
-    // 显示退出菜单
-    function showLogoutMenu() {
+    // 鏄剧ず閫€鍑鸿彍鍗?    function showLogoutMenu() {
       const menu = document.createElement('div');
       menu.className = 'logout-menu';
       menu.style.cssText = `
@@ -266,7 +265,7 @@
       `;
       menu.innerHTML = `
         <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);">
-          当前用户
+          褰撳墠鐢ㄦ埛
         </div>
         <div style="padding:12px 16px;font-size:14px;color:var(--text);font-weight:500;" id="menuUsername">
           ${document.getElementById('currentUsername').textContent}
@@ -274,8 +273,7 @@
         <div style="padding:8px;border-top:1px solid var(--border);">
           <button onclick="logout();document.querySelector('.logout-menu').remove();" 
             style="width:100%;padding:10px;border:none;border-radius:6px;background:transparent;color:var(--danger);font-size:13px;cursor:pointer;text-align:left;">
-            🚪 退出登录
-          </button>
+            馃毆 閫€鍑虹櫥褰?          </button>
         </div>
       `;
       document.body.appendChild(menu);
@@ -291,67 +289,67 @@
     }
   </script>
   <script>
-    // 角色数据
+    // 瑙掕壊鏁版嵁
     let roles = [
-      { id: 'admin', name: '👑 超级管理员', code: 'admin', desc: '拥有系统全部权限，可进行任何操作', type: 'system', userCount: 3, created: '2026-01-01' },
-      { id: 'dept-manager', name: '🏢 部门经理', code: 'dept_manager', desc: '管理部门成员，查看部门数据，审批流程', type: 'system', userCount: 12, created: '2026-01-15' },
-      { id: 'hr', name: '👥 人事专员', code: 'hr', desc: '管理员工档案、考勤、招聘等人事工作', type: 'system', userCount: 5, created: '2026-02-01' },
-      { id: 'finance', name: '💰 财务专员', code: 'finance', desc: '管理财务数据、报销审批、薪资核算', type: 'system', userCount: 4, created: '2026-02-01' },
-      { id: 'project-manager', name: '📋 项目经理', code: 'project_manager', desc: '管理项目进度、分配任务、查看项目报表', type: 'system', userCount: 8, created: '2026-02-10' },
-      { id: 'normal', name: '👤 普通员工', code: 'normal', desc: '基础办公权限，查看个人数据和公告', type: 'system', userCount: 156, created: '2026-01-01' },
-      { id: 'guest', name: '👁️ 访客', code: 'guest', desc: '仅可查看公开信息和公司简介', type: 'system', userCount: 2, created: '2026-03-01' },
-      { id: 'custom', name: '⚙️ 自定义角色', code: 'custom', desc: '根据需求灵活配置权限组合', type: 'custom', userCount: 0, created: '2026-03-15' }
+      { id: 'admin', name: '馃憫 瓒呯骇绠＄悊鍛?, code: 'admin', desc: '鎷ユ湁绯荤粺鍏ㄩ儴鏉冮檺锛屽彲杩涜浠讳綍鎿嶄綔', type: 'system', userCount: 3, created: '2026-01-01' },
+      { id: 'dept-manager', name: '馃彚 閮ㄩ棬缁忕悊', code: 'dept_manager', desc: '绠＄悊閮ㄩ棬鎴愬憳锛屾煡鐪嬮儴闂ㄦ暟鎹紝瀹℃壒娴佺▼', type: 'system', userCount: 12, created: '2026-01-15' },
+      { id: 'hr', name: '馃懃 浜轰簨涓撳憳', code: 'hr', desc: '绠＄悊鍛樺伐妗ｆ銆佽€冨嫟銆佹嫑鑱樼瓑浜轰簨宸ヤ綔', type: 'system', userCount: 5, created: '2026-02-01' },
+      { id: 'finance', name: '馃挵 璐㈠姟涓撳憳', code: 'finance', desc: '绠＄悊璐㈠姟鏁版嵁銆佹姤閿€瀹℃壒銆佽柂璧勬牳绠?, type: 'system', userCount: 4, created: '2026-02-01' },
+      { id: 'project-manager', name: '馃搵 椤圭洰缁忕悊', code: 'project_manager', desc: '绠＄悊椤圭洰杩涘害銆佸垎閰嶄换鍔°€佹煡鐪嬮」鐩姤琛?, type: 'system', userCount: 8, created: '2026-02-10' },
+      { id: 'normal', name: '馃懁 鏅€氬憳宸?, code: 'normal', desc: '鍩虹鍔炲叕鏉冮檺锛屾煡鐪嬩釜浜烘暟鎹拰鍏憡', type: 'system', userCount: 156, created: '2026-01-01' },
+      { id: 'guest', name: '馃憗锔?璁垮', code: 'guest', desc: '浠呭彲鏌ョ湅鍏紑淇℃伅鍜屽叕鍙哥畝浠?, type: 'system', userCount: 2, created: '2026-03-01' },
+      { id: 'custom', name: '鈿欙笍 鑷畾涔夎鑹?, code: 'custom', desc: '鏍规嵁闇€姹傜伒娲婚厤缃潈闄愮粍鍚?, type: 'custom', userCount: 0, created: '2026-03-15' }
     ];
 
-    // 权限模块数据
+    // 鏉冮檺妯″潡鏁版嵁
     const permModules = [
-      { id: 'dashboard', name: '首页概览', icon: '🏠', perms: [
-        { id: 'view-dashboard', name: '查看仪表盘' },
-        { id: 'view-stats', name: '查看统计数据' },
-        { id: 'export-dashboard', name: '导出报表' },
-        { id: 'config-dashboard', name: '配置仪表盘' }
+      { id: 'dashboard', name: '棣栭〉姒傝', icon: '馃彔', perms: [
+        { id: 'view-dashboard', name: '鏌ョ湅浠〃鐩? },
+        { id: 'view-stats', name: '鏌ョ湅缁熻鏁版嵁' },
+        { id: 'export-dashboard', name: '瀵煎嚭鎶ヨ〃' },
+        { id: 'config-dashboard', name: '閰嶇疆浠〃鐩? }
       ]},
-      { id: 'user', name: '用户管理', icon: '👥', perms: [
-        { id: 'user-view', name: '查看用户列表' },
-        { id: 'user-create', name: '新增用户' },
-        { id: 'user-edit', name: '编辑用户' },
-        { id: 'user-delete', name: '删除用户' },
-        { id: 'user-reset-pwd', name: '重置密码' },
-        { id: 'user-batch', name: '批量操作' },
-        { id: 'user-import', name: '导入用户' },
-        { id: 'user-export', name: '导出用户' }
+      { id: 'user', name: '鐢ㄦ埛绠＄悊', icon: '馃懃', perms: [
+        { id: 'user-view', name: '鏌ョ湅鐢ㄦ埛鍒楄〃' },
+        { id: 'user-create', name: '鏂板鐢ㄦ埛' },
+        { id: 'user-edit', name: '缂栬緫鐢ㄦ埛' },
+        { id: 'user-delete', name: '鍒犻櫎鐢ㄦ埛' },
+        { id: 'user-reset-pwd', name: '閲嶇疆瀵嗙爜' },
+        { id: 'user-batch', name: '鎵归噺鎿嶄綔' },
+        { id: 'user-import', name: '瀵煎叆鐢ㄦ埛' },
+        { id: 'user-export', name: '瀵煎嚭鐢ㄦ埛' }
       ]},
-      { id: 'dept', name: '部门管理', icon: '🏢', perms: [
-        { id: 'dept-view', name: '查看部门架构' },
-        { id: 'dept-create', name: '新增部门' },
-        { id: 'dept-edit', name: '编辑部门' },
-        { id: 'dept-delete', name: '删除部门' },
-        { id: 'dept-export', name: '导出成员' }
+      { id: 'dept', name: '閮ㄩ棬绠＄悊', icon: '馃彚', perms: [
+        { id: 'dept-view', name: '鏌ョ湅閮ㄩ棬鏋舵瀯' },
+        { id: 'dept-create', name: '鏂板閮ㄩ棬' },
+        { id: 'dept-edit', name: '缂栬緫閮ㄩ棬' },
+        { id: 'dept-delete', name: '鍒犻櫎閮ㄩ棬' },
+        { id: 'dept-export', name: '瀵煎嚭鎴愬憳' }
       ]},
-      { id: 'role', name: '角色权限', icon: '🔐', perms: [
-        { id: 'role-view', name: '查看角色列表' },
-        { id: 'role-create', name: '新增角色' },
-        { id: 'role-edit', name: '编辑角色' },
-        { id: 'role-delete', name: '删除角色' },
-        { id: 'role-assign', name: '分配权限' }
+      { id: 'role', name: '瑙掕壊鏉冮檺', icon: '馃攼', perms: [
+        { id: 'role-view', name: '鏌ョ湅瑙掕壊鍒楄〃' },
+        { id: 'role-create', name: '鏂板瑙掕壊' },
+        { id: 'role-edit', name: '缂栬緫瑙掕壊' },
+        { id: 'role-delete', name: '鍒犻櫎瑙掕壊' },
+        { id: 'role-assign', name: '鍒嗛厤鏉冮檺' }
       ]},
-      { id: 'report', name: '数据报表', icon: '📊', perms: [
-        { id: 'report-view', name: '查看报表' },
-        { id: 'report-create', name: '创建报表' },
-        { id: 'report-edit', name: '编辑报表' },
-        { id: 'report-export', name: '导出报表' },
-        { id: 'report-share', name: '分享报表' }
+      { id: 'report', name: '鏁版嵁鎶ヨ〃', icon: '馃搳', perms: [
+        { id: 'report-view', name: '鏌ョ湅鎶ヨ〃' },
+        { id: 'report-create', name: '鍒涘缓鎶ヨ〃' },
+        { id: 'report-edit', name: '缂栬緫鎶ヨ〃' },
+        { id: 'report-export', name: '瀵煎嚭鎶ヨ〃' },
+        { id: 'report-share', name: '鍒嗕韩鎶ヨ〃' }
       ]},
-      { id: 'system', name: '系统设置', icon: '⚙️', perms: [
-        { id: 'sys-view', name: '查看设置' },
-        { id: 'sys-edit', name: '修改设置' },
-        { id: 'sys-log', name: '查看日志' },
-        { id: 'sys-backup', name: '数据备份' },
-        { id: 'sys-restore', name: '数据恢复' }
+      { id: 'system', name: '绯荤粺璁剧疆', icon: '鈿欙笍', perms: [
+        { id: 'sys-view', name: '鏌ョ湅璁剧疆' },
+        { id: 'sys-edit', name: '淇敼璁剧疆' },
+        { id: 'sys-log', name: '鏌ョ湅鏃ュ織' },
+        { id: 'sys-backup', name: '鏁版嵁澶囦唤' },
+        { id: 'sys-restore', name: '鏁版嵁鎭㈠' }
       ]}
     ];
 
-    // 角色权限映射（简化版，实际应该每个角色有自己的权限配置）
+    // 瑙掕壊鏉冮檺鏄犲皠锛堢畝鍖栫増锛屽疄闄呭簲璇ユ瘡涓鑹叉湁鑷繁鐨勬潈闄愰厤缃級
     let rolePermissions = {
       admin: permModules.flatMap(m => m.perms.map(p => p.id)),
       'dept-manager': ['view-dashboard', 'view-stats', 'user-view', 'dept-view', 'report-view', 'report-export'],
@@ -366,17 +364,17 @@
     let currentRoleId = 'admin';
     let editingRoleId = null;
 
-    // 渲染角色列表
+    // 娓叉煋瑙掕壊鍒楄〃
     function renderRoleList() {
       const list = document.getElementById('roleList');
-      document.getElementById('roleCount').textContent = `共 ${roles.length} 个角色`;
+      document.getElementById('roleCount').textContent = `鍏?${roles.length} 涓鑹瞏;
       
       list.innerHTML = roles.map(role => `
         <li class="role-item ${role.id === currentRoleId ? 'active' : ''}" onclick="selectRole('${role.id}')" data-id="${role.id}">
           <div class="role-name">${role.name}</div>
           <div class="role-desc">${role.desc}</div>
           <div class="role-meta">
-            <span class="role-count">${role.userCount} 人</span>
+            <span class="role-count">${role.userCount} 浜?/span>
             <span class="role-time">${role.created}</span>
           </div>
         </li>
@@ -391,14 +389,14 @@
       renderPermissionPanel();
     }
 
-    // 渲染权限面板
+    // 娓叉煋鏉冮檺闈㈡澘
     function renderPermissionPanel() {
       const role = roles.find(r => r.id === currentRoleId);
       if (!role) return;
 
-      document.getElementById('roleType').textContent = role.type === 'system' ? '系统内置' : '自定义';
+      document.getElementById('roleType').textContent = role.type === 'system' ? '绯荤粺鍐呯疆' : '鑷畾涔?;
       document.getElementById('permTitle').textContent = role.name.replace(/^[^\s]+\s/, '');
-      document.getElementById('permSubtitle').textContent = `${role.desc} · ${role.userCount} 人在用`;
+      document.getElementById('permSubtitle').textContent = `${role.desc} 路 ${role.userCount} 浜哄湪鐢╜;
 
       const perms = rolePermissions[currentRoleId] || [];
       const totalPerms = permModules.reduce((sum, m) => sum + m.perms.length, 0);
@@ -422,9 +420,9 @@
                 <label class="module-check">
                   <input type="checkbox" ${moduleChecked ? 'checked' : ''} ${modulePartial ? 'indeterminate' : ''} 
                     onclick="event.stopPropagation();toggleAllInModule(this, '${module.id}')" />
-                  <span>全选</span>
+                  <span>鍏ㄩ€?/span>
                 </label>
-                <button class="module-toggle">▼</button>
+                <button class="module-toggle">鈻?/button>
               </div>
             </div>
             <div class="module-permissions">
@@ -446,7 +444,7 @@
       const toggle = header.querySelector('.module-toggle');
       const isCollapsed = permissions.classList.contains('collapsed');
       permissions.classList.toggle('collapsed');
-      toggle.textContent = isCollapsed ? '▼' : '▲';
+      toggle.textContent = isCollapsed ? '鈻? : '鈻?;
     }
 
     function toggleAllInModule(checkbox, moduleId) {
@@ -463,7 +461,7 @@
       }
       
       renderPermissionPanel();
-      showToast(checkbox.checked ? '已全选该模块权限' : '已取消该模块权限');
+      showToast(checkbox.checked ? '宸插叏閫夎妯″潡鏉冮檺' : '宸插彇娑堣妯″潡鏉冮檺');
     }
 
     function updatePermission(permId, checked) {
@@ -475,15 +473,14 @@
       }
       rolePermissions[currentRoleId] = perms;
       
-      // 更新百分比
-      const totalPerms = permModules.reduce((sum, m) => sum + m.perms.length, 0);
+      // 鏇存柊鐧惧垎姣?      const totalPerms = permModules.reduce((sum, m) => sum + m.perms.length, 0);
       document.getElementById('permPercent').textContent = Math.round((perms.length / totalPerms) * 100) + '%';
     }
 
-    // 弹窗
+    // 寮圭獥
     window.openModal = function(type) {
       editingRoleId = type === 'edit' ? currentRoleId : null;
-      document.getElementById('modalTitle').textContent = type === 'add' ? '新增角色' : '编辑角色';
+      document.getElementById('modalTitle').textContent = type === 'add' ? '鏂板瑙掕壊' : '缂栬緫瑙掕壊';
       
       if (type === 'edit') {
         const role = roles.find(r => r.id === currentRoleId);
@@ -502,22 +499,22 @@
     function saveRole() {
       const name = document.getElementById('roleName').value.trim();
       if (!name) {
-        showToast('请输入角色名称', 'error');
+        showToast('璇疯緭鍏ヨ鑹插悕绉?, 'error');
         return;
       }
 
       if (editingRoleId) {
         const role = roles.find(r => r.id === editingRoleId);
         if (role) {
-          role.name = (role.name.match(/^[^\s]+/) || ['👤'])[0] + ' ' + name;
+          role.name = (role.name.match(/^[^\s]+/) || ['馃懁'])[0] + ' ' + name;
           role.code = document.getElementById('roleCode').value;
           role.desc = document.getElementById('roleDesc').value;
-          showToast('角色更新成功');
+          showToast('瑙掕壊鏇存柊鎴愬姛');
         }
       } else {
         const newRole = {
           id: 'role_' + Date.now(),
-          name: '👤 ' + name,
+          name: '馃懁 ' + name,
           code: document.getElementById('roleCode').value || 'custom_' + Date.now(),
           desc: document.getElementById('roleDesc').value || name,
           type: 'custom',
@@ -527,7 +524,7 @@
         roles.push(newRole);
         rolePermissions[newRole.id] = [];
         currentRoleId = newRole.id;
-        showToast('角色创建成功');
+        showToast('瑙掕壊鍒涘缓鎴愬姛');
       }
 
       closeModal('roleModal');
@@ -541,7 +538,7 @@
 
       const newRole = {
         id: 'role_' + Date.now(),
-        name: role.name + ' (复制)',
+        name: role.name + ' (澶嶅埗)',
         code: role.code + '_copy',
         desc: role.desc,
         type: 'custom',
@@ -554,7 +551,7 @@
       
       renderRoleList();
       renderPermissionPanel();
-      showToast('角色已复制');
+      showToast('瑙掕壊宸插鍒?);
     }
 
     function deleteRole() {
@@ -562,26 +559,25 @@
       if (!role) return;
 
       if (role.type === 'system') {
-        showToast('系统内置角色不可删除', 'error');
+        showToast('绯荤粺鍐呯疆瑙掕壊涓嶅彲鍒犻櫎', 'error');
         return;
       }
       if (role.userCount > 0) {
-        showToast('该角色下还有用户，无法删除', 'error');
+        showToast('璇ヨ鑹蹭笅杩樻湁鐢ㄦ埛锛屾棤娉曞垹闄?, 'error');
         return;
       }
 
-      confirmAction(`删除角色「${role.name}」`, () => {
+      confirmAction(`鍒犻櫎瑙掕壊銆?{role.name}銆峘, () => {
         roles = roles.filter(r => r.id !== currentRoleId);
         delete rolePermissions[currentRoleId];
         currentRoleId = roles[0]?.id || 'admin';
         renderRoleList();
         renderPermissionPanel();
-        showToast('角色已删除');
+        showToast('瑙掕壊宸插垹闄?);
       });
     }
 
-    // 初始化
-    document.addEventListener('DOMContentLoaded', () => {
+    // 鍒濆鍖?    document.addEventListener('DOMContentLoaded', () => {
       renderRoleList();
       renderPermissionPanel();
     });
