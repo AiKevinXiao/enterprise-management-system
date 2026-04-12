@@ -2,8 +2,8 @@ from PIL import Image
 import os
 
 def create_gif():
-    output_dir = r"E:\AI Project\企业管理系统\demo-gif"
-    gif_path = r"E:\AI Project\企业管理系统\demo.gif"
+    output_dir = os.path.dirname(os.path.abspath(__file__))
+    gif_path = os.path.join(output_dir, "demo.gif")
     
     image_files = sorted([f for f in os.listdir(output_dir) if f.endswith('.png')])
     
