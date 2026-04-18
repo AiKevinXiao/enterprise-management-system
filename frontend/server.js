@@ -34,7 +34,7 @@ const server = http.createServer((req, res) => {
   const contentType = MIME_TYPES[ext] || 'text/plain';
   
   res.writeHead(200, {
-    'Content-Type': contentType,
+    'Content-Type': contentType + (contentType.startsWith('text/') ? '; charset=utf-8' : ''),
     'Access-Control-Allow-Origin': '*',
     'Cache-Control': 'no-cache, no-store, must-revalidate',
     'Pragma': 'no-cache',

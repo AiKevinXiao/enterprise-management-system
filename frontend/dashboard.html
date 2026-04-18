@@ -1,13 +1,13 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>浼佷笟绠＄悊绯荤粺</title>
-  <link rel="stylesheet" href="common.v2.css" />
+  <title>企业管理系统</title>
+  <link rel="stylesheet" href="common.css" />
 </head>
 <body>
-  <!-- 椤堕儴鏍?-->
+  <!-- 顶部栏 -->
   <header class="header">
     <div class="header-left">
       <div class="logo-wrap">
@@ -16,196 +16,198 @@
         </div>
       </div>
       <div>
-        <div class="system-name">浼佷笟绠＄悊绯荤粺</div>
+        <div class="system-name">企业管理系统</div>
       </div>
-      <input class="search-box" placeholder="鎼滅储鍔熻兘銆佹暟鎹€佺敤鎴?.." />
+      <input class="search-box" placeholder="搜索功能、数据、用户..." />
     </div>
     <div class="header-right">
-      <button class="icon-btn" title="鍒囨崲涓婚" onclick="toggleTheme()">
-        <span id="themeToggleIcon">鈽€锔?/span>
+      <button class="icon-btn" title="切换主题" onclick="toggleTheme()">
+        <span id="themeToggleIcon">☀️</span>
       </button>
-      <button class="icon-btn" title="閫氱煡">
-        馃敂
+      <button class="icon-btn" title="通知">
+        🔔
         <span class="badge">3</span>
       </button>
-      <button class="icon-btn" title="甯姪">鉂?/button>
+      <button class="icon-btn" title="帮助">❓</button>
       <div class="user-menu" onclick="showLogoutMenu()">
-        <div class="avatar" id="userAvatar">鑲?/div>
-        <span class="user-name" id="currentUsername">鑲栧厛鐢?/span>
-        <span style="color:var(--muted)">鈻?/span>
+        <div class="avatar" id="userAvatar">肖</div>
+        <span class="user-name" id="currentUsername">肖先生</span>
+        <span style="color:var(--muted)">▼</span>
       </div>
     </div>
   </header>
 
-  <!-- 渚ц竟鏍?-->
+  <!-- 侧边栏 -->
   <aside class="sidebar">
     <div class="nav-section">
-      <div class="nav-title">宸ヤ綔鍙?/div>
+      <div class="nav-title">工作台</div>
       <a class="nav-item" href="dashboard.html">
-        <span class="nav-icon">馃彔</span>
-        <span>棣栭〉姒傝</span>
+        <span class="nav-icon">🏠</span>
+        <span>首页概览</span>
       </a>
       <a class="nav-item">
-        <span class="nav-icon">馃搳</span>
-        <span>鏁版嵁鎶ヨ〃</span>
+        <span class="nav-icon">📊</span>
+        <span>数据报表</span>
       </a>
       <a class="nav-item">
-        <span class="nav-icon">馃搵</span>
-        <span>寰呭姙浜嬮」</span>
+        <span class="nav-icon">📋</span>
+        <span>待办事项</span>
       </a>
     </div>
 
     <div class="nav-section">
-      <div class="nav-title">缁勭粐绠＄悊</div>
+      <div class="nav-title">组织管理</div>
       <a class="nav-item" href="user-management.html">
-        <span class="nav-icon">馃懃</span>
-        <span>鐢ㄦ埛绠＄悊</span>
+        <span class="nav-icon">👥</span>
+        <span>用户管理</span>
       </a>
       <a class="nav-item" href="department.html">
-        <span class="nav-icon">馃彚</span>
-        <span>閮ㄩ棬鏋舵瀯</span>
+        <span class="nav-icon">🏢</span>
+        <span>部门架构</span>
       </a>
       <a class="nav-item" href="role-permission.html">
-        <span class="nav-icon">馃攼</span>
-        <span>瑙掕壊鏉冮檺</span>
+        <span class="nav-icon">🔐</span>
+        <span>角色权限</span>
       </a>
     </div>
 
     <div class="nav-section">
-      <div class="nav-title">绯荤粺绠＄悊</div>
+      <div class="nav-title">系统管理</div>
       <a class="nav-item">
-        <span class="nav-icon">鈿欙笍</span>
-        <span>绯荤粺璁剧疆</span>
+        <span class="nav-icon">⚙️</span>
+        <span>系统设置</span>
       </a>
       <a class="nav-item">
-        <span class="nav-icon">馃摐</span>
-        <span>鎿嶄綔鏃ュ織</span>
+        <span class="nav-icon">📜</span>
+        <span>操作日志</span>
       </a>
       <a class="nav-item">
-        <span class="nav-icon">馃敀</span>
-        <span>瀹夊叏瀹¤</span>
+        <span class="nav-icon">🔒</span>
+        <span>安全审计</span>
       </a>
     </div>
   </aside>
 
-  <!-- 涓诲唴瀹瑰尯 -->
+  <!-- 主内容区 -->
   <main class="main">
     <div class="page-header">
       <div>
-        <div class="page-title">娆㈣繋鍥炴潵锛岃倴鍏堢敓</div>
-        <div class="page-subtitle" id="currentDate">浠婂ぉ鏄?2026 骞?3 鏈?28 鏃ワ紝绯荤粺杩愯姝ｅ父</div>
+        <div class="page-title">欢迎回来，肖先生</div>
+        <div class="page-subtitle" id="currentDate">今天是 2026 年 3 月 28 日，系统运行正常</div>
       </div>
       <div style="display:flex;gap:10px">
-        <button class="btn btn-outline" onclick="showToast('鎶ヨ〃瀵煎嚭涓?..', 'warning')">瀵煎嚭鎶ヨ〃</button>
-        <button class="btn btn-primary" onclick="showToast('鍔熻兘寮€鍙戜腑')">+ 鏂板缓</button>
+        <button class="btn btn-outline" onclick="showToast('报表导出中...', 'warning')">导出报表</button>
+        <button class="btn btn-primary" onclick="showToast('功能开发中')">+ 新建</button>
       </div>
     </div>
 
-    <!-- 缁熻鍗＄墖 -->
+    <!-- 统计卡片 -->
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-label">鎬荤敤鎴锋暟</div>
+        <div class="stat-label">总用户数</div>
         <div class="stat-value">2,847</div>
-        <div class="stat-trend">鈫?12.5% 杈冧笂鏈?/div>
+        <div class="stat-trend">↑ 12.5% 较上月</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">娲昏穬浼氳瘽</div>
+        <div class="stat-label">活跃会话</div>
         <div class="stat-value">156</div>
-        <div class="stat-trend">鈫?8.2% 杈冩槰鏃?/div>
+        <div class="stat-trend">↑ 8.2% 较昨日</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">寰呭鐞嗗伐鍗?/div>
+        <div class="stat-label">待处理工单</div>
         <div class="stat-value">23</div>
-        <div class="stat-trend down">鈫?3 杈冩槰鏃?/div>
+        <div class="stat-trend down">↓ 3 较昨日</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">绯荤粺鍋ュ悍搴?/div>
+        <div class="stat-label">系统健康度</div>
         <div class="stat-value">98.7%</div>
-        <div class="stat-trend">姝ｅ父杩愯涓?/div>
+        <div class="stat-trend">正常运行中</div>
       </div>
     </div>
 
-    <!-- 鏈€杩戞椿鍔?-->
+    <!-- 最近活动 -->
     <div class="content-card">
       <div class="card-header">
-        <div class="card-title">鏈€杩戞搷浣滆褰?/div>
-        <button class="btn btn-outline" style="padding:6px 12px;font-size:12px">鏌ョ湅鍏ㄩ儴</button>
+        <div class="card-title">最近操作记录</div>
+        <button class="btn btn-outline" style="padding:6px 12px;font-size:12px">查看全部</button>
       </div>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>鎿嶄綔浜?/th>
-              <th>鎿嶄綔绫诲瀷</th>
-              <th>妯″潡</th>
-              <th>鏃堕棿</th>
-              <th>鐘舵€?/th>
+              <th>操作人</th>
+              <th>操作类型</th>
+              <th>模块</th>
+              <th>时间</th>
+              <th>状态</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>寮犱笁</td>
-              <td>鐢ㄦ埛鍒涘缓</td>
-              <td>鐢ㄦ埛绠＄悊</td>
+              <td>张三</td>
+              <td>用户创建</td>
+              <td>用户管理</td>
               <td>2026-03-28 17:32</td>
-              <td><span class="status status-ok">鎴愬姛</span></td>
+              <td><span class="status status-ok">成功</span></td>
             </tr>
             <tr>
-              <td>鏉庡洓</td>
-              <td>鏉冮檺鍙樻洿</td>
-              <td>瑙掕壊鏉冮檺</td>
+              <td>李四</td>
+              <td>权限变更</td>
+              <td>角色权限</td>
               <td>2026-03-28 16:45</td>
-              <td><span class="status status-ok">鎴愬姛</span></td>
+              <td><span class="status status-ok">成功</span></td>
             </tr>
             <tr>
-              <td>鐜嬩簲</td>
-              <td>鏁版嵁瀵煎嚭</td>
-              <td>鏁版嵁鎶ヨ〃</td>
+              <td>王五</td>
+              <td>数据导出</td>
+              <td>数据报表</td>
               <td>2026-03-28 15:20</td>
-              <td><span class="status status-warn">澶勭悊涓?/span></td>
+              <td><span class="status status-warn">处理中</span></td>
             </tr>
             <tr>
-              <td>璧靛叚</td>
-              <td>鐧诲綍澶辫触</td>
-              <td>瀹夊叏瀹¤</td>
+              <td>赵六</td>
+              <td>登录失败</td>
+              <td>安全审计</td>
               <td>2026-03-28 14:08</td>
-              <td><span class="status status-err">澶辫触</span></td>
+              <td><span class="status status-err">失败</span></td>
             </tr>
             <tr>
-              <td>鑲栧厛鐢?/td>
-              <td>绯荤粺閰嶇疆</td>
-              <td>绯荤粺璁剧疆</td>
+              <td>肖先生</td>
+              <td>系统配置</td>
+              <td>系统设置</td>
               <td>2026-03-28 11:30</td>
-              <td><span class="status status-ok">鎴愬姛</span></td>
+              <td><span class="status status-ok">成功</span></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- 蹇嵎鍏ュ彛 -->
+    <!-- 快捷入口 -->
     <div class="content-card">
       <div class="card-header">
-        <div class="card-title">蹇嵎鍏ュ彛</div>
+        <div class="card-title">快捷入口</div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px">
-        <button class="btn btn-outline" style="padding:16px" onclick="location.href='user-management.html'">馃懃 娣诲姞鐢ㄦ埛</button>
-        <button class="btn btn-outline" style="padding:16px" onclick="showToast('鍔熻兘寮€鍙戜腑')">馃搳 鏌ョ湅鎶ヨ〃</button>
-        <button class="btn btn-outline" style="padding:16px" onclick="location.href='role-permission.html'">馃攼 鏉冮檺閰嶇疆</button>
-        <button class="btn btn-outline" style="padding:16px" onclick="showToast('鍔熻兘寮€鍙戜腑')">馃搵 鍒涘缓宸ュ崟</button>
-        <button class="btn btn-outline" style="padding:16px" onclick="showToast('鍔熻兘寮€鍙戜腑')">馃摟 娑堟伅閫氱煡</button>
-        <button class="btn btn-outline" style="padding:16px" onclick="showToast('鍔熻兘寮€鍙戜腑')">鈿欙笍 绯荤粺璁剧疆</button>
+        <button class="btn btn-outline" style="padding:16px" onclick="location.href='user-management.html'">👥 添加用户</button>
+        <button class="btn btn-outline" style="padding:16px" onclick="showToast('功能开发中')">📊 查看报表</button>
+        <button class="btn btn-outline" style="padding:16px" onclick="location.href='role-permission.html'">🔐 权限配置</button>
+        <button class="btn btn-outline" style="padding:16px" onclick="showToast('功能开发中')">📋 创建工单</button>
+        <button class="btn btn-outline" style="padding:16px" onclick="showToast('功能开发中')">📧 消息通知</button>
+        <button class="btn btn-outline" style="padding:16px" onclick="showToast('功能开发中')">⚙️ 系统设置</button>
       </div>
     </div>
   </main>
 
-  <script src="common.v2.js"></script>
+  <script src="common.js"></script>
   <script>
-    // 鍔ㄦ€佹樉绀哄綋鍓嶆棩鏈?    const now = new Date();
-    const dateStr = `浠婂ぉ鏄?${now.getFullYear()} 骞?${now.getMonth() + 1} 鏈?${now.getDate()} 鏃ワ紝绯荤粺杩愯姝ｅ父`;
+    // 动态显示当前日期
+    const now = new Date();
+    const dateStr = `今天是 ${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日，系统运行正常`;
     document.getElementById('currentDate').textContent = dateStr;
     
-    // 鏄剧ず閫€鍑鸿彍鍗?    function showLogoutMenu() {
+    // 显示退出菜单
+    function showLogoutMenu() {
       const menu = document.createElement('div');
       menu.className = 'logout-menu';
       menu.style.cssText = `
@@ -216,7 +218,7 @@
       `;
       menu.innerHTML = `
         <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);">
-          褰撳墠鐢ㄦ埛
+          当前用户
         </div>
         <div style="padding:12px 16px;font-size:14px;color:var(--text);font-weight:500;" id="menuUsername">
           ${document.getElementById('currentUsername').textContent}
@@ -224,12 +226,13 @@
         <div style="padding:8px;border-top:1px solid var(--border);">
           <button onclick="logout();document.querySelector('.logout-menu').remove();" 
             style="width:100%;padding:10px;border:none;border-radius:6px;background:transparent;color:var(--danger);font-size:13px;cursor:pointer;text-align:left;">
-            馃毆 閫€鍑虹櫥褰?          </button>
+            🚪 退出登录
+          </button>
         </div>
       `;
       document.body.appendChild(menu);
       
-      // 鐐瑰嚮鍏朵粬鍦版柟鍏抽棴鑿滃崟
+      // 点击其他地方关闭菜单
       setTimeout(() => {
         document.addEventListener('click', function closeMenu(e) {
           if (!menu.contains(e.target)) {
