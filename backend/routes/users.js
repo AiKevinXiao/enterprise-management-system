@@ -50,4 +50,135 @@ router.get('/:id', (req, res) => {
   res.json(user);
 });
 
+// 创建用户
+router.post('/', (req, res) => {
+  const { username, password, name, email, phone, dept_id, role_id, status = 'active' } = req.body;
+  
+  if (!username || !password || !name) {
+    return res.status(400).json({ message: '用户名、密码和姓名为必填项' });
+  }
+
+  // 检查用户名是否已存在
+  const existing = get('SELECT id FROM users WHERE username = ?', [username]);
+  if (existing) {
+    return res.status(400).json({ message: '用户名已存在' });
+  }
+
+  // 简单密码哈希（生产环境应使用 bcrypt）
+  const crypto = require('crypto');
+  const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+
+  const result = run(
+    `INSERT INTO users (username, password, name, email, phone, dept_id, role_id, status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+    [username, passwordHash, name, email, phone, dept_id, role_id, status]
+  );
+
+  res.status(201).json({
+    id: result.lastInsertRowid,
+    username,
+    name,
+    email,
+    phone,
+    dept_id,
+    role_id,
+    status,
+    message: '用户创建成功'
+  });
+});
+
+// 更新用户
+router.put('/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, email, phone, dept_id, role_id, status } = req.body;
+
+  const user = get('SELECT id FROM users WHERE id = ?', [id]);
+  if (!user) {
+    return res.status(404).json({ message: '用户不存在' });
+  }
+
+  run(
+    `UPDATE users SET name = ?, email = ?, phone = ?, dept_id = ?, role_id = ?, status = ?, updated_at = datetime('now') WHERE id = ?`,
+    [name, email, phone, dept_id, role_id, status, id]
+  );
+
+  res.json({ id, name, email, phone, dept_id, role_id, status, message: '用户更新成功' });
+});
+
+// 删除用户
+router.delete('/:id', (req, res) => {
+  const { id } = req.params;
+
+  const user = get('SELECT id, username FROM users WHERE id = ?', [id]);
+  if (!user) {
+    return res.status(404).json({ message: '用户不存在' });
+  }
+
+  // 不允许删除自己
+  if (req.user && req.user.id === parseInt(id)) {
+    return res.status(400).json({ message: '不能删除自己的账号' });
+  }
+
+  run('DELETE FROM users WHERE id = ?', [id]);
+  res.json({ message: '用户删除成功' });
+});
+
+// 重置密码
+router.put('/:id/reset-password', (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+
+  if (!password || password.length < 8) {
+    return res.status(400).json({ message: '密码至少 8 位' });
+  }
+
+  const user = get('SELECT id FROM users WHERE id = ?', [id]);
+  if (!user) {
+    return res.status(404).json({ message: '用户不存在' });
+  }
+
+  const crypto = require('crypto');
+  const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+
+  run('UPDATE users SET password = ?, updated_at = datetime(\'now\') WHERE id = ?', [passwordHash, id]);
+  res.json({ message: '密码重置成功' });
+});
+
+// 批量操作
+router.post('/batch', (req, res) => {
+  const { action, ids } = req.body;
+
+  if (!action || !ids || !Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ message: '参数错误' });
+  }
+
+  const placeholders = ids.map(() => '?').join(',');
+  let sql, params;
+
+  switch (action) {
+    case 'enable':
+      sql = `UPDATE users SET status = 'active', updated_at = datetime('now') WHERE id IN (${placeholders})`;
+      params = ids;
+      break;
+    case 'disable':
+      sql = `UPDATE users SET status = 'disabled', updated_at = datetime('now') WHERE id IN (${placeholders})`;
+      params = ids;
+      break;
+    case 'delete':
+      // 不能删除自己
+      const filteredIds = req.user ? ids.filter(id => id !== req.user.id) : ids;
+      if (filteredIds.length === 0) {
+        return res.status(400).json({ message: '不能删除自己的账号' });
+      }
+      sql = `DELETE FROM users WHERE id IN (${filteredIds.map(() => '?').join(',')})`;
+      params = filteredIds;
+      break;
+    default:
+      return res.status(400).json({ message: '不支持的操作类型' });
+  }
+
+  run(sql, params);
+  res.json({ message: `批量${action === 'enable' ? '启用' : action === 'disable' ? '禁用' : '删除'}成功` });
+});
+
 module.exports = router;

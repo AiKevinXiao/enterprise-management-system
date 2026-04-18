@@ -116,9 +116,9 @@
     <div class="batch-bar" id="batchBar" style="display:none">
       <span class="batch-info">已选择 <strong id="selectedCount">0</strong> 个用户</span>
       <div class="batch-actions">
-        <button class="btn btn-sm btn-outline" onclick="batchAction('启用')">批量启用</button>
-        <button class="btn btn-sm btn-outline" onclick="batchAction('禁用')">批量禁用</button>
-        <button class="btn btn-sm btn-danger" onclick="batchAction('删除')">批量删除</button>
+        <button class="btn btn-sm btn-outline" onclick="batchAction('enable')">批量启用</button>
+        <button class="btn btn-sm btn-outline" onclick="batchAction('disable')">批量禁用</button>
+        <button class="btn btn-sm btn-danger" onclick="batchAction('delete')">批量删除</button>
         <button class="btn btn-sm btn-outline" onclick="showToast('导出成功')">导出选中</button>
       </div>
     </div>
@@ -320,63 +320,156 @@
     }
   </script>
   <script>
-    // 模拟用户数据
-    let users = [
-      { id: 1, name: '张三', account: 'zhangsan', dept: 'tech', role: 'admin', status: 'active', lastLogin: '2026-04-04 09:15', avatarColor: 'linear-gradient(135deg,#60A5FA,#3B82F6)' },
-      { id: 2, name: '李四', account: 'lisi', dept: 'product', role: 'manager', status: 'active', lastLogin: '2026-04-03 18:30', avatarColor: 'linear-gradient(135deg,#FBBF24,#F59E0B)' },
-      { id: 3, name: '王五', account: 'wangwu', dept: 'design', role: 'user', status: 'disabled', lastLogin: '2026-03-28 14:20', avatarColor: 'linear-gradient(135deg,#4ADE80,#22C55E)' },
-      { id: 4, name: '赵六', account: 'zhaoliu', dept: 'hr', role: 'user', status: 'pending', lastLogin: '从未登录', avatarColor: 'linear-gradient(135deg,#F87171,#EF4444)' },
-      { id: 5, name: '钱七', account: 'qianqi', dept: 'finance', role: 'manager', status: 'active', lastLogin: '2026-04-04 11:05', avatarColor: 'linear-gradient(135deg,#60A5FA,#3B82F6)' },
-      { id: 6, name: '孙八', account: 'sunba', dept: 'sales', role: 'user', status: 'active', lastLogin: '2026-04-02 16:40', avatarColor: 'linear-gradient(135deg,#A78BFA,#8B5CF6)' },
-      { id: 7, name: '周九', account: 'zhoujiu', dept: 'tech', role: 'user', status: 'active', lastLogin: '2026-04-04 08:50', avatarColor: 'linear-gradient(135deg,#FB7185,#F43F5E)' },
-      { id: 8, name: '吴十', account: 'wushi', dept: 'product', role: 'user', status: 'disabled', lastLogin: '2026-03-15 10:20', avatarColor: 'linear-gradient(135deg,#34D399,#10B981)' },
-      { id: 9, name: '郑十一', account: 'zhengshiyi', dept: 'design', role: 'user', status: 'active', lastLogin: '2026-04-01 15:30', avatarColor: 'linear-gradient(135deg,#60A5FA,#3B82F6)' },
-      { id: 10, name: '陈十二', account: 'chenshier', dept: 'hr', role: 'manager', status: 'active', lastLogin: '2026-04-04 10:20', avatarColor: 'linear-gradient(135deg,#FBBF24,#F59E0B)' },
-      { id: 11, name: '林十三', account: 'linshisan', dept: 'tech', role: 'user', status: 'pending', lastLogin: '从未登录', avatarColor: 'linear-gradient(135deg,#4ADE80,#22C55E)' },
-      { id: 12, name: '黄十四', account: 'huangshisi', dept: 'sales', role: 'admin', status: 'active', lastLogin: '2026-04-03 17:45', avatarColor: 'linear-gradient(135deg,#F87171,#EF4444)' }
-    ];
-
-    // 部门/角色/状态映射
-    const deptMap = { tech: '技术部', product: '产品部', design: '设计部', hr: '人力资源部', finance: '财务部', sales: '销售部' };
-    const roleMap = { admin: '管理员', manager: '部门经理', user: '普通用户', guest: '访客' };
-    const statusMap = { active: { text: '正常', class: 'status-active' }, disabled: { text: '禁用', class: 'status-disabled' }, pending: { text: '待激活', class: 'status-pending' } };
-
     // 分页状态
     let currentPage = 1;
     let pageSize = 20;
-    let filteredUsers = [...users];
+    let totalCount = 0;
     let editingUserId = null;
     let resettingUserId = null;
 
-    // 渲染表格
-    function renderTable() {
-      const tbody = document.getElementById('userTableBody');
-      const start = (currentPage - 1) * pageSize;
-      const end = start + pageSize;
-      const pageData = filteredUsers.slice(start, end);
+    // 部门/角色映射（从 API 加载）
+    let deptMap = {};
+    let roleMap = {};
 
-      tbody.innerHTML = pageData.map(user => {
-        const status = statusMap[user.status];
+    // 状态映射
+    const statusMap = {
+      active: { text: '正常', class: 'status-active' },
+      disabled: { text: '禁用', class: 'status-disabled' },
+      pending: { text: '待激活', class: 'status-pending' }
+    };
+
+    // 头像颜色
+    const avatarColors = [
+      'linear-gradient(135deg,#60A5FA,#3B82F6)',
+      'linear-gradient(135deg,#FBBF24,#F59E0B)',
+      'linear-gradient(135deg,#4ADE80,#22C55E)',
+      'linear-gradient(135deg,#F87171,#EF4444)',
+      'linear-gradient(135deg,#A78BFA,#8B5CF6)',
+      'linear-gradient(135deg,#FB7185,#F43F5E)',
+      'linear-gradient(135deg,#34D399,#10B981)'
+    ];
+
+    function getAvatarColor(name) {
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return avatarColors[Math.abs(hash) % avatarColors.length];
+    }
+
+    // 加载部门列表
+    async function loadDepartments() {
+      try {
+        const res = await AuthManager.api('/departments');
+        const data = await res.json();
+        const depts = data.data || [];
+        
+        deptMap = {};
+        depts.forEach(d => { deptMap[d.id] = d.name; });
+
+        // 更新筛选下拉框
+        const filterSelect = document.getElementById('filterDept');
+        filterSelect.innerHTML = '<option value="">全部部门</option>' +
+          depts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+
+        // 更新表单下拉框
+        const formSelect = document.getElementById('userDept');
+        formSelect.innerHTML = '<option value="">请选择部门</option>' +
+          depts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+      } catch (e) {
+        console.error('加载部门失败:', e);
+      }
+    }
+
+    // 加载角色列表
+    async function loadRoles() {
+      try {
+        const res = await AuthManager.api('/roles');
+        const data = await res.json();
+        const roles = data.data || [];
+        
+        roleMap = {};
+        roles.forEach(r => { roleMap[r.id] = r.name; });
+
+        // 更新筛选下拉框
+        const filterSelect = document.getElementById('filterRole');
+        filterSelect.innerHTML = '<option value="">全部角色</option>' +
+          roles.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+
+        // 更新表单下拉框
+        const formSelect = document.getElementById('userRole');
+        formSelect.innerHTML = '<option value="">请选择角色</option>' +
+          roles.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+      } catch (e) {
+        console.error('加载角色失败:', e);
+      }
+    }
+
+    // 加载用户列表
+    async function loadUsers() {
+      try {
+        const keyword = document.getElementById('searchKeyword').value.trim();
+        const dept_id = document.getElementById('filterDept').value;
+        const role_id = document.getElementById('filterRole').value;
+        const status = document.getElementById('filterStatus').value;
+
+        const params = new URLSearchParams();
+        params.append('page', currentPage);
+        params.append('pageSize', pageSize);
+        if (keyword) params.append('keyword', keyword);
+        if (dept_id) params.append('dept_id', dept_id);
+        if (role_id) params.append('role_id', role_id);
+        if (status) params.append('status', status);
+
+        const res = await AuthManager.api(`/users?${params}`);
+        const data = await res.json();
+
+        totalCount = data.total || 0;
+        renderTable(data.list || []);
+      } catch (e) {
+        console.error('加载用户失败:', e);
+        showToast('加载用户列表失败', 'error');
+      }
+    }
+
+    // 渲染表格
+    function renderTable(users) {
+      const tbody = document.getElementById('userTableBody');
+      
+      if (!users || users.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align:center;padding:40px;color:var(--muted);">
+              暂无数据
+            </td>
+          </tr>
+        `;
+        updatePagination();
+        return;
+      }
+
+      tbody.innerHTML = users.map(user => {
+        const status = statusMap[user.status] || statusMap.active;
         return `
           <tr data-id="${user.id}">
             <td><input type="checkbox" class="checkbox user-checkbox" value="${user.id}" /></td>
             <td>
               <div class="user-cell">
-                <div class="user-avatar" style="background:${user.avatarColor}">${user.name[0]}</div>
+                <div class="user-avatar" style="background:${getAvatarColor(user.name)}">${user.name[0]}</div>
                 <div class="user-info">
                   <span class="user-name-cell">${user.name}</span>
-                  <span class="user-account">${user.account}</span>
+                  <span class="user-account">${user.username}</span>
                 </div>
               </div>
             </td>
-            <td>${deptMap[user.dept]}</td>
-            <td>${roleMap[user.role]}</td>
+            <td>${user.dept_name || '-'}</td>
+            <td>${user.role_name || '-'}</td>
             <td><span class="status-badge ${status.class}">${status.text}</span></td>
-            <td>${user.lastLogin}</td>
+            <td>${user.last_login || '从未登录'}</td>
             <td>
               <div class="action-btns">
                 <a class="action-link" onclick="editUser(${user.id})">编辑</a>
-                <a class="action-link" onclick="openResetModal(${user.id})">重置密码</a>
+                <a class="action-link" onclick="openResetModal(${user.id}, '${user.name}', '${user.username}')">重置密码</a>
                 <a class="action-link danger" onclick="deleteUser(${user.id})">删除</a>
               </div>
             </td>
@@ -394,8 +487,8 @@
 
     // 更新分页
     function updatePagination() {
-      const totalPages = Math.ceil(filteredUsers.length / pageSize) || 1;
-      document.getElementById('totalCount').textContent = filteredUsers.length.toLocaleString();
+      const totalPages = Math.ceil(totalCount / pageSize) || 1;
+      document.getElementById('totalCount').textContent = totalCount.toLocaleString();
       
       // 更新按钮状态
       document.getElementById('btnFirst').disabled = currentPage === 1;
@@ -432,50 +525,34 @@
 
     function goToPage(page) {
       currentPage = page;
-      renderTable();
+      loadUsers();
     }
 
     function prevPage() {
       if (currentPage > 1) {
         currentPage--;
-        renderTable();
+        loadUsers();
       }
     }
 
     function nextPage() {
-      const totalPages = Math.ceil(filteredUsers.length / pageSize);
+      const totalPages = Math.ceil(totalCount / pageSize);
       if (currentPage < totalPages) {
         currentPage++;
-        renderTable();
+        loadUsers();
       }
     }
 
     function changePageSize() {
       pageSize = parseInt(document.getElementById('pageSize').value);
       currentPage = 1;
-      renderTable();
+      loadUsers();
     }
 
     // 搜索
     function handleSearch() {
-      const keyword = document.getElementById('searchKeyword').value.toLowerCase();
-      const dept = document.getElementById('filterDept').value;
-      const role = document.getElementById('filterRole').value;
-      const status = document.getElementById('filterStatus').value;
-
-      filteredUsers = users.filter(user => {
-        const matchKeyword = !keyword || 
-          user.name.toLowerCase().includes(keyword) || 
-          user.account.toLowerCase().includes(keyword);
-        const matchDept = !dept || user.dept === dept;
-        const matchRole = !role || user.role === role;
-        const matchStatus = !status || user.status === status;
-        return matchKeyword && matchDept && matchRole && matchStatus;
-      });
-
       currentPage = 1;
-      renderTable();
-      showToast(`搜索完成，共找到 ${filteredUsers.length} 条记录`);
+      loadUsers();
     }
 
     function handleReset() {
@@ -483,28 +560,33 @@
       document.getElementById('filterDept').value = '';
       document.getElementById('filterRole').value = '';
       document.getElementById('filterStatus').value = '';
-      filteredUsers = [...users];
       currentPage = 1;
-      renderTable();
+      loadUsers();
       showToast('筛选已重置');
     }
 
-    // 新增/编辑用户
-    function editUser(id) {
-      const user = users.find(u => u.id === id);
-      if (!user) return;
+    // 编辑用户
+    async function editUser(id) {
+      try {
+        const res = await AuthManager.api(`/users/${id}`);
+        const user = await res.json();
 
-      editingUserId = id;
-      document.getElementById('modalTitle').textContent = '编辑用户';
-      document.getElementById('userId').value = user.id;
-      document.getElementById('userName').value = user.name;
-      document.getElementById('userAccount').value = user.account;
-      document.getElementById('userDept').value = user.dept;
-      document.getElementById('userRole').value = user.role;
-      document.getElementById('userStatus').value = user.status;
-      document.getElementById('passwordRow').style.display = 'none';
+        editingUserId = id;
+        document.getElementById('modalTitle').textContent = '编辑用户';
+        document.getElementById('userId').value = user.id;
+        document.getElementById('userName').value = user.name;
+        document.getElementById('userAccount').value = user.username;
+        document.getElementById('userPhone').value = user.phone || '';
+        document.getElementById('userEmail').value = user.email || '';
+        document.getElementById('userDept').value = user.dept_id || '';
+        document.getElementById('userRole').value = user.role_id || '';
+        document.getElementById('userStatus').value = user.status || 'active';
+        document.getElementById('passwordRow').style.display = 'none';
 
-      ModalManager.open('userModal');
+        ModalManager.open('userModal');
+      } catch (e) {
+        showToast('获取用户信息失败', 'error');
+      }
     }
 
     // 覆盖全局 openModal
@@ -519,96 +601,87 @@
       }
     };
 
-    function saveUser() {
+    // 保存用户
+    async function saveUser() {
       const name = document.getElementById('userName').value.trim();
-      const account = document.getElementById('userAccount').value.trim();
-      const dept = document.getElementById('userDept').value;
-      const role = document.getElementById('userRole').value;
+      const username = document.getElementById('userAccount').value.trim();
+      const dept_id = document.getElementById('userDept').value;
+      const role_id = document.getElementById('userRole').value;
       const status = document.getElementById('userStatus').value;
+      const phone = document.getElementById('userPhone').value.trim();
+      const email = document.getElementById('userEmail').value.trim();
 
-      if (!name || !account || !dept || !role) {
+      if (!name || !username || !dept_id || !role_id) {
         showToast('请填写必填项', 'error');
         return;
       }
 
-      if (editingUserId) {
-        // 编辑
-        const user = users.find(u => u.id === editingUserId);
-        if (user) {
-          user.name = name;
-          user.account = account;
-          user.dept = dept;
-          user.role = role;
-          user.status = status;
+      try {
+        if (editingUserId) {
+          // 编辑
+          const res = await AuthManager.api(`/users/${editingUserId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ name, email, phone, dept_id, role_id, status })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message);
           showToast('用户更新成功');
-        }
-      } else {
-        // 新增
-        const password = document.getElementById('userPassword').value;
-        const passwordConfirm = document.getElementById('userPasswordConfirm').value;
-        
-        if (!password || password.length < 8) {
-          showToast('密码至少 8 位', 'error');
-          return;
-        }
-        if (password !== passwordConfirm) {
-          showToast('两次输入的密码不一致', 'error');
-          return;
+        } else {
+          // 新增
+          const password = document.getElementById('userPassword').value;
+          const passwordConfirm = document.getElementById('userPasswordConfirm').value;
+          
+          if (!password || password.length < 8) {
+            showToast('密码至少 8 位', 'error');
+            return;
+          }
+          if (password !== passwordConfirm) {
+            showToast('两次输入的密码不一致', 'error');
+            return;
+          }
+
+          const res = await AuthManager.api('/users', {
+            method: 'POST',
+            body: JSON.stringify({ username, password, name, email, phone, dept_id, role_id, status })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message);
+          showToast('用户创建成功');
         }
 
-        const colors = [
-          'linear-gradient(135deg,#60A5FA,#3B82F6)',
-          'linear-gradient(135deg,#FBBF24,#F59E0B)',
-          'linear-gradient(135deg,#4ADE80,#22C55E)',
-          'linear-gradient(135deg,#F87171,#EF4444)',
-          'linear-gradient(135deg,#A78BFA,#8B5CF6)',
-          'linear-gradient(135deg,#FB7185,#F43F5E)',
-          'linear-gradient(135deg,#34D399,#10B981)'
-        ];
-
-        const newUser = {
-          id: Date.now(),
-          name,
-          account,
-          dept,
-          role,
-          status,
-          lastLogin: '从未登录',
-          avatarColor: colors[Math.floor(Math.random() * colors.length)]
-        };
-        users.unshift(newUser);
-        filteredUsers = [...users];
-        showToast('用户创建成功');
+        closeModal('userModal');
+        loadUsers();
+      } catch (e) {
+        showToast(e.message || '操作失败', 'error');
       }
-
-      closeModal('userModal');
-      renderTable();
     }
 
     // 删除用户
-    function deleteUser(id) {
-      confirmAction('删除该用户', () => {
-        users = users.filter(u => u.id !== id);
-        filteredUsers = filteredUsers.filter(u => u.id !== id);
-        renderTable();
+    async function deleteUser(id) {
+      if (!confirm('确定要删除该用户吗？此操作不可恢复。')) return;
+
+      try {
+        const res = await AuthManager.api(`/users/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
         showToast('删除成功');
-      });
+        loadUsers();
+      } catch (e) {
+        showToast(e.message || '删除失败', 'error');
+      }
     }
 
     // 重置密码
-    function openResetModal(id) {
-      const user = users.find(u => u.id === id);
-      if (!user) return;
-      
+    function openResetModal(id, name, username) {
       resettingUserId = id;
-      document.getElementById('resetUserName').textContent = `${user.name} (${user.account})`;
+      document.getElementById('resetUserName').textContent = `${name} (${username})`;
       document.getElementById('newPassword').value = '';
       document.getElementById('newPasswordConfirm').value = '';
       document.getElementById('sendEmail').checked = false;
       ModalManager.open('resetModal');
     }
 
-    function resetPassword() {
+    async function resetPassword() {
       const password = document.getElementById('newPassword').value;
       const passwordConfirm = document.getElementById('newPasswordConfirm').value;
 
@@ -621,41 +694,56 @@
         return;
       }
 
-      closeModal('resetModal');
-      const sendEmail = document.getElementById('sendEmail').checked;
-      showToast(sendEmail ? '密码已重置，邮件通知已发送' : '密码重置成功');
+      try {
+        const res = await AuthManager.api(`/users/${resettingUserId}/reset-password`, {
+          method: 'PUT',
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+
+        closeModal('resetModal');
+        const sendEmail = document.getElementById('sendEmail').checked;
+        showToast(sendEmail ? '密码已重置，邮件通知已发送' : '密码重置成功');
+      } catch (e) {
+        showToast(e.message || '重置失败', 'error');
+      }
     }
 
     // 批量操作
-    function batchAction(action) {
-      const selected = TableBatch.getSelected();
-      if (selected.length === 0) {
+    async function batchAction(action) {
+      const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+      if (checkboxes.length === 0) {
         showToast('请先选择用户', 'warning');
         return;
       }
-      
-      confirmAction(`${action}选中的 ${selected.length} 个用户`, () => {
-        const selectedIds = Array.from(document.querySelectorAll('.user-checkbox:checked')).map(cb => parseInt(cb.value));
-        
-        if (action === '删除') {
-          users = users.filter(u => !selectedIds.includes(u.id));
-        } else if (action === '启用') {
-          users.forEach(u => { if (selectedIds.includes(u.id)) u.status = 'active'; });
-        } else if (action === '禁用') {
-          users.forEach(u => { if (selectedIds.includes(u.id)) u.status = 'disabled'; });
-        }
-        
-        filteredUsers = [...users];
-        renderTable();
+
+      const actionText = action === 'enable' ? '启用' : action === 'disable' ? '禁用' : '删除';
+      if (!confirm(`确定要批量${actionText}选中的 ${checkboxes.length} 个用户吗？`)) return;
+
+      const ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+      try {
+        const res = await AuthManager.api('/users/batch', {
+          method: 'POST',
+          body: JSON.stringify({ action, ids })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+
+        showToast(`批量${actionText}成功`);
+        loadUsers();
         document.getElementById('batchBar').style.display = 'none';
         document.getElementById('selectAll').checked = false;
-        showToast(`批量${action}成功`);
-      });
+      } catch (e) {
+        showToast(e.message || '操作失败', 'error');
+      }
     }
 
     // 初始化
-    document.addEventListener('DOMContentLoaded', () => {
-      renderTable();
+    document.addEventListener('DOMContentLoaded', async () => {
+      await Promise.all([loadDepartments(), loadRoles()]);
+      await loadUsers();
     });
   </script>
 </body>
