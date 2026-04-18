@@ -84,6 +84,11 @@ function createTables() {
       updated_at TEXT DEFAULT (datetime('now', 'localtime'))
     )
   `);
+  try {
+    db.run("ALTER TABLE users ADD COLUMN deleted_at TEXT");
+  } catch (e) {
+    if (!e.message.includes("duplicate column")) console.error(e);
+  }
 
   db.run(`
     CREATE TABLE IF NOT EXISTS departments (

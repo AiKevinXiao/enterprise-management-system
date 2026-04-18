@@ -31,13 +31,13 @@ router.get('/', (req, res) => {
   if (role_id) { where += ' AND u.role_id = ?'; params.push(role_id); }
   if (status) { where += ' AND u.status = ?'; params.push(status); }
 
-  const totalResult = get(`SELECT COUNT(*) as count FROM users u WHERE ${where}`, params);
+  const totalResult = get(`SELECT COUNT(*) as count FROM users u WHERE ${where} AND u.deleted_at IS NULL`, params);
   const users = all(
     `SELECT u.*, d.name as dept_name, r.name as role_name
      FROM users u
      LEFT JOIN departments d ON u.dept_id = d.id
      LEFT JOIN roles r ON u.role_id = r.id
-     WHERE ${where}
+     WHERE ${where} AND u.deleted_at IS NULL
      ORDER BY u.created_at DESC
      LIMIT ? OFFSET ?`,
     [...params, parseInt(pageSize), parseInt(offset)]
@@ -145,7 +145,7 @@ router.delete('/:id', (req, res) => {
     return res.status(400).json({ message: '不能删除自己的账号' });
   }
 
-  run('DELETE FROM users WHERE id = ?', [id]);
+  run("UPDATE users SET deleted_at = datetime('now', 'localtime') WHERE id = ?", [id]);
   res.json({ message: '用户删除成功' });
 });
 
@@ -197,7 +197,7 @@ router.post('/batch', (req, res) => {
       if (filteredIds.length === 0) {
         return res.status(400).json({ message: '不能删除自己的账号' });
       }
-      sql = `DELETE FROM users WHERE id IN (${filteredIds.map(() => '?').join(',')})`;
+      sql = `UPDATE users SET deleted_at = datetime('now', 'localtime') WHERE id IN (${filteredIds.map(() => '?').join(',')})`;
       params = filteredIds;
       break;
     default:
@@ -208,4 +208,16 @@ router.post('/batch', (req, res) => {
   res.json({ message: `批量${action === 'enable' ? '启用' : action === 'disable' ? '禁用' : '删除'}成功` });
 });
 
+
+
+// Restore a deleted user
+router.put('/:id/restore', (req, res) => {
+  const { id } = req.params;
+  const user = get('SELECT id FROM users WHERE id = ? AND deleted_at IS NOT NULL', [id]);
+  if (!user) {
+    return res.status(404).json({ message: '用户不存在或未被删除' });
+  }
+  run("UPDATE users SET deleted_at = NULL, updated_at = datetime('now', 'localtime') WHERE id = ?", [id]);
+  res.json({ message: '用户恢复成功' });
+});
 module.exports = router;
