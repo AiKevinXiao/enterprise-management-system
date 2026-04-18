@@ -33,8 +33,19 @@ router.get('/', (req, res) => {
     [...params, parseInt(pageSize), parseInt(offset)]
   );
 
+  // 手机号脱敏处理
+  const maskPhone = (phone) => {
+    if (!phone || phone.length < 7) return phone;
+    return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
+  };
+
+  const maskedUsers = users.map(user => ({
+    ...user,
+    phone: maskPhone(user.phone)
+  }));
+
   res.json({
-    list: users,
+    list: maskedUsers,
     total: totalResult ? totalResult.count : 0,
     page: parseInt(page),
     pageSize: parseInt(pageSize)
