@@ -745,7 +745,9 @@
     // 初始化
     document.addEventListener('DOMContentLoaded', async () => {
       await Promise.all([loadDepartments(), loadRoles()]);
-      await loadUsers();
+      // 页面加载时不自动查询，等待用户点击搜索按钮
+      renderTable([]);
+      document.getElementById('totalCount').textContent = '0';
     });
   </script>
 </body>
