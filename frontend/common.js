@@ -242,6 +242,7 @@ const ThemeManager = {
  * API 配置
  */
 const API_BASE = 'http://localhost:3000/api';
+window.API_BASE = API_BASE;
 
 /**
  * 用户认证管理
