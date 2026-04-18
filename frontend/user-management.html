@@ -133,6 +133,7 @@
               <th>用户信息</th>
               <th>部门</th>
               <th>角色</th>
+              <th>手机号</th>
               <th>状态</th>
               <th>最后登录</th>
               <th>操作</th>
@@ -439,7 +440,7 @@
       if (!users || users.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="7" style="text-align:center;padding:40px;color:var(--muted);">
+            <td colspan="8" style="text-align:center;padding:40px;color:var(--muted);">
               暂无数据
             </td>
           </tr>
@@ -464,6 +465,7 @@
             </td>
             <td>${user.dept_name || '-'}</td>
             <td>${user.role_name || '-'}</td>
+            <td>${user.phone || '-'}</td>
             <td><span class="status-badge ${status.class}">${status.text}</span></td>
             <td>${user.last_login || '从未登录'}</td>
             <td>
