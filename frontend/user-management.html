@@ -74,15 +74,17 @@
         </div>
         <div class="filter-item">
           <label class="filter-label">部门</label>
-          <select class="filter-select" id="filterDept">
-            <option value="">全部部门</option>
-            <option value="tech">技术部</option>
-            <option value="product">产品部</option>
-            <option value="design">设计部</option>
-            <option value="hr">人力资源部</option>
-            <option value="finance">财务部</option>
-            <option value="sales">销售部</option>
-          </select>
+          <div class="tree-select" id="deptTreeSelect">
+            <div class="tree-select-trigger" onclick="toggleDeptTree()">
+              <span id="deptSelectedText">全部部门</span>
+              <span class="tree-select-arrow">▼</span>
+            </div>
+            <div class="tree-select-dropdown" id="deptTreeDropdown" style="display:none">
+              <div class="tree-select-option" onclick="selectDept('', '全部部门')">全部部门</div>
+              <div id="deptTreeOptions"></div>
+            </div>
+          </div>
+          <input type="hidden" id="filterDept" value="" />
         </div>
         <div class="filter-item">
           <label class="filter-label">角色</label>
@@ -368,12 +370,11 @@
         deptMap = {};
         depts.forEach(d => { deptMap[d.id] = d.name; });
 
-        // 更新筛选下拉框
-        const filterSelect = document.getElementById('filterDept');
-        filterSelect.innerHTML = '<option value="">全部部门</option>' +
-          depts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+        // 构建部门树并渲染树形下拉
+        const deptTree = buildDeptTree(depts);
+        renderDeptTree(deptTree);
 
-        // 更新表单下拉框
+        // 更新表单下拉框（保持普通下拉）
         const formSelect = document.getElementById('userDept');
         formSelect.innerHTML = '<option value="">请选择部门</option>' +
           depts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
@@ -381,6 +382,94 @@
         console.error('加载部门失败:', e);
       }
     }
+
+    // 构建部门树
+    function buildDeptTree(depts) {
+      const map = {};
+      const roots = [];
+      
+      depts.forEach(d => {
+        map[d.id] = { ...d, children: [], expanded: false };
+      });
+      
+      depts.forEach(d => {
+        if (d.parent_id && map[d.parent_id]) {
+          map[d.parent_id].children.push(map[d.id]);
+        } else {
+          roots.push(map[d.id]);
+        }
+      });
+      
+      return roots;
+    }
+
+    // 渲染部门树
+    function renderDeptTree(tree, container = null, level = 0) {
+      const target = container || document.getElementById('deptTreeOptions');
+      if (!container) target.innerHTML = '';
+      
+      tree.forEach(node => {
+        const hasChildren = node.children && node.children.length > 0;
+        const indent = '  '.repeat(level);
+        
+        const nodeEl = document.createElement('div');
+        nodeEl.className = 'tree-node';
+        nodeEl.dataset.id = node.id;
+        nodeEl.dataset.name = node.name;
+        nodeEl.innerHTML = `
+          <span class="indent">${indent}</span>
+          <span class="expand-icon ${hasChildren ? '' : 'leaf'}" onclick="toggleTreeNode(event, ${node.id})">
+            ${hasChildren ? (node.expanded ? '▼' : '▶') : ''}
+          </span>
+          <span onclick="selectDept(${node.id}, '${node.name}')">${node.name}</span>
+        `;
+        target.appendChild(nodeEl);
+        
+        if (hasChildren && node.expanded) {
+          const childrenContainer = document.createElement('div');
+          childrenContainer.className = 'tree-children';
+          childrenContainer.id = `tree-children-${node.id}`;
+          target.appendChild(childrenContainer);
+          renderDeptTree(node.children, childrenContainer, level + 1);
+        }
+      });
+    }
+
+    // 切换树节点展开/折叠
+    function toggleTreeNode(event, nodeId) {
+      event.stopPropagation();
+      const childrenEl = document.getElementById(`tree-children-${nodeId}`);
+      if (childrenEl) {
+        childrenEl.style.display = childrenEl.style.display === 'none' ? 'block' : 'none';
+        const icon = event.target;
+        icon.textContent = childrenEl.style.display === 'none' ? '▶' : '▼';
+      }
+    }
+
+    // 切换部门树下拉
+    function toggleDeptTree() {
+      const dropdown = document.getElementById('deptTreeDropdown');
+      const isOpen = dropdown.style.display !== 'none';
+      dropdown.style.display = isOpen ? 'none' : 'block';
+      document.querySelector('.tree-select').classList.toggle('open', !isOpen);
+    }
+
+    // 选择部门
+    function selectDept(id, name) {
+      document.getElementById('filterDept').value = id;
+      document.getElementById('deptSelectedText').textContent = name;
+      document.getElementById('deptTreeDropdown').style.display = 'none';
+      document.querySelector('.tree-select').classList.remove('open');
+    }
+
+    // 点击外部关闭下拉
+    document.addEventListener('click', (e) => {
+      const treeSelect = document.getElementById('deptTreeSelect');
+      if (treeSelect && !treeSelect.contains(e.target)) {
+        document.getElementById('deptTreeDropdown').style.display = 'none';
+        treeSelect.classList.remove('open');
+      }
+    });
 
     // 加载角色列表
     async function loadRoles() {
