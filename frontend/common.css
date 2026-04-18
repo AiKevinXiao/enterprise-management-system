@@ -248,7 +248,8 @@ tr:hover{background:var(--bg-hover)}
 }
 .page-info{font-size:13px;color:var(--muted)}
 .page-controls{display:flex;align-items:center;gap:8px}
-.page-btn{
+#pageNumbers{display:inline-flex;gap:4px}
+.page-btn{display:inline-flex;
   width:32px;height:32px;border:1px solid var(--border);
   border-radius:8px;background:var(--bg);color:var(--text);
   cursor:pointer;display:flex;align-items:center;justify-content:center;
