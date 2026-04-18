@@ -84,6 +84,12 @@ function createTables() {
       updated_at TEXT DEFAULT (datetime('now', 'localtime'))
     )
   `);
+  // Migration: add deleted_at column if not exists
+  {
+    var info = db.exec("PRAGMA table_info(users)");
+    var hasDeleted = info.length > 0 && info[0].values.some(function(row){ return row[1] === 'deleted_at'; });
+    if (!hasDeleted) db.run("ALTER TABLE users ADD COLUMN deleted_at TEXT");
+  }
   try {
     db.run("ALTER TABLE users ADD COLUMN deleted_at TEXT");
   } catch (e) {

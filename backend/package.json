@@ -19,7 +19,7 @@
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "sql.js": "^1.11.0"
+    "sql.js": "^1.14.1"
   },
   "devDependencies": {
     "jest": "^29.7.0",
