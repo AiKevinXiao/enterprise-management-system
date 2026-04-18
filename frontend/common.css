@@ -364,6 +364,26 @@ tr:hover{background:var(--bg-hover)}
   max-height:280px;overflow-y:auto;overflow-x:auto;z-index:100;padding:8px 0;
   box-shadow:0 4px 12px rgba(0,0,0,.15);
   width:max-content;min-width:100%;
+  scrollbar-width:thin;
+  scrollbar-color:var(--border) transparent;
+}
+.tree-select-dropdown::-webkit-scrollbar{
+  width:6px;
+  height:6px;
+}
+.tree-select-dropdown::-webkit-scrollbar-track{
+  background:transparent;
+  border-radius:3px;
+}
+.tree-select-dropdown::-webkit-scrollbar-thumb{
+  background:var(--border);
+  border-radius:3px;
+}
+.tree-select-dropdown::-webkit-scrollbar-thumb:hover{
+  background:var(--muted);
+}
+.tree-select-dropdown::-webkit-scrollbar-corner{
+  background:transparent;
 }
 .tree-select-option{
   padding:8px 12px;font-size:13px;cursor:pointer;color:var(--text);
