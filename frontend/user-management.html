@@ -371,8 +371,8 @@
         depts.forEach(d => { deptMap[d.id] = d.name; });
 
         // 构建部门树并渲染树形下拉
-        const deptTree = buildDeptTree(depts);
-        renderDeptTree(deptTree);
+        deptTreeData = buildDeptTree(depts);
+        renderDeptTree(deptTreeData);
 
         // 更新表单下拉框（保持普通下拉）
         const formSelect = document.getElementById('userDept');
@@ -403,6 +403,9 @@
       return roots;
     }
 
+    // 部门树数据缓存
+    let deptTreeData = [];
+
     // 渲染部门树
     function renderDeptTree(tree, container = null, level = 0) {
       const target = container || document.getElementById('deptTreeOptions');
@@ -410,27 +413,30 @@
       
       tree.forEach(node => {
         const hasChildren = node.children && node.children.length > 0;
-        const indent = '  '.repeat(level);
+        const indentWidth = level * 16;
         
         const nodeEl = document.createElement('div');
         nodeEl.className = 'tree-node';
         nodeEl.dataset.id = node.id;
         nodeEl.dataset.name = node.name;
+        nodeEl.dataset.haschildren = hasChildren;
+        nodeEl.dataset.level = level;
         nodeEl.innerHTML = `
-          <span class="indent">${indent}</span>
+          <span class="indent" style="width:${indentWidth}px"></span>
           <span class="expand-icon ${hasChildren ? '' : 'leaf'}" onclick="toggleTreeNode(event, ${node.id})">
-            ${hasChildren ? (node.expanded ? '▼' : '▶') : ''}
+            ${hasChildren ? '▶' : ''}
           </span>
           <span onclick="selectDept(${node.id}, '${node.name}')">${node.name}</span>
         `;
         target.appendChild(nodeEl);
         
-        if (hasChildren && node.expanded) {
+        // 创建子节点容器（初始隐藏）
+        if (hasChildren) {
           const childrenContainer = document.createElement('div');
           childrenContainer.className = 'tree-children';
           childrenContainer.id = `tree-children-${node.id}`;
+          childrenContainer.style.display = 'none';
           target.appendChild(childrenContainer);
-          renderDeptTree(node.children, childrenContainer, level + 1);
         }
       });
     }
@@ -439,11 +445,40 @@
     function toggleTreeNode(event, nodeId) {
       event.stopPropagation();
       const childrenEl = document.getElementById(`tree-children-${nodeId}`);
-      if (childrenEl) {
-        childrenEl.style.display = childrenEl.style.display === 'none' ? 'block' : 'none';
-        const icon = event.target;
-        icon.textContent = childrenEl.style.display === 'none' ? '▶' : '▼';
+      const icon = event.target;
+      
+      if (!childrenEl) return;
+      
+      const isHidden = childrenEl.style.display === 'none';
+      
+      if (isHidden) {
+        // 展开：先渲染子节点（如果为空）
+        if (childrenEl.children.length === 0) {
+          const parentNode = findNodeInTree(deptTreeData, nodeId);
+          if (parentNode && parentNode.children) {
+            const level = parseInt(icon.closest('.tree-node').dataset.level) + 1;
+            renderDeptTree(parentNode.children, childrenEl, level);
+          }
+        }
+        childrenEl.style.display = 'block';
+        icon.textContent = '▼';
+      } else {
+        // 折叠
+        childrenEl.style.display = 'none';
+        icon.textContent = '▶';
       }
+    }
+
+    // 在树中查找节点
+    function findNodeInTree(tree, nodeId) {
+      for (const node of tree) {
+        if (node.id === nodeId) return node;
+        if (node.children && node.children.length > 0) {
+          const found = findNodeInTree(node.children, nodeId);
+          if (found) return found;
+        }
+      }
+      return null;
     }
 
     // 切换部门树下拉
