@@ -838,9 +838,9 @@
           // 新增
           const password = document.getElementById('userPassword').value;
           const passwordConfirm = document.getElementById('userPasswordConfirm').value;
-          
-          if (!password || password.length < 8) {
-            showToast('密码至少 8 位', 'error');
+          const pwdRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+          if (!pwdRegex.test(password)) {
+            showToast('密码至少8位，且必须包含大写字母、小写字母、数字和特殊字符', 'error');
             return;
           }
           if (password !== passwordConfirm) {
@@ -892,9 +892,9 @@
     async function resetPassword() {
       const password = document.getElementById('newPassword').value;
       const passwordConfirm = document.getElementById('newPasswordConfirm').value;
-
-      if (!password || password.length < 8) {
-        showToast('密码至少 8 位', 'error');
+      const pwdRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+      if (!pwdRegex.test(password)) {
+        showToast('密码至少8位，且必须包含大写字母、小写字母、数字和特殊字符', 'error');
         return;
       }
       if (password !== passwordConfirm) {

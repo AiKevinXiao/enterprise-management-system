@@ -6,6 +6,16 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
+// 密码复杂度校验
+function validatePassword(password) {
+  if (!password || password.length < 8) return '密码至少8位';
+  if (!/[A-Z]/.test(password)) return '密码必须包含大写字母';
+  if (!/[a-z]/.test(password)) return '密码必须包含小写字母';
+  if (!/[0-9]/.test(password)) return '密码必须包含数字';
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return '密码必须包含特殊字符';
+  return null;
+}
+
 router.get('/', (req, res) => {
   const { keyword = '', dept_id, role_id, status, page = 1, pageSize = 20 } = req.query;
   const offset = (page - 1) * pageSize;
@@ -67,6 +77,11 @@ router.post('/', (req, res) => {
   
   if (!username || !password || !name) {
     return res.status(400).json({ message: '用户名、密码和姓名为必填项' });
+  }
+
+  const pwdError = validatePassword(password);
+  if (pwdError) {
+    return res.status(400).json({ message: pwdError });
   }
 
   // 检查用户名是否已存在
@@ -139,8 +154,9 @@ router.put('/:id/reset-password', (req, res) => {
   const { id } = req.params;
   const { password } = req.body;
 
-  if (!password || password.length < 8) {
-    return res.status(400).json({ message: '密码至少 8 位' });
+  const pwdError = validatePassword(password);
+  if (pwdError) {
+    return res.status(400).json({ message: pwdError });
   }
 
   const user = get('SELECT id FROM users WHERE id = ?', [id]);
