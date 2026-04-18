@@ -212,15 +212,16 @@
           <div class="form-row">
             <div class="form-group">
               <label class="form-label required">部门</label>
-              <select class="form-select" id="userDept" required>
-                <option value="">请选择部门</option>
-                <option value="tech">技术部</option>
-                <option value="product">产品部</option>
-                <option value="design">设计部</option>
-                <option value="hr">人力资源部</option>
-                <option value="finance">财务部</option>
-                <option value="sales">销售部</option>
-              </select>
+              <div class="tree-select" id="formDeptTreeSelect">
+                <div class="tree-select-trigger" onclick="toggleFormDeptTree()">
+                  <span id="formDeptSelectedText">请选择部门</span>
+                  <span class="tree-select-arrow">▼</span>
+                </div>
+                <div class="tree-select-dropdown" id="formDeptTreeDropdown" style="display:none">
+                  <div id="formDeptTreeOptions"></div>
+                </div>
+              </div>
+              <input type="hidden" id="userDept" required>
             </div>
             <div class="form-group">
               <label class="form-label required">角色</label>
@@ -373,11 +374,6 @@
         // 构建部门树并渲染树形下拉
         deptTreeData = buildDeptTree(depts);
         renderDeptTree(deptTreeData);
-
-        // 更新表单下拉框（保持普通下拉）
-        const formSelect = document.getElementById('userDept');
-        formSelect.innerHTML = '<option value="">请选择部门</option>' +
-          depts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
       } catch (e) {
         console.error('加载部门失败:', e);
       }
@@ -486,7 +482,7 @@
       const dropdown = document.getElementById('deptTreeDropdown');
       const isOpen = dropdown.style.display !== 'none';
       dropdown.style.display = isOpen ? 'none' : 'block';
-      document.querySelector('.tree-select').classList.toggle('open', !isOpen);
+      document.getElementById('deptTreeSelect').classList.toggle('open', !isOpen);
     }
 
     // 选择部门
@@ -494,7 +490,86 @@
       document.getElementById('filterDept').value = id;
       document.getElementById('deptSelectedText').textContent = name;
       document.getElementById('deptTreeDropdown').style.display = 'none';
-      document.querySelector('.tree-select').classList.remove('open');
+      document.getElementById('deptTreeSelect').classList.remove('open');
+    }
+
+    // 切换表单部门树下拉
+    function toggleFormDeptTree() {
+      const dropdown = document.getElementById('formDeptTreeDropdown');
+      const isOpen = dropdown.style.display !== 'none';
+      dropdown.style.display = isOpen ? 'none' : 'block';
+      document.getElementById('formDeptTreeSelect').classList.toggle('open', !isOpen);
+      if (!isOpen && dropdown.children[0].children.length === 0) {
+        renderFormDeptTree(deptTreeData);
+      }
+    }
+
+    // 选择表单部门
+    function selectFormDept(id, name) {
+      document.getElementById('userDept').value = id;
+      document.getElementById('formDeptSelectedText').textContent = name;
+      document.getElementById('formDeptTreeDropdown').style.display = 'none';
+      document.getElementById('formDeptTreeSelect').classList.remove('open');
+    }
+
+    // 渲染表单部门树
+    function renderFormDeptTree(tree, container = null, level = 0) {
+      const target = container || document.getElementById('formDeptTreeOptions');
+      if (!container) target.innerHTML = '';
+      
+      tree.forEach(node => {
+        const hasChildren = node.children && node.children.length > 0;
+        const indentWidth = level * 16;
+        
+        const nodeEl = document.createElement('div');
+        nodeEl.className = 'tree-node';
+        nodeEl.dataset.id = node.id;
+        nodeEl.dataset.name = node.name;
+        nodeEl.dataset.haschildren = hasChildren;
+        nodeEl.dataset.level = level;
+        nodeEl.innerHTML = `
+          <span class="indent" style="width:${indentWidth}px"></span>
+          <span class="expand-icon ${hasChildren ? '' : 'leaf'}" onclick="toggleFormTreeNode(event, ${node.id})">
+            ${hasChildren ? '▶' : ''}
+          </span>
+          <span onclick="selectFormDept(${node.id}, '${node.name}')">${node.name}</span>
+        `;
+        target.appendChild(nodeEl);
+        
+        if (hasChildren) {
+          const childrenContainer = document.createElement('div');
+          childrenContainer.className = 'tree-children';
+          childrenContainer.id = `form-tree-children-${node.id}`;
+          childrenContainer.style.display = 'none';
+          target.appendChild(childrenContainer);
+        }
+      });
+    }
+
+    // 切换表单树节点展开/折叠
+    function toggleFormTreeNode(event, nodeId) {
+      event.stopPropagation();
+      const childrenEl = document.getElementById(`form-tree-children-${nodeId}`);
+      const icon = event.target;
+      
+      if (!childrenEl) return;
+      
+      const isHidden = childrenEl.style.display === 'none';
+      
+      if (isHidden) {
+        if (childrenEl.children.length === 0) {
+          const parentNode = findNodeInTree(deptTreeData, nodeId);
+          if (parentNode && parentNode.children) {
+            const level = parseInt(icon.closest('.tree-node').dataset.level) + 1;
+            renderFormDeptTree(parentNode.children, childrenEl, level);
+          }
+        }
+        childrenEl.style.display = 'block';
+        icon.textContent = '▼';
+      } else {
+        childrenEl.style.display = 'none';
+        icon.textContent = '▶';
+      }
     }
 
     // 点击外部关闭下拉
@@ -503,6 +578,11 @@
       if (treeSelect && !treeSelect.contains(e.target)) {
         document.getElementById('deptTreeDropdown').style.display = 'none';
         treeSelect.classList.remove('open');
+      }
+      const formTreeSelect = document.getElementById('formDeptTreeSelect');
+      if (formTreeSelect && !formTreeSelect.contains(e.target)) {
+        document.getElementById('formDeptTreeDropdown').style.display = 'none';
+        formTreeSelect.classList.remove('open');
       }
     });
 
@@ -705,6 +785,7 @@
         document.getElementById('userPhone').value = user.phone || '';
         document.getElementById('userEmail').value = user.email || '';
         document.getElementById('userDept').value = user.dept_id || '';
+        document.getElementById('formDeptSelectedText').textContent = deptMap[user.dept_id] || '请选择部门';
         document.getElementById('userRole').value = user.role_id || '';
         document.getElementById('userStatus').value = user.status || 'active';
         document.getElementById('passwordRow').style.display = 'none';
@@ -723,6 +804,7 @@
         document.getElementById('userForm').reset();
         document.getElementById('userId').value = '';
         document.getElementById('passwordRow').style.display = 'flex';
+        document.getElementById('formDeptSelectedText').textContent = '请选择部门';
         ModalManager.open('userModal');
       }
     };
