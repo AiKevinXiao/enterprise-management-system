@@ -48,7 +48,16 @@ function saveDB() {
 
 function run(sql, params = []) {
   db.run(sql, params);
+  const changes = db.getRowsModified();
+  let lastID = null;
+  if (changes > 0) {
+    // For INSERT, get last insert rowid
+    const stmt = db.prepare('SELECT last_insert_rowid() as id');
+    stmt.step();
+    lastID = stmt.getAsObject().id;
+  }
   saveDB();
+  return { lastID, changes };
 }
 
 function all(sql, params = []) {
@@ -120,6 +129,7 @@ function createTables() {
       type TEXT DEFAULT 'custom' CHECK(type IN ('system', 'custom')),
       data_scope TEXT DEFAULT 'self' CHECK(data_scope IN ('all', 'dept', 'self')),
       user_count INTEGER DEFAULT 0,
+      deleted_at TEXT DEFAULT NULL,
       created_at TEXT DEFAULT (datetime('now', 'localtime'))
     )
   `);
