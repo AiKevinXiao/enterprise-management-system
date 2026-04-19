@@ -422,10 +422,10 @@
         console.log('API response data:', data);
         
         if (data.code === 200 && data.data) {
-          // 保存权限到本地缓存
-          const permIds = (data.data.permissions || []).map(p => p.id);
-          console.log('Permission IDs:', permIds);
-          rolePermissions[roleId] = permIds;
+          // 保存权限代码到本地缓存（使用code而非id）
+          const permCodes = (data.data.permissions || []).map(p => p.code);
+          console.log('Permission codes:', permCodes);
+          rolePermissions[roleId] = permCodes;
         }
       } catch (e) {
         console.error('加载角色权限失败:', e);
@@ -449,8 +449,8 @@
       document.getElementById('permPercent').textContent = Math.round((perms.length / totalPerms) * 100) + '%';
 
       document.getElementById('permModules').innerHTML = permModules.map((module, idx) => {
-        const moduleChecked = module.perms.every(p => perms.includes(p.id));
-        const modulePartial = module.perms.some(p => perms.includes(p.id)) && !moduleChecked;
+        const moduleChecked = module.perms.every(p => perms.includes(p.code));
+        const modulePartial = module.perms.some(p => perms.includes(p.code)) && !moduleChecked;
         
         return `
           <div class="perm-module">
@@ -471,9 +471,9 @@
             <div class="module-permissions">
               ${module.perms.map(p => `
                 <div class="perm-item">
-                  <input type="checkbox" id="${p.id}" ${perms.includes(p.id) ? 'checked' : ''} 
-                    onchange="updatePermission('${p.id}', this.checked)" />
-                  <label for="${p.id}">${p.name}</label>
+                  <input type="checkbox" id="${p.code}" ${perms.includes(p.code) ? 'checked' : ''} 
+                    onchange="updatePermission('${p.code}', this.checked)" />
+                  <label for="${p.code}">${p.name}</label>
                 </div>
               `).join('')}
             </div>
@@ -497,22 +497,22 @@
       const perms = rolePermissions[currentRoleId] || [];
       if (checkbox.checked) {
         module.perms.forEach(p => {
-          if (!perms.includes(p.id)) perms.push(p.id);
+          if (!perms.includes(p.code)) perms.push(p.code);
         });
       } else {
-        rolePermissions[currentRoleId] = perms.filter(id => !module.perms.some(p => p.id === id));
+        rolePermissions[currentRoleId] = perms.filter(code => !module.perms.some(p => p.code === code));
       }
       
       renderPermissionPanel();
       showToast(checkbox.checked ? '已全选该模块权限' : '已取消该模块权限');
     }
 
-    function updatePermission(permId, checked) {
+    function updatePermission(permCode, checked) {
       let perms = rolePermissions[currentRoleId] || [];
       if (checked) {
-        if (!perms.includes(permId)) perms.push(permId);
+        if (!perms.includes(permCode)) perms.push(permCode);
       } else {
-        perms = perms.filter(id => id !== permId);
+        perms = perms.filter(code => code !== permCode);
       }
       rolePermissions[currentRoleId] = perms;
       
