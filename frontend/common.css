@@ -166,7 +166,7 @@ body{
   display:flex;justify-content:space-between;align-items:center;
   margin-bottom:24px;
 }
-.breadcrumb{font-size:13px;color:var(--muted);margin-bottom:6px}
+.breadcrumb{font-size:13px;color:var(--muted);margin-bottom:4px}
 .breadcrumb span{color:var(--primary)}
 .page-title{font-size:22px;font-weight:600;color:var(--text)}
 
