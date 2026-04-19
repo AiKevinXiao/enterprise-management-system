@@ -345,7 +345,6 @@
           });
           
           permModules = Object.values(modulesMap);
-          console.log('Loaded permission modules:', permModules);
         }
       } catch (e) {
         console.error('加载权限列表失败:', e);
@@ -433,7 +432,6 @@
     }
 
     async function selectRole(id) {
-      console.log('selectRole called with id:', id, typeof id);
       // 确保 id 转换为数字类型以保持一致
       currentRoleId = Number(id);
       document.querySelectorAll('.role-item').forEach(i => i.classList.remove('active'));
@@ -447,18 +445,13 @@
     
     // 加载角色权限
     async function loadRolePermissions(roleId) {
-      console.log('loadRolePermissions called with roleId:', roleId);
-      console.log('Token:', AuthManager.getToken());
       try {
         const res = await AuthManager.api('/roles/' + roleId);
-        console.log('API response status:', res.status);
         const data = await res.json();
-        console.log('API response data:', data);
         
         if (data.code === 200 && data.data) {
           // 保存权限代码到本地缓存（使用code而非id）
           const permCodes = (data.data.permissions || []).map(p => p.code);
-          console.log('Permission codes:', permCodes);
           rolePermissions[roleId] = permCodes;
         }
       } catch (e) {
@@ -477,7 +470,6 @@
         });
         const data = await res.json();
         if (data.code === 200) {
-          console.log('权限保存成功');
           showToast('权限保存成功', 'success');
         } else {
           console.error('保存权限失败:', data.message);
@@ -772,8 +764,6 @@
         showToast('加载角色列表失败', 'error');
         return;
       }
-      console.log('Roles loaded:', roles);
-      console.log('currentRoleId after loadRoles:', currentRoleId, typeof currentRoleId);
       renderRoleList();
       // 加载第一个角色的权限
       if (currentRoleId) {
