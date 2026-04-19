@@ -296,7 +296,7 @@
           // 映射API数据到UI格式
           roles = data.data.map(role => ({
             id: role.id,
-            name: role.type === 'system' ? '🔐 ' : '⚙️ ' + role.name,
+            name: role.type === 'system' ? '🔐 ' + role.name : '⚙️ ' + role.name,
             code: role.code,
             desc: role.description || '',
             type: role.type,
@@ -404,7 +404,26 @@
       document.querySelectorAll('.role-item').forEach(i => i.classList.remove('active'));
       const item = document.querySelector(`.role-item[data-id="${id}"]`);
       if (item) item.classList.add('active');
+      
+      // 加载角色权限
+      loadRolePermissions(id);
       renderPermissionPanel();
+    }
+    
+    // 加载角色权限
+    async function loadRolePermissions(roleId) {
+      try {
+        const res = await AuthManager.api('/roles/' + roleId);
+        const data = await res.json();
+        
+        if (data.code === 200 && data.data) {
+          // 保存权限到本地缓存
+          const permIds = (data.data.permissions || []).map(p => p.id);
+          rolePermissions[roleId] = permIds;
+        }
+      } catch (e) {
+        console.error('加载角色权限失败:', e);
+      }
     }
 
     // 渲染权限面板
@@ -672,6 +691,10 @@
     document.addEventListener('DOMContentLoaded', async () => {
       await loadRoles();
       renderRoleList();
+      // 加载第一个角色的权限
+      if (currentRoleId) {
+        await loadRolePermissions(currentRoleId);
+      }
       renderPermissionPanel();
     });
   </script>
