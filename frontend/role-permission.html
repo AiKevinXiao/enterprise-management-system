@@ -379,7 +379,7 @@
       custom: []
     };
 
-    let currentRoleId = 'admin';
+    let currentRoleId = null;
     let editingRoleId = null;
 
     // 渲染角色列表
@@ -400,6 +400,7 @@
     }
 
     async function selectRole(id) {
+      console.log('selectRole called with id:', id, typeof id);
       currentRoleId = id;
       document.querySelectorAll('.role-item').forEach(i => i.classList.remove('active'));
       const item = document.querySelector(`.role-item[data-id="${id}"]`);
@@ -412,13 +413,18 @@
     
     // 加载角色权限
     async function loadRolePermissions(roleId) {
+      console.log('loadRolePermissions called with roleId:', roleId);
+      console.log('Token:', AuthManager.getToken());
       try {
         const res = await AuthManager.api('/roles/' + roleId);
+        console.log('API response status:', res.status);
         const data = await res.json();
+        console.log('API response data:', data);
         
         if (data.code === 200 && data.data) {
           // 保存权限到本地缓存
           const permIds = (data.data.permissions || []).map(p => p.id);
+          console.log('Permission IDs:', permIds);
           rolePermissions[roleId] = permIds;
         }
       } catch (e) {
@@ -690,6 +696,8 @@
     // 初始化
     document.addEventListener('DOMContentLoaded', async () => {
       await loadRoles();
+      console.log('Roles loaded:', roles);
+      console.log('currentRoleId after loadRoles:', currentRoleId, typeof currentRoleId);
       renderRoleList();
       // 加载第一个角色的权限
       if (currentRoleId) {
