@@ -731,10 +731,20 @@
 
     // 初始化
     document.addEventListener('DOMContentLoaded', async () => {
-      // 先加载所有权限列表
-      await loadAllPermissions();
+      // 先加载所有权限列表（失败不影响后续）
+      try {
+        await loadAllPermissions();
+      } catch(e) {
+        console.warn('加载权限列表失败，使用默认数据', e);
+      }
       // 加载角色列表
-      await loadRoles();
+      try {
+        await loadRoles();
+      } catch(e) {
+        console.error('加载角色列表失败', e);
+        showToast('加载角色列表失败', 'error');
+        return;
+      }
       console.log('Roles loaded:', roles);
       console.log('currentRoleId after loadRoles:', currentRoleId, typeof currentRoleId);
       renderRoleList();
