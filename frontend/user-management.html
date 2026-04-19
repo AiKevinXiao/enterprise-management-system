@@ -813,11 +813,12 @@
       });
 
       // 更新面包屑标题
-      const breadcrumbTitle = document.getElementById('breadcrumbTitle');
+      const breadcrumb = document.querySelector('.breadcrumb');
       if (view === 'deleted') {
-        breadcrumbTitle.textContent = '回收站';
+        // 回收站作为用户管理的下级页面
+        breadcrumb.innerHTML = '组织管理 / <span>用户管理</span> / <span id="breadcrumbTitle">回收站</span>';
       } else {
-        breadcrumbTitle.textContent = '用户管理';
+        breadcrumb.innerHTML = '组织管理 / <span id="breadcrumbTitle">用户管理</span>';
       }
 
       // 隐藏/显示新增按钮
