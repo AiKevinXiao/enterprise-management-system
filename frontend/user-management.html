@@ -6,7 +6,11 @@
   <title>用户管理 - 企业管理系统</title>
   <link rel="stylesheet" href="common.css" />
   <style>
-    .view-tabs { display:flex; gap:0; margin-bottom:16px; border-bottom:2px solid var(--border); }
+    /* 页面头部整合样式 */
+.page-header { display:flex; justify-content:space-between; align-items:center; padding-bottom:16px; border-bottom:1px solid var(--border); margin-bottom:16px; }
+.page-header .header-left { display:flex; flex-direction:column; gap:4px; }
+.header-right-area { display:flex; align-items:center; gap:20px; }
+.view-tabs { display:flex; gap:0; border-bottom:2px solid var(--border); }
     .view-tab { padding:10px 24px; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-2px; font-size:14px; color:var(--muted); cursor:pointer; transition:all .2s; }
     .view-tab:hover { color:var(--text); }
     .view-tab.active { color:var(--primary); border-bottom-color:var(--primary); font-weight:500; }
@@ -63,19 +67,19 @@
 
   <!-- 主内容区 -->
   <main class="main">
-    <!-- 页面头部 -->
+    <!-- 页面头部 + Tab 整合 -->
     <div class="page-header">
-      <div>
+      <div class="header-left">
         <div class="breadcrumb">组织管理 / <span>用户管理</span></div>
         <div class="page-title">用户管理</div>
       </div>
-      <button class="btn btn-primary" id="addUserBtn" onclick="openModal('add')">+ 新增用户</button>
-    </div>
-
-    <!-- Tab 切换 -->
-    <div class="view-tabs" id="viewTabs">
-      <button class="view-tab active" data-view="active" onclick="switchView('active')">用户列表</button>
-      <button class="view-tab" data-view="deleted" onclick="switchView('deleted')">&#128465; 回收站</button>
+      <div class="header-right-area">
+        <div class="view-tabs" id="viewTabs">
+          <button class="view-tab active" data-view="active" onclick="switchView('active')">用户列表</button>
+          <button class="view-tab" data-view="deleted" onclick="switchView('deleted')">&#128465; 回收站</button>
+        </div>
+        <button class="btn btn-primary" id="addUserBtn" onclick="openModal('add')">+ 新增用户</button>
+      </div>
     </div>
 
     <!-- 筛选区 -->

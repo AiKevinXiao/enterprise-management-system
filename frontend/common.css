@@ -205,7 +205,7 @@ body{
 /* 筛选区 */
 .filter-bar{
   background:var(--bg-elev);border:1px solid var(--border);
-  border-radius:var(--radius);padding:16px;margin-bottom:20px;
+  border-radius:var(--radius);padding:12px 16px;margin-bottom:12px;
 }
 .filter-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .filter-item{display:flex;flex-direction:column;gap:6px}
