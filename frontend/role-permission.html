@@ -279,17 +279,45 @@
     }
   </script>
   <script>
-    // 角色数据
-    let roles = [
-      { id: 'admin', name: '👑 超级管理员', code: 'admin', desc: '拥有系统全部权限，可进行任何操作', type: 'system', userCount: 3, created: '2026-01-01' },
-      { id: 'dept-manager', name: '🏢 部门经理', code: 'dept_manager', desc: '管理部门成员，查看部门数据，审批流程', type: 'system', userCount: 12, created: '2026-01-15' },
-      { id: 'hr', name: '👥 人事专员', code: 'hr', desc: '管理员工档案、考勤、招聘等人事工作', type: 'system', userCount: 5, created: '2026-02-01' },
-      { id: 'finance', name: '💰 财务专员', code: 'finance', desc: '管理财务数据、报销审批、薪资核算', type: 'system', userCount: 4, created: '2026-02-01' },
-      { id: 'project-manager', name: '📋 项目经理', code: 'project_manager', desc: '管理项目进度、分配任务、查看项目报表', type: 'system', userCount: 8, created: '2026-02-10' },
-      { id: 'normal', name: '👤 普通员工', code: 'normal', desc: '基础办公权限，查看个人数据和公告', type: 'system', userCount: 156, created: '2026-01-01' },
-      { id: 'guest', name: '👁️ 访客', code: 'guest', desc: '仅可查看公开信息和公司简介', type: 'system', userCount: 2, created: '2026-03-01' },
-      { id: 'custom', name: '⚙️ 自定义角色', code: 'custom', desc: '根据需求灵活配置权限组合', type: 'custom', userCount: 0, created: '2026-03-15' }
-    ];
+    // 角色数据（从API加载）
+    let roles = [];
+    let rolesLoading = false;
+
+    // 加载角色列表
+    async function loadRoles() {
+      if (rolesLoading) return;
+      rolesLoading = true;
+      
+      try {
+        const res = await AuthManager.api('/roles');
+        const data = await res.json();
+        
+        if (data.code === 200) {
+          // 映射API数据到UI格式
+          roles = data.data.map(role => ({
+            id: role.id,
+            name: role.type === 'system' ? '🔐 ' : '⚙️ ' + role.name,
+            code: role.code,
+            desc: role.description || '',
+            type: role.type,
+            userCount: role.user_count || 0,
+            created: role.created_at ? role.created_at.split(' ')[0] : ''
+          }));
+          
+          // 默认选中第一个角色
+          if (roles.length > 0 && !currentRoleId) {
+            currentRoleId = roles[0].id;
+          }
+          
+          renderRoleList();
+        }
+      } catch (e) {
+        console.error('加载角色列表失败:', e);
+        showToast('加载角色列表失败', 'error');
+      } finally {
+        rolesLoading = false;
+      }
+    }
 
     // 权限模块数据
     const permModules = [
@@ -569,7 +597,8 @@
     }
 
     // 初始化
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadRoles();
       renderRoleList();
       renderPermissionPanel();
     });
