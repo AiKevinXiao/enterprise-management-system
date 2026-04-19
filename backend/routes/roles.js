@@ -94,7 +94,7 @@ router.get('/:id', (req, res) => {
 // 更新角色
 router.put('/:id', (req, res) => {
   try {
-    const { name, description, type, data_scope, permission_ids } = req.body;
+    const { name, description, type, data_scope, permission_ids, permission_codes } = req.body;
     
     const id = parseInt(req.params.id);
     const role = get('SELECT * FROM roles WHERE id = ? AND (deleted_at IS NULL OR deleted_at = "")', [id]);
@@ -111,9 +111,20 @@ router.put('/:id', (req, res) => {
     );
     
     // 更新权限关联
-    if (permission_ids !== undefined) {
+    let finalPermIds = permission_ids;
+    
+    // 如果提供了 permission_codes，转换为 IDs
+    if (permission_codes !== undefined && !permission_ids) {
+      finalPermIds = [];
+      permission_codes.forEach(code => {
+        const perm = get('SELECT id FROM permissions WHERE code = ?', [code]);
+        if (perm) finalPermIds.push(perm.id);
+      });
+    }
+    
+    if (finalPermIds !== undefined) {
       run('DELETE FROM role_permissions WHERE role_id = ?', [id]);
-      permission_ids.forEach(pid => {
+      finalPermIds.forEach(pid => {
         run('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)', [id, pid]);
       });
     }

@@ -466,6 +466,29 @@
       }
     }
 
+    // 保存角色权限到后端
+    async function saveRolePermissions() {
+      if (!currentRoleId) return;
+      const perms = rolePermissions[currentRoleId] || [];
+      try {
+        const res = await AuthManager.api('/roles/' + currentRoleId, {
+          method: 'PUT',
+          body: JSON.stringify({ permission_codes: perms })
+        });
+        const data = await res.json();
+        if (data.code === 200) {
+          console.log('权限保存成功');
+          showToast('权限保存成功', 'success');
+        } else {
+          console.error('保存权限失败:', data.message);
+          showToast('保存权限失败: ' + data.message, 'error');
+        }
+      } catch (e) {
+        console.error('保存权限失败:', e);
+        showToast('保存权限失败', 'error');
+      }
+    }
+
     // 渲染权限面板
     function renderPermissionPanel() {
       const role = roles.find(r => r.id === currentRoleId);
@@ -539,6 +562,9 @@
       
       renderPermissionPanel();
       showToast(checkbox.checked ? '已全选该模块权限' : '已取消该模块权限');
+      
+      // 保存到后端
+      saveRolePermissions();
     }
 
     function updatePermission(permCode, checked) {
@@ -553,6 +579,9 @@
       // 更新百分比
       const totalPerms = permModules.reduce((sum, m) => sum + m.perms.length, 0);
       document.getElementById('permPercent').textContent = Math.round((perms.length / totalPerms) * 100) + '%';
+      
+      // 保存到后端
+      saveRolePermissions();
     }
 
     // 弹窗
