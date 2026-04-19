@@ -399,14 +399,14 @@
       `).join('');
     }
 
-    function selectRole(id) {
+    async function selectRole(id) {
       currentRoleId = id;
       document.querySelectorAll('.role-item').forEach(i => i.classList.remove('active'));
       const item = document.querySelector(`.role-item[data-id="${id}"]`);
       if (item) item.classList.add('active');
       
-      // 加载角色权限
-      loadRolePermissions(id);
+      // 加载角色权限后再渲染面板
+      await loadRolePermissions(id);
       renderPermissionPanel();
     }
     
