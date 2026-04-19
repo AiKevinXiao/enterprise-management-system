@@ -515,65 +515,123 @@
       ModalManager.open('roleModal');
     };
 
-    function saveRole() {
+    async function saveRole() {
       const name = document.getElementById('roleName').value.trim();
       if (!name) {
         showToast('请输入角色名称', 'error');
         return;
       }
 
-      if (editingRoleId) {
-        const role = roles.find(r => r.id === editingRoleId);
-        if (role) {
-          role.name = (role.name.match(/^[^\s]+/) || ['👤'])[0] + ' ' + name;
-          role.code = document.getElementById('roleCode').value;
-          role.desc = document.getElementById('roleDesc').value;
-          showToast('角色更新成功');
-        }
-      } else {
-        const newRole = {
-          id: 'role_' + Date.now(),
-          name: '👤 ' + name,
-          code: document.getElementById('roleCode').value || 'custom_' + Date.now(),
-          desc: document.getElementById('roleDesc').value || name,
-          type: 'custom',
-          userCount: 0,
-          created: new Date().toISOString().split('T')[0]
-        };
-        roles.push(newRole);
-        rolePermissions[newRole.id] = [];
-        currentRoleId = newRole.id;
-        showToast('角色创建成功');
-      }
+      const code = document.getElementById('roleCode').value.trim() || 'custom_' + Date.now();
+      const description = document.getElementById('roleDesc').value.trim();
 
-      closeModal('roleModal');
-      renderRoleList();
-      renderPermissionPanel();
+      try {
+        if (editingRoleId) {
+          // 编辑角色 - PUT /api/roles/:id
+          const res = await AuthManager.api('/roles/' + editingRoleId, {
+            method: 'PUT',
+            body: JSON.stringify({ name, code, description })
+          });
+          const data = await res.json();
+          
+          if (data.code === 200) {
+            // 更新本地数据
+            const role = roles.find(r => r.id === editingRoleId);
+            if (role) {
+              role.name = (role.name.match(/^[^\s]+/) || ['⚙️'])[0] + ' ' + name;
+              role.code = code;
+              role.desc = description;
+            }
+            showToast('角色更新成功');
+          } else {
+            showToast(data.message || '更新失败', 'error');
+            return;
+          }
+        } else {
+          // 新增角色 - POST /api/roles
+          const res = await AuthManager.api('/roles', {
+            method: 'POST',
+            body: JSON.stringify({ name, code, description, data_scope: 'all' })
+          });
+          const data = await res.json();
+          
+          if (data.code === 200 && data.data) {
+            // 添加到本地列表
+            const newRole = {
+              id: data.data.id,
+              name: '⚙️ ' + name,
+              code: code,
+              desc: description,
+              type: 'custom',
+              userCount: 0,
+              created: new Date().toISOString().split('T')[0]
+            };
+            roles.push(newRole);
+            rolePermissions[newRole.id] = [];
+            currentRoleId = newRole.id;
+            showToast('角色创建成功');
+          } else {
+            showToast(data.message || '创建失败', 'error');
+            return;
+          }
+        }
+
+        closeModal('roleModal');
+        renderRoleList();
+        renderPermissionPanel();
+      } catch (e) {
+        console.error('保存角色失败:', e);
+        showToast('保存失败: ' + e.message, 'error');
+      }
     }
 
-    function copyRole() {
+    async function copyRole() {
       const role = roles.find(r => r.id === currentRoleId);
       if (!role) return;
 
-      const newRole = {
-        id: 'role_' + Date.now(),
-        name: role.name + ' (复制)',
-        code: role.code + '_copy',
-        desc: role.desc,
-        type: 'custom',
-        userCount: 0,
-        created: new Date().toISOString().split('T')[0]
-      };
-      roles.push(newRole);
-      rolePermissions[newRole.id] = [...(rolePermissions[currentRoleId] || [])];
-      currentRoleId = newRole.id;
-      
-      renderRoleList();
-      renderPermissionPanel();
-      showToast('角色已复制');
+      // 提取纯角色名称（去掉 emoji）
+      const cleanName = role.name.replace(/^[^\s]+\s*/, '');
+
+      try {
+        // 调用新增 API 创建副本
+        const res = await AuthManager.api('/roles', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: cleanName + ' (复制)',
+            code: role.code + '_copy',
+            description: role.desc,
+            data_scope: 'all'
+          })
+        });
+        const data = await res.json();
+
+        if (data.code === 200 && data.data) {
+          const newRole = {
+            id: data.data.id,
+            name: '⚙️ ' + cleanName + ' (复制)',
+            code: role.code + '_copy',
+            desc: role.desc,
+            type: 'custom',
+            userCount: 0,
+            created: new Date().toISOString().split('T')[0]
+          };
+          roles.push(newRole);
+          rolePermissions[newRole.id] = [...(rolePermissions[currentRoleId] || [])];
+          currentRoleId = newRole.id;
+          
+          renderRoleList();
+          renderPermissionPanel();
+          showToast('角色已复制');
+        } else {
+          showToast(data.message || '复制失败', 'error');
+        }
+      } catch (e) {
+        console.error('复制角色失败:', e);
+        showToast('复制失败: ' + e.message, 'error');
+      }
     }
 
-    function deleteRole() {
+    async function deleteRole() {
       const role = roles.find(r => r.id === currentRoleId);
       if (!role) return;
 
@@ -586,13 +644,27 @@
         return;
       }
 
-      confirmAction(`删除角色「${role.name}」`, () => {
-        roles = roles.filter(r => r.id !== currentRoleId);
-        delete rolePermissions[currentRoleId];
-        currentRoleId = roles[0]?.id || 'admin';
-        renderRoleList();
-        renderPermissionPanel();
-        showToast('角色已删除');
+      confirmAction(`删除角色「${role.name}」`, async () => {
+        try {
+          const res = await AuthManager.api('/roles/' + currentRoleId, {
+            method: 'DELETE'
+          });
+          const data = await res.json();
+
+          if (data.code === 200) {
+            roles = roles.filter(r => r.id !== currentRoleId);
+            delete rolePermissions[currentRoleId];
+            currentRoleId = roles[0]?.id || null;
+            renderRoleList();
+            renderPermissionPanel();
+            showToast('角色已删除');
+          } else {
+            showToast(data.message || '删除失败', 'error');
+          }
+        } catch (e) {
+          console.error('删除角色失败:', e);
+          showToast('删除失败: ' + e.message, 'error');
+        }
       });
     }
 
