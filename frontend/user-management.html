@@ -1043,8 +1043,6 @@
       const actionText = action === 'enable' ? '启用' : action === 'disable' ? '禁用' : '删除';
       if (!confirm(`确定要批量${actionText}选中的 ${checkboxes.length} 个用户吗？`)) return;
 
-      const ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
-
       try {
         const res = await AuthManager.api('/users/batch', {
           method: 'POST',
@@ -1065,9 +1063,8 @@
     // 初始化
     document.addEventListener('DOMContentLoaded', async () => {
       await Promise.all([loadDepartments(), loadRoles()]);
-      // 页面加载时不自动查询，等待用户点击搜索按钮
-      renderTable([]);
-      document.getElementById('totalCount').textContent = '0';
+      // 页面加载时自动获取用户列表
+      loadUsers();
     });
   </script>
 </body>
