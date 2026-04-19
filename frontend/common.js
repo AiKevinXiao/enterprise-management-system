@@ -241,7 +241,7 @@ const ThemeManager = {
 /**
  * API 配置
  */
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = 'https://four-hey-michelle-yea.trycloudflare.com/api';
 window.API_BASE = API_BASE;
 
 /**
