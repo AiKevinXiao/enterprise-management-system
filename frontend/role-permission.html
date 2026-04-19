@@ -434,13 +434,14 @@
 
     async function selectRole(id) {
       console.log('selectRole called with id:', id, typeof id);
-      currentRoleId = id;
+      // 确保 id 转换为数字类型以保持一致
+      currentRoleId = Number(id);
       document.querySelectorAll('.role-item').forEach(i => i.classList.remove('active'));
       const item = document.querySelector(`.role-item[data-id="${id}"]`);
       if (item) item.classList.add('active');
       
       // 加载角色权限后再渲染面板
-      await loadRolePermissions(id);
+      await loadRolePermissions(currentRoleId);
       renderPermissionPanel();
     }
     
