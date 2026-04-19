@@ -8,13 +8,12 @@
   <style>
     /* 页面头部整合样式 */
 .page-header { display:flex; justify-content:space-between; align-items:center; padding-bottom:16px; border-bottom:1px solid var(--border); margin-bottom:16px; }
-.page-header .header-left { display:flex; flex-direction:column; gap:4px; }
+.page-header .header-left { display:flex; flex-direction:column; gap:8px; }
 .header-right-area { display:flex; align-items:center; gap:20px; }
 .view-tabs { display:flex; gap:0; border-bottom:2px solid var(--border); }
-    .view-tab { padding:10px 24px; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-2px; font-size:14px; color:var(--muted); cursor:pointer; transition:all .2s; }
-    .view-tab:hover { color:var(--text); }
-    .view-tab.active { color:var(--primary); border-bottom-color:var(--primary); font-weight:500; }
-    .view-tab.muted { opacity:0.6; }
+    .view-tab { padding:8px 16px; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-2px; color:var(--muted); cursor:pointer; transition:all .2s; }
+    .view-tab.active { color:var(--text); border-bottom-color:var(--primary); font-size:18px; font-weight:600; }
+    .view-tab.muted { font-size:13px; opacity:0.5; border-bottom-color:transparent; }
     .view-tab.muted:hover { opacity:1; color:var(--text); }
     .view-tab .tab-badge { display:inline-block; background:var(--danger,#EF4444); color:#fff; font-size:11px; padding:1px 6px; border-radius:10px; margin-left:6px; vertical-align:middle; }
   </style>
@@ -72,16 +71,13 @@
     <!-- 页面头部 + Tab 整合 -->
     <div class="page-header">
       <div class="header-left">
-        <div class="breadcrumb">组织管理 / <span>用户管理</span></div>
-        <div class="page-title">用户管理</div>
-      </div>
-      <div class="header-right-area">
+        <div class="breadcrumb">组织管理 / <span id="breadcrumbTitle">用户管理</span></div>
         <div class="view-tabs" id="viewTabs">
           <button class="view-tab active" data-view="active" onclick="switchView('active')">用户管理</button>
-          <button class="view-tab muted" data-view="deleted" onclick="switchView('deleted')">&#128465; 回收站</button>
+          <button class="view-tab muted" data-view="deleted" onclick="switchView('deleted')">回收站</button>
         </div>
-        <button class="btn btn-primary" id="addUserBtn" onclick="openModal('add')">+ 新增用户</button>
       </div>
+      <button class="btn btn-primary" id="addUserBtn" onclick="openModal('add')">+ 新增用户</button>
     </div>
 
     <!-- 筛选区 -->
@@ -816,6 +812,14 @@
         t.classList.toggle('active', isActive);
         t.classList.toggle('muted', !isActive);
       });
+
+      // 更新面包屑标题
+      const breadcrumbTitle = document.getElementById('breadcrumbTitle');
+      if (view === 'deleted') {
+        breadcrumbTitle.textContent = '回收站';
+      } else {
+        breadcrumbTitle.textContent = '用户管理';
+      }
 
       // 隐藏/显示新增按钮
       document.getElementById('addUserBtn').style.display = view === 'deleted' ? 'none' : '';
