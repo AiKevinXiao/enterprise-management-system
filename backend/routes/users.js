@@ -17,8 +17,13 @@ function validatePassword(password) {
 }
 
 router.get('/', (req, res) => {
-  const { keyword = '', dept_id, role_id, status, page = 1, pageSize = 20 } = req.query;
+  const { keyword = '', dept_id, role_id, status, deleted = '0', page = 1, pageSize = 20 } = req.query;
   const offset = (page - 1) * pageSize;
+
+  // deleted=1 查已删除用户，deleted=0 查正常用户
+  const deletedFilter = deleted === '1'
+    ? 'AND u.deleted_at IS NOT NULL'
+    : 'AND u.deleted_at IS NULL';
 
   let where = '1=1';
   const params = [];
@@ -31,14 +36,14 @@ router.get('/', (req, res) => {
   if (role_id) { where += ' AND u.role_id = ?'; params.push(role_id); }
   if (status) { where += ' AND u.status = ?'; params.push(status); }
 
-  const totalResult = get(`SELECT COUNT(*) as count FROM users u WHERE ${where} AND u.deleted_at IS NULL`, params);
+  const totalResult = get(`SELECT COUNT(*) as count FROM users u WHERE ${where} ${deletedFilter}`, params);
   const users = all(
     `SELECT u.*, d.name as dept_name, r.name as role_name
      FROM users u
      LEFT JOIN departments d ON u.dept_id = d.id
      LEFT JOIN roles r ON u.role_id = r.id
-     WHERE ${where} AND u.deleted_at IS NULL
-     ORDER BY u.created_at DESC
+     WHERE ${where} ${deletedFilter}
+     ORDER BY u.deleted_at DESC, u.created_at DESC
      LIMIT ? OFFSET ?`,
     [...params, parseInt(pageSize), parseInt(offset)]
   );
