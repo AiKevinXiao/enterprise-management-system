@@ -229,7 +229,7 @@ function seedData() {
     ['用户', 'user-edit', '编辑用户', '修改用户信息'],
     ['用户', 'user-delete', '删除用户', '删除系统用户'],
     ['用户', 'user-reset-pwd', '重置密码', '重置用户密码'],
-    ['用户', 'user-batch', '批量操作', '批量启用/禁用/删除用户'],
+    ['用户', 'user-restore', '恢复用户', '查看回收站并恢复已删除用户'],
     ['部门架构', 'dept-view', '查看部门架构', '查看部门树形结构'],
     ['部门架构', 'dept-create', '新增部门', '创建新部门'],
     ['部门架构', 'dept-edit', '编辑部门', '修改部门信息'],
@@ -243,11 +243,26 @@ function seedData() {
     'INSERT INTO permissions (module, code, name, description) VALUES (?, ?, ?, ?)', p
   ));
 
-  // 管理员拥有所有权限
-  const allPerms = all('SELECT id FROM permissions');
-  allPerms.forEach(p => db.run(
-    'INSERT INTO role_permissions (role_id, permission_id) VALUES (1, ?)', [p.id]
-  ));
+  // 按角色分配权限
+  // 超级管理员(1): 全部权限
+  // 部门经理(2): view-dashboard, user-view/create/edit, dept-view/create/edit, role-view
+  // 普通员工(3): view-dashboard, user-view, dept-view
+  const permCodes = all('SELECT id, code FROM permissions');
+  const permMap = {};
+  permCodes.forEach(p => { permMap[p.code] = p.id; });
+
+  const rolePermMap = {
+    1: permCodes.map(p => p.id),  // admin: 全部
+    2: ['view-dashboard', 'user-view', 'user-create', 'user-edit',
+        'dept-view', 'dept-create', 'dept-edit', 'role-view'].map(c => permMap[c]).filter(Boolean),
+    3: ['view-dashboard', 'user-view', 'dept-view'].map(c => permMap[c]).filter(Boolean),
+  };
+
+  Object.entries(rolePermMap).forEach(([roleId, permIds]) => {
+    permIds.forEach(pid => {
+      db.run('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)', [roleId, pid]);
+    });
+  });
 
   console.log('Seed data initialized successfully.');
 }
