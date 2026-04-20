@@ -263,6 +263,42 @@ const AuthManager = {
     const user = localStorage.getItem('ems_user');
     return user ? JSON.parse(user) : null;
   },
+
+  // 获取当前用户权限列表
+  getPermissions() {
+    const user = this.getUser();
+    return user && Array.isArray(user.permissions) ? user.permissions : [];
+  },
+
+  // 获取数据范围
+  getDataScope() {
+    const user = this.getUser();
+    return user ? (user.role?.data_scope || 'self') : 'self';
+  },
+
+  // 检查是否有指定权限码
+  hasPermission(code) {
+    return this.getPermissions().includes(code);
+  },
+
+  // 权限断言：若无权限则弹 toast 并返回 false（用于 API 调用前的快速校验）
+  requirePermission(code) {
+    if (!this.hasPermission(code)) {
+      showToast('无此操作权限', 'error');
+      return false;
+    }
+    return true;
+  },
+
+  // 初始化页面权限控制：隐藏无权限的按钮/操作元素
+  initPermissionControl() {
+    document.querySelectorAll('[data-permission]').forEach(el => {
+      const code = el.getAttribute('data-permission');
+      if (!this.hasPermission(code)) {
+        el.style.display = 'none';
+      }
+    });
+  },
   
   // 退出登录
   async logout() {
@@ -370,6 +406,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // 初始化表格批量操作
   TableBatch.init();
+
+  // 初始化权限控制（隐藏无权限的按钮）
+  AuthManager.initPermissionControl();
   
   // 搜索框防抖
   const searchBox = document.querySelector('.search-box');
@@ -381,7 +420,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 导出全局函数（供内联 onclick 使用）
 window.openModal = (type) => {
   if (type === 'add' || type === 'edit') {
     const title = document.getElementById('modalTitle');
@@ -397,3 +435,7 @@ window.confirmAction = confirmAction;
 window.showToast = showToast;
 window.toggleTheme = () => ThemeManager.toggle();
 window.logout = () => AuthManager.logout();
+window.hasPermission = (code) => AuthManager.hasPermission(code);
+window.requirePermission = (code) => AuthManager.requirePermission(code);
+window.getPermissions = () => AuthManager.getPermissions();
+window.getDataScope = () => AuthManager.getDataScope();
