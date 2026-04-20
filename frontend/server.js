@@ -1,14 +1,43 @@
-const http = require('http');
-const fs   = require('fs');
-const path = require('path');
+const http  = require('http');
+const https = require('https');
+const fs    = require('fs');
+const path  = require('path');
 
 // Resolve frontend dir relative to this file's location
 // server.js lives at <project>/frontend/server.js
 const frontendDir = path.resolve(__dirname);
+const BACKEND_URL = 'http://localhost:3000';
 
 http.createServer((req, res) => {
   let url = req.url.split('?')[0];
   if (url === '/') url = '/login.html';
+
+  // Proxy API requests to backend
+  if (url.startsWith('/api/')) {
+    const options = {
+      hostname: 'localhost',
+      port: 3000,
+      path: req.url,
+      method: req.method,
+      headers: {
+        ...req.headers,
+        'Content-Type': 'application/json'
+      }
+    };
+    const proxyReq = http.request(options, (proxyRes) => {
+      res.writeHead(proxyRes.statusCode, {
+        ...proxyRes.headers,
+        'Access-Control-Allow-Origin': '*'
+      });
+      proxyRes.pipe(res);
+    });
+    req.pipe(proxyReq);
+    proxyReq.on('error', (e) => {
+      res.writeHead(502);
+      res.end('Backend unavailable');
+    });
+    return;
+  }
 
   const filePath = path.join(frontendDir, url);
 
