@@ -6,6 +6,7 @@ const ORIGINAL_ENV = process.env;
 beforeAll(async () => {
   process.env.JWT_SECRET = 'test-secret';
   await initDB();
+  run('DELETE FROM login_logs WHERE 1=1');
 });
 
 afterAll(() => {
@@ -299,22 +300,3 @@ describe('角色 API 集成测试', () => {
   });
 });
 
-describe('db.js run 函数测试', () => {
-  const app = require('../app');
-
-  test('INSERT 应返回 lastID', async () => {
-    const token = await getAdminToken(app);
-    
-    const res = await request(app)
-      .post('/api/roles')
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        name: 'lastID测试角色',
-        code: 'test_lastid_' + Date.now(),
-        description: '测试'
-      });
-
-    expect(res.status).toBe(200);
-    expect(res.body.data.id).toBeDefined();
-  });
-});

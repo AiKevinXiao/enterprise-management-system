@@ -6,6 +6,9 @@ const ORIGINAL_ENV = process.env;
 beforeAll(async () => {
   process.env.JWT_SECRET = 'test-secret';
   await initDB();
+  // 重置登录失败计数，避免历史测试锁定账号
+  const { run } = require('../db');
+  run('DELETE FROM login_logs WHERE 1=1');
 });
 
 afterAll(() => {
