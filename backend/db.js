@@ -36,6 +36,16 @@ async function initDB() {
   seedData();
   saveDB();
 
+  // 进程退出时自动保存数据库，防止异常退出导致数据丢失
+  const gracefulShutdown = (signal) => {
+    console.log(`\n${signal} received, saving database...`);
+    saveDB();
+    process.exit(0);
+  };
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('exit', () => saveDB());
+
   return Promise.resolve();
 }
 
