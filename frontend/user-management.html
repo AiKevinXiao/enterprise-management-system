@@ -634,7 +634,7 @@
         const data = await res.json();
 
         totalCount = data.total || 0;
-        renderTable(data.list || []);
+        renderTable(data.data || []);
       } catch (e) {
         console.error('加载用户失败:', e);
         showToast('加载用户列表失败', 'error');
