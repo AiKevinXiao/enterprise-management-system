@@ -26,6 +26,10 @@ api.interceptors.response.use(
     if (res.success === false) {
       return { success: false, message: res.message || '请求失败', data: null }
     }
+    // 保留分页信息（data/total/page/pageSize）
+    if (res.data !== undefined && res.total !== undefined) {
+      return { success: true, data: res.data, total: res.total, page: res.page, pageSize: res.pageSize, message: res.message }
+    }
     return { success: true, data: res.data || res, message: res.message }
   },
   error => {
