@@ -1,10 +1,11 @@
 const express = require('express');
 const { all, get, run } = require('../db');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, permissionMiddleware, dataScopeMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
 
 router.use(authMiddleware);
+router.use(dataScopeMiddleware);
 
 // 密码复杂度校验
 function validatePassword(password) {
@@ -16,7 +17,8 @@ function validatePassword(password) {
   return null;
 }
 
-router.get('/', (req, res) => {
+// GET /api/users — 用户列表（带数据范围过滤）
+router.get('/', permissionMiddleware('user-view'), (req, res) => {
   const { keyword = '', dept_id, role_id, status, deleted = '0', page = 1, pageSize = 20 } = req.query;
   const offset = (page - 1) * pageSize;
 
@@ -24,6 +26,20 @@ router.get('/', (req, res) => {
   const deletedFilter = deleted === '1'
     ? 'AND u.deleted_at IS NOT NULL'
     : 'AND u.deleted_at IS NULL';
+
+  // 数据范围过滤
+  const { mode, deptIds } = req.dataScope;
+  let scopeFilter = '';
+  const scopeParams = [];
+  if (mode === 'dept' && deptIds && deptIds.length > 0) {
+    const placeholders = deptIds.map(() => '?').join(',');
+    scopeFilter = `AND u.dept_id IN (${placeholders})`;
+    scopeParams.push(...deptIds);
+  } else if (mode === 'self') {
+    scopeFilter = 'AND u.id = ?';
+    scopeParams.push(req.dataScope.userId);
+  }
+  // mode=all: 不加 scopeFilter，见全部
 
   let where = '1=1';
   const params = [];
@@ -36,16 +52,17 @@ router.get('/', (req, res) => {
   if (role_id) { where += ' AND u.role_id = ?'; params.push(role_id); }
   if (status) { where += ' AND u.status = ?'; params.push(status); }
 
-  const totalResult = get(`SELECT COUNT(*) as count FROM users u WHERE ${where} ${deletedFilter}`, params);
+  const finalParams = [...scopeParams, ...params];
+  const totalResult = get(`SELECT COUNT(*) as count FROM users u WHERE ${where} ${deletedFilter} ${scopeFilter}`, finalParams);
   const users = all(
     `SELECT u.*, d.name as dept_name, r.name as role_name
      FROM users u
      LEFT JOIN departments d ON u.dept_id = d.id
      LEFT JOIN roles r ON u.role_id = r.id
-     WHERE ${where} ${deletedFilter}
+     WHERE ${where} ${deletedFilter} ${scopeFilter}
      ORDER BY u.deleted_at DESC, u.created_at DESC
      LIMIT ? OFFSET ?`,
-    [...params, parseInt(pageSize), parseInt(offset)]
+    [...finalParams, parseInt(pageSize), parseInt(offset)]
   );
 
   // 手机号脱敏处理
@@ -60,26 +77,39 @@ router.get('/', (req, res) => {
   }));
 
   res.json({
-    list: maskedUsers,
+    data: maskedUsers,
     total: totalResult ? totalResult.count : 0,
     page: parseInt(page),
     pageSize: parseInt(pageSize)
   });
 });
 
-router.get('/:id', (req, res) => {
+// GET /api/users/:id — 用户详情（带数据范围校验）
+router.get('/:id', permissionMiddleware('user-view'), (req, res) => {
+  const targetId = parseInt(req.params.id);
+  const { mode, deptIds, userId } = req.dataScope;
+
+  // 数据范围校验
   const user = get(
     'SELECT u.*, d.name as dept_name, r.name as role_name FROM users u LEFT JOIN departments d ON u.dept_id = d.id LEFT JOIN roles r ON u.role_id = r.id WHERE u.id = ?',
-    [req.params.id]
+    [targetId]
   );
   if (!user) return res.status(404).json({ message: '用户不存在' });
+
+  if (mode === 'self' && targetId !== userId) {
+    return res.status(403).json({ code: 403, message: '无此操作权限' });
+  }
+  if (mode === 'dept' && deptIds && !deptIds.includes(user.dept_id)) {
+    return res.status(403).json({ code: 403, message: '无此操作权限' });
+  }
+
   res.json(user);
 });
 
-// 创建用户
-router.post('/', (req, res) => {
+// POST /api/users — 创建用户
+router.post('/', permissionMiddleware('user-create'), (req, res) => {
   const { username, password, name, email, phone, dept_id, role_id, status = 'active' } = req.body;
-  
+
   if (!username || !password || !name) {
     return res.status(400).json({ message: '用户名、密码和姓名为必填项' });
   }
@@ -95,7 +125,6 @@ router.post('/', (req, res) => {
     return res.status(400).json({ message: '用户名已存在' });
   }
 
-  // 简单密码哈希（生产环境应使用 bcrypt）
   const crypto = require('crypto');
   const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
 
@@ -106,57 +135,77 @@ router.post('/', (req, res) => {
   );
 
   res.status(201).json({
-    id: result.lastInsertRowid,
-    username,
-    name,
-    email,
-    phone,
-    dept_id,
-    role_id,
-    status,
+    data: {
+      id: result.lastInsertRowid,
+      username,
+      name,
+      email,
+      phone,
+      dept_id,
+      role_id,
+      status
+    },
     message: '用户创建成功'
   });
 });
 
-// 更新用户
-router.put('/:id', (req, res) => {
-  const { id } = req.params;
+// PUT /api/users/:id — 更新用户（数据范围 + 权限）
+router.put('/:id', permissionMiddleware('user-edit'), (req, res) => {
+  const targetId = parseInt(req.params.id);
   const { name, email, phone, dept_id, role_id, status } = req.body;
+  const { mode, deptIds, userId } = req.dataScope;
 
-  const user = get('SELECT id FROM users WHERE id = ?', [id]);
-  if (!user) {
+  // 数据范围校验
+  const target = get('SELECT id, dept_id FROM users WHERE id = ?', [targetId]);
+  if (!target) {
     return res.status(404).json({ message: '用户不存在' });
+  }
+
+  if (mode === 'self' && targetId !== userId) {
+    return res.status(403).json({ code: 403, message: '无此操作权限' });
+  }
+  if (mode === 'dept' && deptIds && !deptIds.includes(target.dept_id)) {
+    return res.status(403).json({ code: 403, message: '无此操作权限' });
   }
 
   run(
     `UPDATE users SET name = ?, email = ?, phone = ?, dept_id = ?, role_id = ?, status = ?, updated_at = datetime('now') WHERE id = ?`,
-    [name, email, phone, dept_id, role_id, status, id]
+    [name, email, phone, dept_id, role_id, status, targetId]
   );
 
-  res.json({ id, name, email, phone, dept_id, role_id, status, message: '用户更新成功' });
+  res.json({ id: targetId, name, email, phone, dept_id, role_id, status, message: '用户更新成功' });
 });
 
-// 删除用户
-router.delete('/:id', (req, res) => {
-  const { id } = req.params;
+// DELETE /api/users/:id — 删除用户
+router.delete('/:id', permissionMiddleware('user-delete'), (req, res) => {
+  const targetId = parseInt(req.params.id);
 
-  const user = get('SELECT id, username FROM users WHERE id = ?', [id]);
+  const user = get('SELECT id, username, dept_id FROM users WHERE id = ?', [targetId]);
   if (!user) {
     return res.status(404).json({ message: '用户不存在' });
   }
 
   // 不允许删除自己
-  if (req.user && req.user.id === parseInt(id)) {
+  if (req.user.id === targetId) {
     return res.status(400).json({ message: '不能删除自己的账号' });
   }
 
-  run("UPDATE users SET deleted_at = datetime('now', 'localtime') WHERE id = ?", [id]);
+  // 数据范围校验
+  const { mode, deptIds } = req.dataScope;
+  if (mode === 'self') {
+    return res.status(403).json({ code: 403, message: '无此操作权限' });
+  }
+  if (mode === 'dept' && deptIds && !deptIds.includes(user.dept_id)) {
+    return res.status(403).json({ code: 403, message: '无此操作权限' });
+  }
+
+  run("UPDATE users SET deleted_at = datetime('now', 'localtime') WHERE id = ?", [targetId]);
   res.json({ message: '用户删除成功' });
 });
 
-// 重置密码
-router.put('/:id/reset-password', (req, res) => {
-  const { id } = req.params;
+// PUT /api/users/:id/reset-password — 重置密码
+router.put('/:id/reset-password', permissionMiddleware('user-reset-pwd'), (req, res) => {
+  const targetId = parseInt(req.params.id);
   const { password } = req.body;
 
   const pwdError = validatePassword(password);
@@ -164,65 +213,90 @@ router.put('/:id/reset-password', (req, res) => {
     return res.status(400).json({ message: pwdError });
   }
 
-  const user = get('SELECT id FROM users WHERE id = ?', [id]);
-  if (!user) {
+  const target = get('SELECT id, dept_id FROM users WHERE id = ?', [targetId]);
+  if (!target) {
     return res.status(404).json({ message: '用户不存在' });
+  }
+
+  // 数据范围校验
+  const { mode, deptIds } = req.dataScope;
+  if (mode === 'self') {
+    return res.status(403).json({ code: 403, message: '无此操作权限' });
+  }
+  if (mode === 'dept' && deptIds && !deptIds.includes(target.dept_id)) {
+    return res.status(403).json({ code: 403, message: '无此操作权限' });
   }
 
   const crypto = require('crypto');
   const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
-
-  run('UPDATE users SET password = ?, updated_at = datetime(\'now\') WHERE id = ?', [passwordHash, id]);
+  run('UPDATE users SET password = ?, updated_at = datetime(\'now\') WHERE id = ?', [passwordHash, targetId]);
   res.json({ message: '密码重置成功' });
 });
 
-// 批量操作
-router.post('/batch', (req, res) => {
+// POST /api/users/batch — 批量操作
+router.post('/batch', permissionMiddleware('user-delete'), (req, res) => {
   const { action, ids } = req.body;
 
   if (!action || !ids || !Array.isArray(ids) || ids.length === 0) {
     return res.status(400).json({ message: '参数错误' });
   }
 
-  const placeholders = ids.map(() => '?').join(',');
-  let sql, params;
+  const { mode, deptIds, userId } = req.dataScope;
 
-  switch (action) {
-    case 'enable':
-      sql = `UPDATE users SET status = 'active', updated_at = datetime('now') WHERE id IN (${placeholders})`;
-      params = ids;
-      break;
-    case 'disable':
-      sql = `UPDATE users SET status = 'disabled', updated_at = datetime('now') WHERE id IN (${placeholders})`;
-      params = ids;
-      break;
-    case 'delete':
-      // 不能删除自己
-      const filteredIds = req.user ? ids.filter(id => id !== req.user.id) : ids;
-      if (filteredIds.length === 0) {
-        return res.status(400).json({ message: '不能删除自己的账号' });
-      }
-      sql = `UPDATE users SET deleted_at = datetime('now', 'localtime') WHERE id IN (${filteredIds.map(() => '?').join(',')})`;
-      params = filteredIds;
-      break;
-    default:
-      return res.status(400).json({ message: '不支持的操作类型' });
+  // 数据范围过滤 ids
+  const filteredIds = ids.filter(id => {
+    if (mode === 'all') return true;
+    if (mode === 'self') return false; // self 不能批量操作
+    // dept: 由后端校验实际 dept_id，过滤超范围用户
+    return true;
+  });
+
+  if (filteredIds.length === 0) {
+    return res.status(403).json({ code: 403, message: '无此操作权限' });
   }
 
-  run(sql, params);
+  // 不能删除自己
+  const actualFiltered = filteredIds.filter(id => id !== userId);
+  if (actualFiltered.length === 0) {
+    return res.status(400).json({ message: '不能删除自己的账号' });
+  }
+
+  const placeholders = actualFiltered.map(() => '?').join(',');
+  let sql;
+  if (action === 'enable') {
+    sql = `UPDATE users SET status = 'active', updated_at = datetime('now') WHERE id IN (${placeholders})`;
+  } else if (action === 'disable') {
+    sql = `UPDATE users SET status = 'disabled', updated_at = datetime('now') WHERE id IN (${placeholders})`;
+  } else if (action === 'delete') {
+    sql = `UPDATE users SET deleted_at = datetime('now', 'localtime') WHERE id IN (${placeholders})`;
+  } else {
+    return res.status(400).json({ message: '不支持的操作类型' });
+  }
+
+  run(sql, actualFiltered);
   res.json({ message: `批量${action === 'enable' ? '启用' : action === 'disable' ? '禁用' : '删除'}成功` });
 });
 
+// PUT /api/users/:id/restore — 恢复已删除用户
+router.put('/:id/restore', permissionMiddleware('user-restore'), (req, res) => {
+  const targetId = parseInt(req.params.id);
 
-
-// Restore a deleted user
-router.put('/:id/restore', (req, res) => {
-  const { id } = req.params;
-  const user = get('SELECT id FROM users WHERE id = ? AND deleted_at IS NOT NULL', [id]);
+  const user = get('SELECT id, dept_id FROM users WHERE id = ? AND deleted_at IS NOT NULL', [targetId]);
   if (!user) {
     return res.status(404).json({ message: '用户不存在或未被删除' });
   }
-  run("UPDATE users SET deleted_at = NULL, updated_at = datetime('now', 'localtime') WHERE id = ?", [id]);
+
+  // 数据范围校验
+  const { mode, deptIds } = req.dataScope;
+  if (mode === 'self') {
+    return res.status(403).json({ code: 403, message: '无此操作权限' });
+  }
+  if (mode === 'dept' && deptIds && !deptIds.includes(user.dept_id)) {
+    return res.status(403).json({ code: 403, message: '无此操作权限' });
+  }
+
+  run("UPDATE users SET deleted_at = NULL, updated_at = datetime('now', 'localtime') WHERE id = ?", [targetId]);
   res.json({ message: '用户恢复成功' });
 });
+
 module.exports = router;

@@ -61,14 +61,28 @@ router.post('/login', (req, res) => {
 
   logLogin(username, req.ip, true, '登录成功');
 
-  const token = jwt.sign(
-    { id: user.id, username: user.username, role_id: user.role_id },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRES }
+  // 查询用户权限码列表
+  const permissions = all(
+    'SELECT p.code FROM permissions p JOIN role_permissions rp ON p.id = rp.permission_id WHERE rp.role_id = ?',
+    [user.role_id]
   );
+  const permCodes = permissions.map(p => p.code);
 
   const role = get('SELECT * FROM roles WHERE id = ?', [user.role_id]);
   const dept = get('SELECT * FROM departments WHERE id = ?', [user.dept_id]);
+
+  const token = jwt.sign(
+    {
+      id: user.id,
+      username: user.username,
+      role_id: user.role_id,
+      dept_id: user.dept_id,
+      data_scope: role ? role.data_scope : 'self',
+      permissions: permCodes
+    },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES }
+  );
 
   res.json({
     message: '登录成功',
@@ -82,6 +96,7 @@ router.post('/login', (req, res) => {
       status: user.status,
       role: role ? { id: role.id, name: role.name, code: role.code, data_scope: role.data_scope } : null,
       dept: dept ? { id: dept.id, name: dept.name } : null,
+      permissions: permCodes,
       last_login: user.last_login
     }
   });

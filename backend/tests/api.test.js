@@ -28,7 +28,7 @@ describe('受保护资源', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(200);
-    expect(res.body.list).toBeDefined();
+    expect(res.body.data).toBeDefined();
     expect(res.body.total).toBeGreaterThan(0);
   });
 

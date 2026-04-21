@@ -444,3 +444,14 @@ tr:hover{background:var(--bg-hover)}
 .tree-node .expand-icon.leaf{visibility:hidden}
 .tree-children{margin-left:12px;border-left:1px solid var(--border);padding-left:4px;min-width:max-content}
 
+/* 无权限元素弱化显示 */
+.no-permission{
+  opacity:.4;
+  cursor:not-allowed !important;
+  pointer-events:none;
+  color:var(--muted) !important;
+}
+.no-permission:hover{
+  background:transparent !important;
+  color:var(--muted) !important;
+}

@@ -36,6 +36,16 @@ async function initDB() {
   seedData();
   saveDB();
 
+  // 进程退出时自动保存数据库，防止异常退出导致数据丢失
+  const gracefulShutdown = (signal) => {
+    console.log(`\n${signal} received, saving database...`);
+    saveDB();
+    process.exit(0);
+  };
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('exit', () => saveDB());
+
   return Promise.resolve();
 }
 
@@ -48,7 +58,16 @@ function saveDB() {
 
 function run(sql, params = []) {
   db.run(sql, params);
+  const changes = db.getRowsModified();
+  let lastID = null;
+  if (changes > 0) {
+    // For INSERT, get last insert rowid
+    const stmt = db.prepare('SELECT last_insert_rowid() as id');
+    stmt.step();
+    lastID = stmt.getAsObject().id;
+  }
   saveDB();
+  return { lastID, changes };
 }
 
 function all(sql, params = []) {
@@ -120,6 +139,7 @@ function createTables() {
       type TEXT DEFAULT 'custom' CHECK(type IN ('system', 'custom')),
       data_scope TEXT DEFAULT 'self' CHECK(data_scope IN ('all', 'dept', 'self')),
       user_count INTEGER DEFAULT 0,
+      deleted_at TEXT DEFAULT NULL,
       created_at TEXT DEFAULT (datetime('now', 'localtime'))
     )
   `);
@@ -203,18 +223,17 @@ function seedData() {
 
   // 权限
   const permissions = [
-    ['首页概览', 'view-dashboard', '查看仪表盘', '查看首页统计和概览信息'],
-    ['首页概览', 'export-dashboard', '导出报表', '导出首页统计数据'],
-    ['用户管理', 'user-view', '查看用户列表', '查看系统用户列表'],
-    ['用户管理', 'user-create', '新增用户', '创建新用户'],
-    ['用户管理', 'user-edit', '编辑用户', '修改用户信息'],
-    ['用户管理', 'user-delete', '删除用户', '删除系统用户'],
-    ['用户管理', 'user-reset-pwd', '重置密码', '重置用户密码'],
-    ['用户管理', 'user-batch', '批量操作', '批量启用/禁用/删除用户'],
-    ['部门管理', 'dept-view', '查看部门架构', '查看部门树形结构'],
-    ['部门管理', 'dept-create', '新增部门', '创建新部门'],
-    ['部门管理', 'dept-edit', '编辑部门', '修改部门信息'],
-    ['部门管理', 'dept-delete', '删除部门', '删除部门'],
+    ['首页', 'view-dashboard', '查看首页', '查看首页统计和概览信息'],
+    ['用户', 'user-view', '查看用户列表', '查看系统用户列表'],
+    ['用户', 'user-create', '新增用户', '创建新用户'],
+    ['用户', 'user-edit', '编辑用户', '修改用户信息'],
+    ['用户', 'user-delete', '删除用户', '删除系统用户'],
+    ['用户', 'user-reset-pwd', '重置密码', '重置用户密码'],
+    ['用户', 'user-restore', '恢复用户', '查看回收站并恢复已删除用户'],
+    ['部门架构', 'dept-view', '查看部门架构', '查看部门树形结构'],
+    ['部门架构', 'dept-create', '新增部门', '创建新部门'],
+    ['部门架构', 'dept-edit', '编辑部门', '修改部门信息'],
+    ['部门架构', 'dept-delete', '删除部门', '删除部门'],
     ['角色权限', 'role-view', '查看角色列表', '查看系统角色'],
     ['角色权限', 'role-create', '新增角色', '创建新角色'],
     ['角色权限', 'role-edit', '编辑角色', '修改角色和权限配置'],
@@ -224,11 +243,26 @@ function seedData() {
     'INSERT INTO permissions (module, code, name, description) VALUES (?, ?, ?, ?)', p
   ));
 
-  // 管理员拥有所有权限
-  const allPerms = all('SELECT id FROM permissions');
-  allPerms.forEach(p => db.run(
-    'INSERT INTO role_permissions (role_id, permission_id) VALUES (1, ?)', [p.id]
-  ));
+  // 按角色分配权限
+  // 超级管理员(1): 全部权限
+  // 部门经理(2): view-dashboard, user-view/create/edit, dept-view/create/edit, role-view
+  // 普通员工(3): view-dashboard, user-view, dept-view
+  const permCodes = all('SELECT id, code FROM permissions');
+  const permMap = {};
+  permCodes.forEach(p => { permMap[p.code] = p.id; });
+
+  const rolePermMap = {
+    1: permCodes.map(p => p.id),  // admin: 全部
+    2: ['view-dashboard', 'user-view', 'user-create', 'user-edit',
+        'dept-view', 'dept-create', 'dept-edit', 'role-view'].map(c => permMap[c]).filter(Boolean),
+    3: ['view-dashboard', 'user-view', 'dept-view'].map(c => permMap[c]).filter(Boolean),
+  };
+
+  Object.entries(rolePermMap).forEach(([roleId, permIds]) => {
+    permIds.forEach(pid => {
+      db.run('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)', [roleId, pid]);
+    });
+  });
 
   console.log('Seed data initialized successfully.');
 }
