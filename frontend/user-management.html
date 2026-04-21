@@ -721,6 +721,9 @@
       });
 
       updatePagination();
+      
+      // 动态渲染后重新应用权限控制
+      AuthManager.initPermissionControl();
     }
 
     // 更新分页
