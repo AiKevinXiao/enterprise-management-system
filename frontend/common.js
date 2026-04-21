@@ -290,12 +290,12 @@ const AuthManager = {
     return true;
   },
 
-  // 初始化页面权限控制：隐藏无权限的按钮/操作元素
+  // 初始化页面权限控制：弱化显示无权限的按钮/操作元素
   initPermissionControl() {
     document.querySelectorAll('[data-permission]').forEach(el => {
       const code = el.getAttribute('data-permission');
       if (!this.hasPermission(code)) {
-        el.style.display = 'none';
+        el.classList.add('no-permission');
       }
     });
   },
