@@ -251,7 +251,7 @@ async function loadData() {
     const params = {
       page: pagination.page,
       pageSize: pagination.pageSize,
-      deleted: currentView.value === 'deleted'
+      deleted: currentView.value === 'deleted' ? '1' : '0'
     }
     if (searchForm.keyword) params.keyword = searchForm.keyword
     if (searchForm.dept_id) params.dept_id = searchForm.dept_id
