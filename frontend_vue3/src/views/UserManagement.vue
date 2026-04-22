@@ -257,8 +257,8 @@ async function loadData() {
 
     const res = await getUserList(params)
     if (res.success) {
-      tableData.value = res.data.list || []
-      pagination.total = res.data.total || 0
+      tableData.value = res.data || []
+      pagination.total = res.total || 0
     }
   } catch (e) {
     ElMessage.error('加载数据失败')
