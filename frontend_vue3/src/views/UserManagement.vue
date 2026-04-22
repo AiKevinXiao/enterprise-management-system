@@ -14,10 +14,11 @@
             placeholder="选择部门"
             clearable
             check-strictly
+            style="width: 200px"
           />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="选择状态" clearable>
+          <el-select v-model="searchForm.status" placeholder="选择状态" clearable style="width: 120px">
             <el-option label="正常" value="active" />
             <el-option label="禁用" value="disabled" />
             <el-option label="待审核" value="pending" />
