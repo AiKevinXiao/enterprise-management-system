@@ -42,11 +42,25 @@
         <div class="table-header">
           <el-radio-group v-model="currentView" @change="handleViewChange">
             <el-radio-button value="active">用户列表</el-radio-button>
-            <el-radio-button value="deleted">回收站</el-radio-button>
+            <el-radio-button value="deleted" v-permission="'user-restore'">回收站</el-radio-button>
           </el-radio-group>
           <div class="table-actions" v-if="currentView === 'active'">
             <el-button type="primary" v-permission="'user-create'" @click="handleAdd">
               <el-icon><Plus /></el-icon> 新增用户
+            </el-button>
+            <el-button v-permission="'user-delete'" :disabled="!selectedRows.length" @click="handleBatchAction('enable')">
+              批量启用
+            </el-button>
+            <el-button v-permission="'user-delete'" :disabled="!selectedRows.length" @click="handleBatchAction('disable')">
+              批量禁用
+            </el-button>
+            <el-button type="danger" v-permission="'user-delete'" :disabled="!selectedRows.length" @click="handleBatchAction('delete')">
+              批量删除
+            </el-button>
+          </div>
+          <div class="table-actions" v-else>
+            <el-button type="success" v-permission="'user-restore'" :disabled="!selectedRows.length" @click="handleBatchRestore">
+              <el-icon><Refresh /></el-icon> 批量恢复
             </el-button>
           </div>
         </div>
@@ -170,7 +184,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
-import { getUserList, createUser, updateUser, deleteUser, restoreUser, resetPassword } from '../api/users'
+import { getUserList, createUser, updateUser, deleteUser, restoreUser, resetPassword, batchAction } from '../api/users'
 import { getDepartmentList } from '../api/departments'
 import { getRoleList } from '../api/roles'
 
@@ -316,6 +330,7 @@ function handleReset() {
 
 function handleViewChange() {
   pagination.page = 1
+  selectedRows.value = []
   loadData()
 }
 
@@ -412,6 +427,41 @@ async function handleRestore(row) {
     }
   } catch (e) {
     // 取消恢复
+  }
+}
+
+async function handleBatchRestore() {
+  if (!selectedRows.value.length) return
+  try {
+    await ElMessageBox.confirm(`确定要批量恢复选中的 ${selectedRows.value.length} 个用户吗？`, '提示', { type: 'info' })
+    const ids = selectedRows.value.map(r => r.id)
+    const res = await batchAction('restore', ids)
+    if (res.success) {
+      ElMessage.success('批量恢复成功')
+      loadData()
+    } else {
+      ElMessage.error(res.message || '批量恢复失败')
+    }
+  } catch (e) {
+    // 取消
+  }
+}
+
+async function handleBatchAction(action) {
+  if (!selectedRows.value.length) return
+  const actionText = { enable: '启用', disable: '禁用', delete: '删除' }[action]
+  try {
+    await ElMessageBox.confirm(`确定要批量${actionText}选中的 ${selectedRows.value.length} 个用户吗？`, '提示', { type: action === 'delete' ? 'warning' : 'info' })
+    const ids = selectedRows.value.map(r => r.id)
+    const res = await batchAction(action, ids)
+    if (res.success) {
+      ElMessage.success(`批量${actionText}成功`)
+      loadData()
+    } else {
+      ElMessage.error(res.message || `批量${actionText}失败`)
+    }
+  } catch (e) {
+    // 取消
   }
 }
 
