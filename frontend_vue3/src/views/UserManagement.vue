@@ -15,10 +15,11 @@
             clearable
             check-strictly
             style="width: 200px"
+            @change="handleSearch"
           />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="选择状态" clearable style="width: 120px">
+          <el-select v-model="searchForm.status" placeholder="选择状态" clearable style="width: 120px" @change="handleSearch">
             <el-option label="正常" value="active" />
             <el-option label="禁用" value="disabled" />
             <el-option label="待审核" value="pending" />
@@ -282,10 +283,12 @@ async function loadDeptTree() {
 function buildTree(list, parentId = null) {
   return list
     .filter(item => item.parent_id === parentId)
-    .map(item => ({
-      ...item,
-      children: buildTree(list, item.id)
-    }))
+    .map(item => {
+      const children = buildTree(list, item.id)
+      const node = { ...item }
+      if (children.length > 0) node.children = children
+      return node
+    })
 }
 
 async function loadRoleList() {
