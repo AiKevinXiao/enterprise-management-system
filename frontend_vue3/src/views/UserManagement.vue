@@ -40,10 +40,7 @@
     <el-card class="table-card">
       <template #header>
         <div class="table-header">
-          <el-radio-group v-model="currentView" @change="handleViewChange">
-            <el-radio-button value="active">用户列表</el-radio-button>
-            <el-radio-button value="deleted" v-permission="'user-restore'">回收站</el-radio-button>
-          </el-radio-group>
+          <el-segmented v-model="currentView" :options="viewOptions" @change="handleViewChange" />
           <div class="table-actions" v-if="currentView === 'active'">
             <el-button type="primary" v-permission="'user-create'" @click="handleAdd">
               <el-icon><Plus /></el-icon> 新增用户
@@ -187,6 +184,7 @@ import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getUserList, createUser, updateUser, deleteUser, restoreUser, resetPassword, batchAction } from '../api/users'
 import { getDepartmentList } from '../api/departments'
 import { getRoleList } from '../api/roles'
+import { useUserStore } from '../stores/user'
 
 // 数据状态
 const loading = ref(false)
@@ -195,6 +193,16 @@ const deptTree = ref([])
 const roleList = ref([])
 const currentView = ref('active')
 const selectedRows = ref([])
+
+// 视图选项（根据权限动态生成）
+const viewOptions = computed(() => {
+  const { hasPermission } = useUserStore()
+  const options = [{ label: '用户列表', value: 'active' }]
+  if (hasPermission('user-restore')) {
+    options.push({ label: '回收站', value: 'deleted' })
+  }
+  return options
+})
 
 // 分页
 const pagination = reactive({
