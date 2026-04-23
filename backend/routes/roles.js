@@ -25,7 +25,17 @@ router.get('/', (req, res) => {
 // 获取所有权限列表（必须在 /:id 之前）
 router.get('/permissions/all', (req, res) => {
   try {
-    const permissions = all('SELECT * FROM permissions ORDER BY module, id');
+    const permissions = all(`
+      SELECT * FROM permissions 
+      ORDER BY 
+        CASE module 
+          WHEN '首页' THEN 1 
+          WHEN '角色权限' THEN 2 
+          WHEN '部门架构' THEN 3 
+          WHEN '用户' THEN 4 
+          ELSE 99 
+        END, id
+    `);
     res.json({ code: 200, data: permissions });
   } catch (err) {
     res.status(500).json({ code: 500, message: err.message });

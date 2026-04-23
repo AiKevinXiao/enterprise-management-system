@@ -143,14 +143,30 @@ function buildPermissionTree(flatList) {
       code: p.code
     })
   })
-  return Object.values(moduleMap)
+  // 按菜单顺序返回
+  const result = []
+  moduleOrder.forEach(mod => {
+    if (moduleMap[mod]) {
+      result.push(moduleMap[mod])
+    }
+  })
+  // 其他未在顺序中定义的模块（如有）
+  Object.keys(moduleMap).forEach(mod => {
+    if (!moduleOrder.includes(mod)) {
+      result.push(moduleMap[mod])
+    }
+  })
+  return result
 }
 
+// 菜单顺序：首页 → 角色权限 → 部门架构 → 用户
+const moduleOrder = ['首页', '角色权限', '部门架构', '用户']
+
 const moduleNameMap = {
-  dashboard: '仪表盘',
-  user: '用户管理',
-  dept: '部门管理',
-  role: '角色权限'
+  '首页': '首页',
+  '角色权限': '角色权限',
+  '部门架构': '部门架构',
+  '用户': '用户管理'
 }
 
 async function loadRoleList() {
