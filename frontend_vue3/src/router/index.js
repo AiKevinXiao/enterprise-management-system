@@ -1,6 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '../stores/user'
 
+const demoRoutes = [
+  {
+    path: 'view-switch-demo',
+    name: 'ViewSwitchDemo',
+    component: () => import('../views/demo/ViewSwitchDemo.vue'),
+    meta: { title: '视图切换对比' }
+  }
+]
+
 const routes = [
   {
     path: '/login',
@@ -38,12 +47,7 @@ const routes = [
         component: () => import('../views/RolePermission.vue'),
         meta: { title: '角色权限', permission: 'role-view' }
       },
-      {
-        path: 'view-switch-demo',
-        name: 'ViewSwitchDemo',
-        component: () => import('../views/ViewSwitchDemo.vue'),
-        meta: { title: '视图切换对比' }
-      }
+      ...demoRoutes
     ]
   }
 ]
