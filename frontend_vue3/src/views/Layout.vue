@@ -18,17 +18,17 @@
           <el-icon><Odometer /></el-icon>
           <span>工作台</span>
         </el-menu-item>
-        <el-menu-item index="/users" v-if="hasPermission('user-view')">
-          <el-icon><User /></el-icon>
-          <span>用户管理</span>
+        <el-menu-item index="/roles" v-if="hasPermission('role-view')">
+          <el-icon><Key /></el-icon>
+          <span>角色权限</span>
         </el-menu-item>
         <el-menu-item index="/departments" v-if="hasPermission('dept-view')">
           <el-icon><OfficeBuilding /></el-icon>
           <span>部门管理</span>
         </el-menu-item>
-        <el-menu-item index="/roles" v-if="hasPermission('role-view')">
-          <el-icon><Key /></el-icon>
-          <span>角色权限</span>
+        <el-menu-item index="/users" v-if="hasPermission('user-view')">
+          <el-icon><User /></el-icon>
+          <span>用户管理</span>
         </el-menu-item>
       </el-menu>
     </aside>
