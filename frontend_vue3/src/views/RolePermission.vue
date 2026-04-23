@@ -18,10 +18,16 @@
               v-for="role in roleList"
               :key="role.id"
               :class="['role-item', { active: currentRoleId === role.id }]"
-              @click="selectRole(role)"
             >
-              <div class="role-name">{{ role.name }}</div>
-              <div class="role-desc">{{ role.description || '暂无描述' }}</div>
+              <div class="role-info" @click="selectRole(role)">
+                <div class="role-name">{{ role.name }}</div>
+                <div class="role-desc">{{ role.description || '暂无描述' }}</div>
+              </div>
+              <div class="role-actions">
+                <el-button type="primary" link size="small" v-permission="'role-edit'" @click.stop="handleEditRole(role)">
+                  编辑
+                </el-button>
+              </div>
             </div>
           </div>
         </el-card>
@@ -210,6 +216,19 @@ function handleAddRole() {
   dialogVisible.value = true
 }
 
+function handleEditRole(role) {
+  isEdit.value = true
+  dialogTitle.value = '编辑角色'
+  editId.value = role.id
+  Object.assign(form, {
+    name: role.name,
+    code: role.code,
+    data_scope: role.data_scope || 'self',
+    description: role.description || ''
+  })
+  dialogVisible.value = true
+}
+
 async function handleSubmit() {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
@@ -276,9 +295,11 @@ watch(currentRoleId, () => {
 }
 
 .role-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 12px;
   border-radius: 8px;
-  cursor: pointer;
   transition: all 0.2s;
   margin-bottom: 8px;
   border: 1px solid #e2e8f0;
@@ -293,6 +314,12 @@ watch(currentRoleId, () => {
   border-color: #10b981;
 }
 
+.role-info {
+  flex: 1;
+  cursor: pointer;
+  min-width: 0;
+}
+
 .role-name {
   font-weight: 500;
   color: #1e293b;
@@ -302,5 +329,10 @@ watch(currentRoleId, () => {
   font-size: 12px;
   color: #94a3b8;
   margin-top: 4px;
+}
+
+.role-actions {
+  flex-shrink: 0;
+  margin-left: 12px;
 }
 </style>
