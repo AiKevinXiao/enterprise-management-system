@@ -42,21 +42,23 @@
         <div class="table-header">
           <el-segmented v-model="currentView" :options="viewOptions" @change="handleViewChange" />
           <div class="table-actions" v-if="currentView === 'active'">
+            <template v-if="selectedRows.length">
+              <el-button type="danger" v-permission="'user-delete'" @click="handleBatchAction('delete')">
+                批量删除
+              </el-button>
+              <el-button v-permission="'user-delete'" @click="handleBatchAction('disable')">
+                批量禁用
+              </el-button>
+              <el-button v-permission="'user-delete'" @click="handleBatchAction('enable')">
+                批量启用
+              </el-button>
+            </template>
             <el-button type="primary" v-permission="'user-create'" @click="handleAdd">
               <el-icon><Plus /></el-icon> 新增用户
             </el-button>
-            <el-button v-permission="'user-delete'" :disabled="!selectedRows.length" @click="handleBatchAction('enable')">
-              批量启用
-            </el-button>
-            <el-button v-permission="'user-delete'" :disabled="!selectedRows.length" @click="handleBatchAction('disable')">
-              批量禁用
-            </el-button>
-            <el-button type="danger" v-permission="'user-delete'" :disabled="!selectedRows.length" @click="handleBatchAction('delete')">
-              批量删除
-            </el-button>
           </div>
           <div class="table-actions" v-else>
-            <el-button type="success" v-permission="'user-restore'" :disabled="!selectedRows.length" @click="handleBatchRestore">
+            <el-button type="success" v-permission="'user-restore'" v-if="selectedRows.length" @click="handleBatchRestore">
               <el-icon><Refresh /></el-icon> 批量恢复
             </el-button>
           </div>
@@ -528,6 +530,15 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.table-actions .el-button--primary {
+  margin-left: auto;
 }
 
 .user-cell {
