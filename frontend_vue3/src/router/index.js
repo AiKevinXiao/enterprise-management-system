@@ -37,6 +37,12 @@ const routes = [
         name: 'RolePermission',
         component: () => import('../views/RolePermission.vue'),
         meta: { title: '角色权限', permission: 'role-view' }
+      },
+      {
+        path: 'view-switch-demo',
+        name: 'ViewSwitchDemo',
+        component: () => import('../views/ViewSwitchDemo.vue'),
+        meta: { title: '视图切换对比' }
       }
     ]
   }
