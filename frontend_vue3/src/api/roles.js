@@ -20,8 +20,12 @@ export function deleteRole(id) {
   return api.delete(`/roles/${id}`)
 }
 
+export function getAllPermissions() {
+  return api.get('/roles/permissions/all')
+}
+
 export function getRolePermissions(id) {
-  return api.get(`/roles/${id}/permissions`)
+  return api.get(`/roles/${id}`)
 }
 
 export function updateRolePermissions(id, permissionIds) {

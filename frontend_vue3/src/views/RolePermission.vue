@@ -85,10 +85,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import { getRoleList, createRole, updateRole, getRolePermissions, updateRolePermissions } from '../api/roles'
+import { getRoleList, createRole, updateRole, getAllPermissions, getRolePermissions, updateRolePermissions } from '../api/roles'
 
 const roleList = ref([])
 const currentRoleId = ref(null)
@@ -118,50 +118,34 @@ const rules = {
 
 const currentRole = computed(() => roleList.value.find(r => r.id === currentRoleId.value))
 
-// 权限树数据（模拟，实际应从后端获取）
-const mockPermissionTree = [
-  {
-    id: 1,
-    name: '仪表盘',
-    code: 'view-dashboard',
-    children: []
-  },
-  {
-    id: 2,
-    name: '用户管理',
-    code: 'user',
-    children: [
-      { id: 21, name: '查看用户', code: 'user-view' },
-      { id: 22, name: '新增用户', code: 'user-create' },
-      { id: 23, name: '编辑用户', code: 'user-edit' },
-      { id: 24, name: '删除用户', code: 'user-delete' },
-      { id: 25, name: '重置密码', code: 'user-reset-pwd' },
-      { id: 26, name: '恢复用户', code: 'user-restore' }
-    ]
-  },
-  {
-    id: 3,
-    name: '部门管理',
-    code: 'dept',
-    children: [
-      { id: 31, name: '查看部门', code: 'dept-view' },
-      { id: 32, name: '新增部门', code: 'dept-create' },
-      { id: 33, name: '编辑部门', code: 'dept-edit' },
-      { id: 34, name: '删除部门', code: 'dept-delete' }
-    ]
-  },
-  {
-    id: 4,
-    name: '角色权限',
-    code: 'role',
-    children: [
-      { id: 41, name: '查看角色', code: 'role-view' },
-      { id: 42, name: '新增角色', code: 'role-create' },
-      { id: 43, name: '编辑角色', code: 'role-edit' },
-      { id: 44, name: '删除角色', code: 'role-delete' }
-    ]
-  }
-]
+function buildPermissionTree(flatList) {
+  // 按 module 分组
+  const moduleMap = {}
+  flatList.forEach(p => {
+    const mod = p.module || 'other'
+    if (!moduleMap[mod]) {
+      moduleMap[mod] = {
+        id: `mod-${mod}`,
+        name: moduleNameMap[mod] || mod,
+        code: mod,
+        children: []
+      }
+    }
+    moduleMap[mod].children.push({
+      id: p.id,
+      name: p.name,
+      code: p.code
+    })
+  })
+  return Object.values(moduleMap)
+}
+
+const moduleNameMap = {
+  dashboard: '仪表盘',
+  user: '用户管理',
+  dept: '部门管理',
+  role: '角色权限'
+}
 
 async function loadRoleList() {
   try {
@@ -177,13 +161,32 @@ async function loadRoleList() {
   }
 }
 
+async function loadAllPermissions() {
+  try {
+    const res = await getAllPermissions()
+    if (res.success) {
+      permissionTreeData.value = buildPermissionTree(res.data)
+    }
+  } catch (e) {
+    ElMessage.error('加载权限列表失败')
+  }
+}
+
 async function loadRolePermissions() {
   if (!currentRoleId.value) return
   
   try {
     const res = await getRolePermissions(currentRoleId.value)
     if (res.success) {
-      checkedPermissionIds.value = res.data.map(p => p.id)
+      const permIds = res.data.permissions ? res.data.permissions.map(p => p.id) : []
+      checkedPermissionIds.value = permIds
+      // el-tree 需要手动设置勾选状态（default-checked-keys 只在初始化时生效）
+      // 使用 nextTick 确保 el-tree 已渲染
+      nextTick(() => {
+        if (permissionTreeRef.value) {
+          permissionTreeRef.value.setCheckedKeys(permIds)
+        }
+      })
     }
   } catch (e) {
     ElMessage.error('加载权限失败')
@@ -236,7 +239,7 @@ async function handleSubmit() {
 async function handleSavePermissions() {
   saving.value = true
   try {
-    const checkedIds = permissionTreeRef.value.getCheckedKeys()
+    const checkedIds = permissionTreeRef.value.getCheckedKeys().filter(id => typeof id === 'number')
     const res = await updateRolePermissions(currentRoleId.value, checkedIds)
     if (res.success) {
       ElMessage.success('保存成功')
@@ -251,7 +254,7 @@ async function handleSavePermissions() {
 }
 
 onMounted(() => {
-  permissionTreeData.value = mockPermissionTree
+  loadAllPermissions()
   loadRoleList()
 })
 
