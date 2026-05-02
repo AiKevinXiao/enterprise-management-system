@@ -202,8 +202,8 @@ function seedData() {
   // 角色
   const roles = [
     ['超级管理员', 'admin', '拥有系统全部权限', 'system', 'all', 1],
-    ['部门经理', 'dept_manager', '管理部门成员', 'system', 'dept', 2],
-    ['普通员工', 'user', '基础办公权限', 'system', 'self', 2],
+    ['部门经理', 'dept_manager', '管理部门成员', 'custom', 'dept', 2],
+    ['普通员工', 'user', '基础办公权限', 'custom', 'self', 2],
   ];
   roles.forEach(r => db.run(
     'INSERT INTO roles (name, code, description, type, data_scope, user_count) VALUES (?, ?, ?, ?, ?, ?)', r
