@@ -93,11 +93,11 @@ router.post('/', (req, res) => {
   }
 });
 
-// 获取角色详情（含权限）
+// 获取角色详情（含权限，不区分是否已删除，回收站也需要查看）
 router.get('/:id', (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const role = get('SELECT * FROM roles WHERE id = ? AND (deleted_at IS NULL OR deleted_at = "")', [id]);
+    const role = get('SELECT * FROM roles WHERE id = ?', [id]);
     if (!role) {
       return res.status(404).json({ code: 404, message: '角色不存在' });
     }
