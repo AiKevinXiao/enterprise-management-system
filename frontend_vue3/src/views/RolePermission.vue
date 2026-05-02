@@ -94,17 +94,31 @@
             <span>权限配置 - {{ currentRole?.name }}<template v-if="currentView === 'deleted'">（只读）</template></span>
           </template>
 
-          <el-tree
-            ref="permissionTreeRef"
-            :data="permissionTreeData"
-            :props="treeProps"
-            show-checkbox
-            node-key="id"
-            default-expand-all
-            :default-checked-keys="checkedPermissionIds"
-            :disabled="currentView === 'deleted'"
-            :class="{ 'permission-tree-readonly': currentView === 'deleted' }"
-          />
+          <div class="permission-grid">
+            <div v-for="mod in permissionTreeData" :key="mod.id" class="permission-module">
+              <div class="module-header">
+                <el-checkbox
+                  :model-value="isModuleAllChecked(mod)"
+                  :indeterminate="isModuleIndeterminate(mod)"
+                  :disabled="currentView === 'deleted'"
+                  @change="val => toggleModule(mod, val)"
+                >
+                  <span class="module-title">{{ mod.name }}</span>
+                </el-checkbox>
+              </div>
+              <div class="module-permissions">
+                <el-checkbox
+                  v-for="perm in mod.children"
+                  :key="perm.id"
+                  v-model="permissionChecked[perm.id]"
+                  :disabled="currentView === 'deleted'"
+                  @change="handlePermissionChange"
+                >
+                  {{ perm.name }}
+                </el-checkbox>
+              </div>
+            </div>
+          </div>
 
           <div v-if="currentView === 'active'" style="margin-top: 24px;">
             <el-button type="primary" v-permission="'role-edit'" :loading="saving" @click="handleSavePermissions">
@@ -161,6 +175,7 @@ const dataScopeMap = {
 const currentRoleId = ref(null)
 const permissionTreeData = ref([])
 const checkedPermissionIds = ref([])
+const permissionChecked = ref({})
 const permissionTreeRef = ref(null)
 const saving = ref(false)
 const currentView = ref('active')
@@ -285,17 +300,38 @@ async function loadRolePermissions() {
     if (res.success) {
       const permIds = res.data.permissions ? res.data.permissions.map(p => p.id) : []
       checkedPermissionIds.value = permIds
-      // el-tree 需要手动设置勾选状态（default-checked-keys 只在初始化时生效）
-      // 使用 nextTick 确保 el-tree 已渲染
-      nextTick(() => {
-        if (permissionTreeRef.value) {
-          permissionTreeRef.value.setCheckedKeys(permIds)
-        }
+      // 构建勾选状态映射
+      const checked = {}
+      permissionTreeData.value.forEach(mod => {
+        mod.children.forEach(perm => {
+          checked[perm.id] = permIds.includes(perm.id)
+        })
       })
+      permissionChecked.value = checked
     }
   } catch (e) {
     ElMessage.error('加载权限失败')
   }
+}
+
+function isModuleAllChecked(mod) {
+  return mod.children.length > 0 && mod.children.every(p => permissionChecked.value[p.id])
+}
+
+function isModuleIndeterminate(mod) {
+  const checked = mod.children.filter(p => permissionChecked.value[p.id]).length
+  return checked > 0 && checked < mod.children.length
+}
+
+function toggleModule(mod, val) {
+  mod.children.forEach(p => {
+    permissionChecked.value[p.id] = val
+  })
+}
+
+function handlePermissionChange() {
+  // 触发响应式更新（用于模块全选/半选状态计算）
+  permissionChecked.value = { ...permissionChecked.value }
 }
 
 function selectRole(role) {
@@ -406,7 +442,9 @@ function handleViewChange() {
 async function handleSavePermissions() {
   saving.value = true
   try {
-    const checkedIds = permissionTreeRef.value.getCheckedKeys().filter(id => typeof id === 'number')
+    const checkedIds = Object.entries(permissionChecked.value)
+      .filter(([_, v]) => v)
+      .map(([k]) => Number(k))
     const res = await updateRolePermissions(currentRoleId.value, checkedIds)
     if (res.success) {
       ElMessage.success('保存成功')
@@ -526,18 +564,43 @@ onMounted(() => {
   color: #303133;
 }
 
-/* 回收站只读模式 - 禁用 checkbox 交互 */
-.permission-tree-readonly :deep(.el-checkbox__input) {
-  pointer-events: none;
-  cursor: default;
+/* 权限网格布局 */
+.permission-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 }
 
-.permission-tree-readonly :deep(.el-tree-node__content) {
-  cursor: default;
-  color: #94a3b8;
+.permission-module {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  transition: border-color 0.2s;
 }
 
-.permission-tree-readonly :deep(.el-tree-node.is-current > .el-tree-node__content) {
-  color: #94a3b8;
+.permission-module:hover {
+  border-color: #94a3b8;
+}
+
+.module-header {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.module-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.module-permissions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.module-permissions .el-checkbox {
+  margin-right: 0;
 }
 </style>
