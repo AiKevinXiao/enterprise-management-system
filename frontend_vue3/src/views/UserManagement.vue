@@ -14,6 +14,7 @@
             placeholder="选择部门"
             clearable
             check-strictly
+            default-expand-all
             style="width: 200px"
             @change="handleSearch"
           />
@@ -40,7 +41,15 @@
     <el-card class="table-card">
       <template #header>
         <div class="table-header">
-          <el-segmented v-model="currentView" :options="viewOptions" @change="handleViewChange" />
+          <div class="view-tabs">
+            <span
+              v-for="opt in viewOptions"
+              :key="opt.value"
+              class="view-tab"
+              :class="{ active: currentView === opt.value }"
+              @click="currentView = opt.value; handleViewChange()"
+            >{{ opt.label }}</span>
+          </div>
           <div class="table-actions" v-if="currentView === 'active'">
             <template v-if="selectedRows.length">
               <el-button type="danger" v-permission="'user-delete'" @click="handleBatchAction('delete')">
@@ -134,6 +143,7 @@
             :props="{ label: 'name', value: 'id', children: 'children' }"
             placeholder="选择部门"
             check-strictly
+            default-expand-all
           />
         </el-form-item>
         <el-form-item label="角色" prop="role_id">
@@ -530,6 +540,30 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.view-tabs {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.view-tab {
+  font-size: 13px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.view-tab:hover {
+  color: #64748b;
+}
+
+.view-tab.active {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
 }
 
 .table-actions {
