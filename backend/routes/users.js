@@ -7,6 +7,16 @@ const router = express.Router();
 router.use(authMiddleware);
 router.use(dataScopeMiddleware);
 
+// 递归获取部门及所有子部门ID
+function getDescendantDeptIds(parentId) {
+  const ids = [parentId];
+  const children = all('SELECT id FROM departments WHERE parent_id = ?', [parentId]);
+  for (const child of children) {
+    ids.push(...getDescendantDeptIds(child.id));
+  }
+  return ids;
+}
+
 // 密码复杂度校验
 function validatePassword(password) {
   if (!password || password.length < 8) return '密码至少8位';
@@ -48,7 +58,13 @@ router.get('/', permissionMiddleware('user-view'), (req, res) => {
     where += ' AND (u.name LIKE ? OR u.username LIKE ? OR u.phone LIKE ? OR u.email LIKE ?)';
     params.push(`%${keyword}%`, `%${keyword}%`, `%${keyword}%`, `%${keyword}%`);
   }
-  if (dept_id) { where += ' AND u.dept_id = ?'; params.push(dept_id); }
+  if (dept_id) {
+    // 递归查出该部门及所有子部门ID
+    const deptIds = getDescendantDeptIds(parseInt(dept_id));
+    const placeholders = deptIds.map(() => '?').join(',');
+    where += ` AND u.dept_id IN (${placeholders})`;
+    params.push(...deptIds);
+  }
   if (role_id) { where += ' AND u.role_id = ?'; params.push(role_id); }
   if (status) { where += ' AND u.status = ?'; params.push(status); }
 

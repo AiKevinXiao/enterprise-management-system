@@ -202,8 +202,8 @@ function seedData() {
   // 角色
   const roles = [
     ['超级管理员', 'admin', '拥有系统全部权限', 'system', 'all', 1],
-    ['部门经理', 'dept_manager', '管理部门成员', 'system', 'dept', 2],
-    ['普通员工', 'user', '基础办公权限', 'system', 'self', 2],
+    ['部门经理', 'dept_manager', '管理部门成员', 'custom', 'dept', 2],
+    ['普通员工', 'user', '基础办公权限', 'custom', 'self', 2],
   ];
   roles.forEach(r => db.run(
     'INSERT INTO roles (name, code, description, type, data_scope, user_count) VALUES (?, ?, ?, ?, ?, ?)', r
@@ -238,6 +238,7 @@ function seedData() {
     ['角色权限', 'role-create', '新增角色', '创建新角色'],
     ['角色权限', 'role-edit', '编辑角色', '修改角色和权限配置'],
     ['角色权限', 'role-delete', '删除角色', '删除系统角色'],
+    ['角色权限', 'role-restore', '恢复角色', '从回收站恢复已删除角色'],
   ];
   permissions.forEach(p => db.run(
     'INSERT INTO permissions (module, code, name, description) VALUES (?, ?, ?, ?)', p
@@ -254,7 +255,7 @@ function seedData() {
   const rolePermMap = {
     1: permCodes.map(p => p.id),  // admin: 全部
     2: ['view-dashboard', 'user-view', 'user-create', 'user-edit',
-        'dept-view', 'dept-create', 'dept-edit', 'role-view'].map(c => permMap[c]).filter(Boolean),
+        'dept-view', 'dept-create', 'dept-edit', 'role-view', 'role-delete', 'role-restore'].map(c => permMap[c]).filter(Boolean),
     3: ['view-dashboard', 'user-view', 'dept-view'].map(c => permMap[c]).filter(Boolean),
   };
 

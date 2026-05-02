@@ -9,13 +9,28 @@ router.use(authMiddleware);
 // 获取角色列表
 router.get('/', (req, res) => {
   try {
-    const roles = all(`
-      SELECT r.*, 
-        (SELECT COUNT(*) FROM users WHERE role_id = r.id AND (deleted_at IS NULL OR deleted_at = "")) as user_count
-      FROM roles r 
-      WHERE r.deleted_at IS NULL OR r.deleted_at = ""
-      ORDER BY r.id
-    `);
+    const deleted = req.query.deleted;
+    let sql, params;
+    if (deleted === 'true') {
+      sql = `
+        SELECT r.*, 
+          (SELECT COUNT(*) FROM users WHERE role_id = r.id AND (deleted_at IS NULL OR deleted_at = "")) as user_count
+        FROM roles r 
+        WHERE r.deleted_at IS NOT NULL AND r.deleted_at != ""
+        ORDER BY r.id
+      `;
+      params = [];
+    } else {
+      sql = `
+        SELECT r.*, 
+          (SELECT COUNT(*) FROM users WHERE role_id = r.id AND (deleted_at IS NULL OR deleted_at = "")) as user_count
+        FROM roles r 
+        WHERE r.deleted_at IS NULL OR r.deleted_at = ""
+        ORDER BY r.id
+      `;
+      params = [];
+    }
+    const roles = all(sql, params);
     res.json({ code: 200, data: roles });
   } catch (err) {
     res.status(500).json({ code: 500, message: err.message });
@@ -25,7 +40,17 @@ router.get('/', (req, res) => {
 // 获取所有权限列表（必须在 /:id 之前）
 router.get('/permissions/all', (req, res) => {
   try {
-    const permissions = all('SELECT * FROM permissions ORDER BY module, id');
+    const permissions = all(`
+      SELECT * FROM permissions 
+      ORDER BY 
+        CASE module 
+          WHEN '首页' THEN 1 
+          WHEN '角色权限' THEN 2 
+          WHEN '部门架构' THEN 3 
+          WHEN '用户' THEN 4 
+          ELSE 99 
+        END, id
+    `);
     res.json({ code: 200, data: permissions });
   } catch (err) {
     res.status(500).json({ code: 500, message: err.message });
@@ -157,10 +182,33 @@ router.delete('/:id', (req, res) => {
     }
     
     // 软删除
-    run('UPDATE roles SET deleted_at = datetime("now") WHERE id = ?', [id]);
-    run('DELETE FROM role_permissions WHERE role_id = ?', [id]);
+    run('UPDATE roles SET deleted_at = datetime("now", "localtime") WHERE id = ?', [id]);
     
     res.json({ code: 200, message: '角色删除成功' });
+  } catch (err) {
+    res.status(500).json({ code: 500, message: err.message });
+  }
+});
+
+// 恢复已删除角色
+router.put('/:id/restore', (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const role = get('SELECT * FROM roles WHERE id = ? AND deleted_at IS NOT NULL AND deleted_at != ""', [id]);
+    if (!role) {
+      return res.status(404).json({ code: 404, message: '角色不存在或未被删除' });
+    }
+    
+    // 检查编码是否被占用
+    const existing = get('SELECT id FROM roles WHERE code = ? AND id != ? AND (deleted_at IS NULL OR deleted_at = "")', [role.code, id]);
+    if (existing) {
+      return res.status(400).json({ code: 400, message: '角色编码已被其他角色使用，无法恢复' });
+    }
+    
+    run('UPDATE roles SET deleted_at = NULL WHERE id = ?', [id]);
+    
+    const restored = get('SELECT * FROM roles WHERE id = ?', [id]);
+    res.json({ code: 200, data: restored, message: '角色恢复成功' });
   } catch (err) {
     res.status(500).json({ code: 500, message: err.message });
   }
