@@ -51,7 +51,7 @@
                 <el-button
                   v-if="role.type !== 'system'"
                   type="danger" link size="small"
-                  v-permission="'role-edit'"
+                  v-permission="'role-delete'"
                   @click.stop="handleDeleteRole(role)"
                 >
                   删除
@@ -77,7 +77,7 @@
                 <div class="role-deleted-at">删除时间：{{ role.deleted_at }}</div>
               </div>
               <div class="role-actions">
-                <el-button type="success" link size="small" @click="handleRestoreRole(role)">
+                <el-button type="success" link size="small" v-permission="'role-restore'" @click="handleRestoreRole(role)">
                   恢复
                 </el-button>
               </div>
