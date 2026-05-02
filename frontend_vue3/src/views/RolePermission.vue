@@ -6,14 +6,32 @@
         <el-card>
           <template #header>
             <div class="card-header">
-              <span>角色列表</span>
-              <el-button type="primary" size="small" v-permission="'role-create'" @click="handleAddRole">
+              <div class="view-tabs">
+                <span
+                  class="view-tab"
+                  :class="{ active: currentView === 'active' }"
+                  @click="currentView = 'active'; handleViewChange()"
+                >角色列表</span>
+                <span
+                  class="view-tab"
+                  :class="{ active: currentView === 'deleted' }"
+                  @click="currentView = 'deleted'; handleViewChange()"
+                >回收站</span>
+              </div>
+              <el-button
+                v-if="currentView === 'active'"
+                type="primary"
+                size="small"
+                v-permission="'role-create'"
+                @click="handleAddRole"
+              >
                 <el-icon><Plus /></el-icon> 新增
               </el-button>
             </div>
           </template>
 
-          <div class="role-list">
+          <!-- 正常角色列表 -->
+          <div v-if="currentView === 'active'" class="role-list">
             <div
               v-for="role in roleList"
               :key="role.id"
@@ -30,15 +48,48 @@
                 <el-button type="primary" link size="small" v-permission="'role-edit'" @click.stop="handleEditRole(role)">
                   编辑
                 </el-button>
+                <el-button
+                  v-if="role.type !== 'system'"
+                  type="danger" link size="small"
+                  v-permission="'role-edit'"
+                  @click.stop="handleDeleteRole(role)"
+                >
+                  删除
+                </el-button>
               </div>
             </div>
+            <el-empty v-if="roleList.length === 0" description="暂无角色" />
+          </div>
+
+          <!-- 回收站 -->
+          <div v-else class="role-list">
+            <div
+              v-for="role in deletedRoles"
+              :key="role.id"
+              class="role-item deleted"
+            >
+              <div class="role-info">
+                <div class="role-name-row">
+                  <span class="role-name">{{ role.name }}</span>
+                  <span class="role-data-scope">{{ dataScopeMap[role.data_scope] || '未设置' }}</span>
+                </div>
+                <div class="role-desc">{{ role.description || '暂无描述' }}</div>
+                <div class="role-deleted-at">删除时间：{{ role.deleted_at }}</div>
+              </div>
+              <div class="role-actions">
+                <el-button type="success" link size="small" @click="handleRestoreRole(role)">
+                  恢复
+                </el-button>
+              </div>
+            </div>
+            <el-empty v-if="deletedRoles.length === 0" description="回收站为空" />
           </div>
         </el-card>
       </el-col>
 
       <!-- 右侧权限配置 -->
       <el-col :span="16">
-        <el-card v-if="currentRoleId">
+        <el-card v-if="currentRoleId && currentView === 'active'">
           <template #header>
             <span>权限配置 - {{ currentRole?.name }}</span>
           </template>
@@ -58,6 +109,9 @@
               保存权限
             </el-button>
           </div>
+        </el-card>
+        <el-card v-else-if="currentView === 'deleted'">
+          <el-empty description="回收站角色无法编辑权限，请先恢复" />
         </el-card>
         <el-card v-else>
           <el-empty description="请选择角色" />
@@ -95,9 +149,9 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import { getRoleList, createRole, updateRole, getAllPermissions, getRolePermissions, updateRolePermissions } from '../api/roles'
+import { getRoleList, createRole, updateRole, deleteRole, restoreRole, getAllPermissions, getRolePermissions, updateRolePermissions } from '../api/roles'
 
 const roleList = ref([])
 const dataScopeMap = {
@@ -110,6 +164,8 @@ const permissionTreeData = ref([])
 const checkedPermissionIds = ref([])
 const permissionTreeRef = ref(null)
 const saving = ref(false)
+const currentView = ref('active')
+const deletedRoles = ref([])
 
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增角色')
@@ -188,6 +244,17 @@ async function loadRoleList() {
     }
   } catch (e) {
     ElMessage.error('加载角色列表失败')
+  }
+}
+
+async function loadDeletedRoles() {
+  try {
+    const res = await getRoleList({ deleted: true })
+    if (res.success) {
+      deletedRoles.value = res.data
+    }
+  } catch (e) {
+    ElMessage.error('加载已删除角色失败')
   }
 }
 
@@ -279,6 +346,55 @@ async function handleSubmit() {
   }
 }
 
+async function handleDeleteRole(role) {
+  try {
+    await ElMessageBox.confirm(
+      `确定删除角色「${role.name}」吗？删除后可在回收站恢复。`,
+      '删除确认',
+      { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' }
+    )
+  } catch {
+    return
+  }
+  try {
+    const res = await deleteRole(role.id)
+    if (res.success) {
+      ElMessage.success('删除成功')
+      if (currentRoleId.value === role.id) {
+        currentRoleId.value = null
+      }
+      loadRoleList()
+    } else {
+      ElMessage.error(res.message || '删除失败')
+    }
+  } catch (e) {
+    ElMessage.error('网络错误')
+  }
+}
+
+async function handleRestoreRole(role) {
+  try {
+    const res = await restoreRole(role.id)
+    if (res.success) {
+      ElMessage.success('恢复成功')
+      loadDeletedRoles()
+      loadRoleList()
+    } else {
+      ElMessage.error(res.message || '恢复失败')
+    }
+  } catch (e) {
+    ElMessage.error('网络错误')
+  }
+}
+
+function handleViewChange() {
+  if (currentView.value === 'active') {
+    loadRoleList()
+  } else {
+    loadDeletedRoles()
+  }
+}
+
 async function handleSavePermissions() {
   saving.value = true
   try {
@@ -299,10 +415,6 @@ async function handleSavePermissions() {
 onMounted(() => {
   loadAllPermissions()
   loadRoleList()
-})
-
-watch(currentRoleId, () => {
-  loadRolePermissions()
 })
 </script>
 
@@ -370,5 +482,39 @@ watch(currentRoleId, () => {
 .role-actions {
   flex-shrink: 0;
   margin-left: 12px;
+}
+
+.role-item.deleted {
+  opacity: 0.75;
+}
+
+.role-deleted-at {
+  font-size: 11px;
+  color: #ef4444;
+  margin-top: 2px;
+}
+
+.view-tabs {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.view-tab {
+  font-size: 13px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.view-tab:hover {
+  color: #64748b;
+}
+
+.view-tab.active {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
 }
 </style>

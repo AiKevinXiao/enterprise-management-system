@@ -1,7 +1,7 @@
 import api from './request'
 
-export function getRoleList() {
-  return api.get('/roles')
+export function getRoleList(params) {
+  return api.get('/roles', { params })
 }
 
 export function getRoleById(id) {
@@ -18,6 +18,10 @@ export function updateRole(id, data) {
 
 export function deleteRole(id) {
   return api.delete(`/roles/${id}`)
+}
+
+export function restoreRole(id) {
+  return api.put(`/roles/${id}/restore`)
 }
 
 export function getAllPermissions() {
