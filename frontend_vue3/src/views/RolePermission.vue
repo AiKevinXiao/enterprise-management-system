@@ -66,9 +66,9 @@
             <div
               v-for="role in deletedRoles"
               :key="role.id"
-              class="role-item deleted"
+              :class="['role-item deleted', { active: currentRoleId === role.id }]"
             >
-              <div class="role-info">
+              <div class="role-info" @click="selectRole(role)">
                 <div class="role-name-row">
                   <span class="role-name">{{ role.name }}</span>
                   <span class="role-data-scope">{{ dataScopeMap[role.data_scope] || '未设置' }}</span>
@@ -77,7 +77,7 @@
                 <div class="role-deleted-at">删除时间：{{ role.deleted_at }}</div>
               </div>
               <div class="role-actions">
-                <el-button type="success" link size="small" v-permission="'role-restore'" @click="handleRestoreRole(role)">
+                <el-button type="success" link size="small" v-permission="'role-restore'" @click.stop="handleRestoreRole(role)">
                   恢复
                 </el-button>
               </div>
@@ -89,29 +89,28 @@
 
       <!-- 右侧权限配置 -->
       <el-col :span="16">
-        <el-card v-if="currentRoleId && currentView === 'active'">
+        <el-card v-if="currentRoleId">
           <template #header>
-            <span>权限配置 - {{ currentRole?.name }}</span>
+            <span>权限配置 - {{ currentRole?.name }}<template v-if="currentView === 'deleted'">（只读）</template></span>
           </template>
 
           <el-tree
             ref="permissionTreeRef"
             :data="permissionTreeData"
-            :props="{ label: 'name', children: 'children' }"
+            :props="treeProps"
             show-checkbox
             node-key="id"
             default-expand-all
             :default-checked-keys="checkedPermissionIds"
+            :disabled="currentView === 'deleted'"
+            :class="{ 'permission-tree-readonly': currentView === 'deleted' }"
           />
 
-          <div style="margin-top: 24px;">
+          <div v-if="currentView === 'active'" style="margin-top: 24px;">
             <el-button type="primary" v-permission="'role-edit'" :loading="saving" @click="handleSavePermissions">
               保存权限
             </el-button>
           </div>
-        </el-card>
-        <el-card v-else-if="currentView === 'deleted'">
-          <el-empty description="回收站角色无法编辑权限，请先恢复" />
         </el-card>
         <el-card v-else>
           <el-empty description="请选择角色" />
@@ -167,6 +166,12 @@ const saving = ref(false)
 const currentView = ref('active')
 const deletedRoles = ref([])
 
+const treeProps = computed(() => ({
+  label: 'name',
+  children: 'children',
+  disabled: () => currentView.value === 'deleted'
+}))
+
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增角色')
 const isEdit = ref(false)
@@ -186,7 +191,10 @@ const rules = {
   code: [{ required: true, message: '请输入角色编码', trigger: 'blur' }]
 }
 
-const currentRole = computed(() => roleList.value.find(r => r.id === currentRoleId.value))
+const currentRole = computed(() => {
+  return roleList.value.find(r => r.id === currentRoleId.value)
+    || deletedRoles.value.find(r => r.id === currentRoleId.value)
+})
 
 function buildPermissionTree(flatList) {
   // 按 module 分组
@@ -516,5 +524,20 @@ onMounted(() => {
   font-size: 16px;
   font-weight: 600;
   color: #303133;
+}
+
+/* 回收站只读模式 - 禁用 checkbox 交互 */
+.permission-tree-readonly :deep(.el-checkbox__input) {
+  pointer-events: none;
+  cursor: default;
+}
+
+.permission-tree-readonly :deep(.el-tree-node__content) {
+  cursor: default;
+  color: #94a3b8;
+}
+
+.permission-tree-readonly :deep(.el-tree-node.is-current > .el-tree-node__content) {
+  color: #94a3b8;
 }
 </style>
