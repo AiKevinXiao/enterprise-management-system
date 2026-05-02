@@ -20,7 +20,10 @@
               :class="['role-item', { active: currentRoleId === role.id }]"
             >
               <div class="role-info" @click="selectRole(role)">
-                <div class="role-name">{{ role.name }}</div>
+                <div class="role-name-row">
+                  <span class="role-name">{{ role.name }}</span>
+                  <span class="role-data-scope">{{ dataScopeMap[role.data_scope] || '未设置' }}</span>
+                </div>
                 <div class="role-desc">{{ role.description || '暂无描述' }}</div>
               </div>
               <div class="role-actions">
@@ -97,6 +100,11 @@ import { Plus } from '@element-plus/icons-vue'
 import { getRoleList, createRole, updateRole, getAllPermissions, getRolePermissions, updateRolePermissions } from '../api/roles'
 
 const roleList = ref([])
+const dataScopeMap = {
+  all: '全部数据',
+  dept: '本部门及下级部门',
+  self: '仅个人数据'
+}
 const currentRoleId = ref(null)
 const permissionTreeData = ref([])
 const checkedPermissionIds = ref([])
@@ -336,6 +344,12 @@ watch(currentRoleId, () => {
   min-width: 0;
 }
 
+.role-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
 .role-name {
   font-weight: 500;
   color: #1e293b;
@@ -345,6 +359,12 @@ watch(currentRoleId, () => {
   font-size: 12px;
   color: #94a3b8;
   margin-top: 4px;
+}
+
+.role-data-scope {
+  font-size: 12px;
+  color: #94a3b8;
+  flex-shrink: 0;
 }
 
 .role-actions {
