@@ -35,13 +35,15 @@ function authMiddleware(req, res, next) {
 
 /**
  * 递归获取 deptId 的所有子部门 ID（包括自己）
+ * 注意：MySQL 版本改为异步
  */
-function getSubDeptIds(deptId) {
-  const result = all('SELECT id FROM departments WHERE parent_id = ?', [deptId]);
+async function getSubDeptIds(deptId) {
+  const result = await all('SELECT id FROM departments WHERE parent_id = ?', [deptId]);
   const ids = [deptId];
-  result.forEach(d => {
-    ids.push(...getSubDeptIds(d.id));
-  });
+  for (const d of result) {
+    const childIds = await getSubDeptIds(d.id);
+    ids.push(...childIds);
+  }
   return [...new Set(ids)];
 }
 
@@ -58,14 +60,17 @@ function dataScopeMiddleware(req, res, next) {
 
   if (mode === 'all') {
     req.dataScope = { mode: 'all', deptIds: null, userId: id };
+    next();
   } else if (mode === 'dept') {
-    req.dataScope = { mode: 'dept', deptIds: getSubDeptIds(dept_id), userId: id };
+    getSubDeptIds(dept_id).then(deptIds => {
+      req.dataScope = { mode: 'dept', deptIds, userId: id };
+      next();
+    }).catch(next);
   } else {
     // self: 仅本人数据
     req.dataScope = { mode: 'self', deptIds: [dept_id], userId: id };
+    next();
   }
-
-  next();
 }
 
 /**

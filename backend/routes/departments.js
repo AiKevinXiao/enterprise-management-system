@@ -6,8 +6,8 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-router.get('/', (req, res) => {
-  const departments = all('SELECT * FROM departments ORDER BY id');
+router.get('/', async (req, res) => {
+  const departments = await all('SELECT * FROM departments ORDER BY id');
   res.json({ code: 200, data: departments });
 });
 

@@ -1,185 +1,65 @@
-const initSqlJs = require('sql.js');
-const path = require('path');
-const fs = require('fs');
+const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 
-const DB_PATH = path.join(__dirname, 'data', 'ems.db');
+const DB_CONFIG = {
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '1qaz@WSX',
+  database: process.env.DB_NAME || 'ems',
+  charset: 'utf8mb4',
+  waitForConnections: true,
+  connectionLimit: 10,
+};
 
-let db;
-let SQL;
+let pool;
 
-function getDB() {
-  if (!db) {
-    throw new Error('Database not initialized. Call initDB() first.');
+async function getPool() {
+  if (!pool) {
+    pool = mysql.createPool(DB_CONFIG);
   }
-  return db;
+  return pool;
 }
 
 async function initDB() {
-  const dataDir = path.join(__dirname, 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+  if (!pool) {
+    pool = mysql.createPool(DB_CONFIG);
+  }
+  // 测试连接
+  const conn = await pool.getConnection();
+  console.log('MySQL connected:', DB_CONFIG.host + ':' + DB_CONFIG.port + '/' + DB_CONFIG.database);
+  conn.release();
+
+  // 检查是否有数据，没有则初始化种子
+  const [rows] = await pool.execute('SELECT COUNT(*) as cnt FROM users');
+  if (rows[0].cnt === 0) {
+    await seedData();
   }
 
-  SQL = await initSqlJs();
+  return pool;
+}
 
-  if (fs.existsSync(DB_PATH)) {
-    const fileBuffer = fs.readFileSync(DB_PATH);
-    db = new SQL.Database(fileBuffer);
-  } else {
-    db = new SQL.Database();
-  }
-
-  db.run('PRAGMA foreign_keys = ON');
-
-  createTables();
-  seedData();
-  saveDB();
-
-  // 进程退出时自动保存数据库，防止异常退出导致数据丢失
-  const gracefulShutdown = (signal) => {
-    console.log(`\n${signal} received, saving database...`);
-    saveDB();
-    process.exit(0);
+async function run(sql, params = []) {
+  const p = await getPool();
+  const [result] = await p.execute(sql, params);
+  return {
+    lastID: result.insertId || null,
+    changes: result.affectedRows || 0
   };
-  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-  process.on('exit', () => saveDB());
-
-  return Promise.resolve();
 }
 
-function saveDB() {
-  if (!db) return;
-  const data = db.export();
-  const buffer = Buffer.from(data);
-  fs.writeFileSync(DB_PATH, buffer);
+async function all(sql, params = []) {
+  const p = await getPool();
+  const [rows] = await p.execute(sql, params);
+  return rows;
 }
 
-function run(sql, params = []) {
-  db.run(sql, params);
-  const changes = db.getRowsModified();
-  let lastID = null;
-  if (changes > 0) {
-    // For INSERT, get last insert rowid
-    const stmt = db.prepare('SELECT last_insert_rowid() as id');
-    stmt.step();
-    lastID = stmt.getAsObject().id;
-  }
-  saveDB();
-  return { lastID, changes };
+async function get(sql, params = []) {
+  const rows = await all(sql, params);
+  return rows.length > 0 ? rows[0] : undefined;
 }
 
-function all(sql, params = []) {
-  const stmt = db.prepare(sql);
-  stmt.bind(params);
-  const results = [];
-  while (stmt.step()) {
-    results.push(stmt.getAsObject());
-  }
-  stmt.free();
-  return results;
-}
-
-function get(sql, params = []) {
-  const results = all(sql, params);
-  return results.length > 0 ? results[0] : undefined;
-}
-
-function createTables() {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
-      name TEXT NOT NULL,
-      phone TEXT,
-      email TEXT,
-      dept_id INTEGER,
-      role_id INTEGER,
-      status TEXT DEFAULT 'active' CHECK(status IN ('active', 'disabled', 'pending')),
-      last_login TEXT,
-      created_at TEXT DEFAULT (datetime('now', 'localtime')),
-      updated_at TEXT DEFAULT (datetime('now', 'localtime'))
-    )
-  `);
-  // Migration: add deleted_at column if not exists
-  {
-    var info = db.exec("PRAGMA table_info(users)");
-    var hasDeleted = info.length > 0 && info[0].values.some(function(row){ return row[1] === 'deleted_at'; });
-    if (!hasDeleted) db.run("ALTER TABLE users ADD COLUMN deleted_at TEXT");
-  }
-  try {
-    db.run("ALTER TABLE users ADD COLUMN deleted_at TEXT");
-  } catch (e) {
-    if (!e.message.includes("duplicate column")) console.error(e);
-  }
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS departments (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      code TEXT UNIQUE,
-      parent_id INTEGER,
-      manager TEXT,
-      description TEXT,
-      location TEXT,
-      quota INTEGER DEFAULT 0,
-      created_at TEXT DEFAULT (datetime('now', 'localtime')),
-      FOREIGN KEY (parent_id) REFERENCES departments(id)
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS roles (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT UNIQUE NOT NULL,
-      code TEXT UNIQUE NOT NULL,
-      description TEXT,
-      type TEXT DEFAULT 'custom' CHECK(type IN ('system', 'custom')),
-      data_scope TEXT DEFAULT 'self' CHECK(data_scope IN ('all', 'dept', 'self')),
-      user_count INTEGER DEFAULT 0,
-      deleted_at TEXT DEFAULT NULL,
-      created_at TEXT DEFAULT (datetime('now', 'localtime'))
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS permissions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      module TEXT NOT NULL,
-      code TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL,
-      description TEXT
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS role_permissions (
-      role_id INTEGER NOT NULL,
-      permission_id INTEGER NOT NULL,
-      PRIMARY KEY (role_id, permission_id),
-      FOREIGN KEY (role_id) REFERENCES roles(id),
-      FOREIGN KEY (permission_id) REFERENCES permissions(id)
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS login_logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT,
-      ip TEXT,
-      success INTEGER DEFAULT 0,
-      message TEXT,
-      created_at TEXT DEFAULT (datetime('now', 'localtime'))
-    )
-  `);
-}
-
-function seedData() {
-  const userCount = get('SELECT COUNT(*) as count FROM users');
-  if (userCount && userCount.count > 0) return;
-
+async function seedData() {
   console.log('Initializing seed data...');
 
   const salt = bcrypt.genSaltSync(10);
@@ -195,9 +75,11 @@ function seedData() {
     ['人力资源部', 'DEPT-HR', 1, '陈十二', '人事管理', 'A座6层', 15],
     ['财务部', 'DEPT-FIN', 1, '林十三', '财务管理', 'A座6层', 12],
   ];
-  depts.forEach(d => db.run(
-    'INSERT INTO departments (name, code, parent_id, manager, description, location, quota) VALUES (?, ?, ?, ?, ?, ?, ?)', d
-  ));
+  for (const d of depts) {
+    await run(
+      'INSERT INTO departments (name, code, parent_id, manager, description, location, quota) VALUES (?, ?, ?, ?, ?, ?, ?)', d
+    );
+  }
 
   // 角色
   const roles = [
@@ -205,11 +87,13 @@ function seedData() {
     ['部门经理', 'dept_manager', '管理部门成员', 'custom', 'dept', 2],
     ['普通员工', 'user', '基础办公权限', 'custom', 'self', 2],
   ];
-  roles.forEach(r => db.run(
-    'INSERT INTO roles (name, code, description, type, data_scope, user_count) VALUES (?, ?, ?, ?, ?, ?)', r
-  ));
+  for (const r of roles) {
+    await run(
+      'INSERT INTO roles (name, code, description, type, data_scope, user_count) VALUES (?, ?, ?, ?, ?, ?)', r
+    );
+  }
 
-  // 5个测试账号
+  // 测试账号
   const users = [
     ['admin', bcrypt.hashSync('admin123', salt), '管理员', '13800000001', 'admin@ems.com', 1, 1, 'active'],
     ['zhangsan', bcrypt.hashSync('123456', salt), '张三', '13800000002', 'zhangsan@ems.com', 2, 2, 'active'],
@@ -217,9 +101,11 @@ function seedData() {
     ['wangwu', bcrypt.hashSync('123456', salt), '王五', '13800000004', 'wangwu@ems.com', 4, 3, 'disabled'],
     ['zhaoliu', bcrypt.hashSync('123456', salt), '赵六', '13800000005', 'zhaoliu@ems.com', 7, 3, 'pending'],
   ];
-  users.forEach(u => db.run(
-    'INSERT INTO users (username, password, name, phone, email, dept_id, role_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', u
-  ));
+  for (const u of users) {
+    await run(
+      'INSERT INTO users (username, password, name, phone, email, dept_id, role_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', u
+    );
+  }
 
   // 权限
   const permissions = [
@@ -240,32 +126,31 @@ function seedData() {
     ['角色权限', 'role-delete', '删除角色', '删除系统角色'],
     ['角色权限', 'role-restore', '恢复角色', '从回收站恢复已删除角色'],
   ];
-  permissions.forEach(p => db.run(
-    'INSERT INTO permissions (module, code, name, description) VALUES (?, ?, ?, ?)', p
-  ));
+  for (const p of permissions) {
+    await run(
+      'INSERT INTO permissions (module, code, name, description) VALUES (?, ?, ?, ?)', p
+    );
+  }
 
-  // 按角色分配权限
-  // 超级管理员(1): 全部权限
-  // 部门经理(2): view-dashboard, user-view/create/edit, dept-view/create/edit, role-view
-  // 普通员工(3): view-dashboard, user-view, dept-view
-  const permCodes = all('SELECT id, code FROM permissions');
+  // 角色权限分配
+  const permRows = await all('SELECT id, code FROM permissions');
   const permMap = {};
-  permCodes.forEach(p => { permMap[p.code] = p.id; });
+  permRows.forEach(p => { permMap[p.code] = p.id; });
 
   const rolePermMap = {
-    1: permCodes.map(p => p.id),  // admin: 全部
+    1: permRows.map(p => p.id), // admin: 全部
     2: ['view-dashboard', 'user-view', 'user-create', 'user-edit',
         'dept-view', 'dept-create', 'dept-edit', 'role-view', 'role-delete', 'role-restore'].map(c => permMap[c]).filter(Boolean),
     3: ['view-dashboard', 'user-view', 'dept-view'].map(c => permMap[c]).filter(Boolean),
   };
 
-  Object.entries(rolePermMap).forEach(([roleId, permIds]) => {
-    permIds.forEach(pid => {
-      db.run('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)', [roleId, pid]);
-    });
-  });
+  for (const [roleId, permIds] of Object.entries(rolePermMap)) {
+    for (const pid of permIds) {
+      await run('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)', [roleId, pid]);
+    }
+  }
 
   console.log('Seed data initialized successfully.');
 }
 
-module.exports = { getDB, initDB, run, all, get, saveDB };
+module.exports = { getPool, initDB, run, all, get };

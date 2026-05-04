@@ -9,7 +9,10 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "testTimeout": 10000
+    "testTimeout": 15000,
+    "testMatch": ["**/__tests__/**/*.test.js"],
+    "globalSetup": "./__tests__/globalSetup.js",
+    "globalTeardown": "./__tests__/globalTeardown.js"
   },
   "keywords": [],
   "author": "Kevin Xiao",
@@ -19,7 +22,7 @@
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "sql.js": "^1.14.1"
+    "mysql2": "^3.22.3"
   },
   "devDependencies": {
     "jest": "^29.7.0",
