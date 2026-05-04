@@ -72,7 +72,7 @@ router.post('/', async (req, res) => {
     
     const result = await run(
       'INSERT INTO roles (name, code, description, type, data_scope) VALUES (?, ?, ?, ?, ?)',
-      [name, code, description, type, data_scope]
+      [name, code, description || null, type, data_scope || 'self']
     );
     
     const roleId = result.lastID;
