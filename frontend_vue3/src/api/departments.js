@@ -1,7 +1,7 @@
 import api from './request'
 
-export function getDepartmentList() {
-  return api.get('/departments')
+export function getDepartmentList(params) {
+  return api.get('/departments', { params })
 }
 
 export function getDepartmentById(id) {
