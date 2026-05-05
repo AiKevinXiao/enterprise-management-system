@@ -100,7 +100,7 @@
                 <el-checkbox
                   :model-value="isModuleAllChecked(mod)"
                   :indeterminate="isModuleIndeterminate(mod)"
-                  :disabled="currentView === 'deleted'"
+                  :disabled="currentView === 'deleted' || !canEditRole"
                   @change="val => toggleModule(mod, val)"
                 >
                   <span class="module-title">{{ mod.name }}</span>
@@ -111,7 +111,7 @@
                   v-for="perm in mod.children"
                   :key="perm.id"
                   v-model="permissionChecked[perm.id]"
-                  :disabled="currentView === 'deleted'"
+                  :disabled="currentView === 'deleted' || !canEditRole"
                   @change="handlePermissionChange"
                 >
                   {{ perm.name }}
@@ -165,6 +165,10 @@ import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { getRoleList, createRole, updateRole, deleteRole, restoreRole, getAllPermissions, getRolePermissions, updateRolePermissions } from '../api/roles'
+import { useUserStore } from '../stores/user'
+
+const userStore = useUserStore()
+const canEditRole = computed(() => userStore.hasPermission('role-edit'))
 
 const roleList = ref([])
 const dataScopeMap = {
