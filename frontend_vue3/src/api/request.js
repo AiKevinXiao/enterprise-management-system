@@ -35,7 +35,9 @@ api.interceptors.response.use(
     if (res.success === false) {
       return { success: false, message: res.message || '请求失败', data: null }
     }
-    return { success: true, data: res.data, total: res.total, page: res.page, pageSize: res.pageSize, message: res.message }
+    // data 为 undefined 时，整个响应体作为 data（兼容登录等接口直接返回 token/user）
+    const finalData = res.data !== undefined ? res.data : res
+    return { success: true, data: finalData, total: res.total, page: res.page, pageSize: res.pageSize, message: res.message }
   },
   error => {
     if (error.response) {
