@@ -142,10 +142,21 @@ async function initDB() {
     }
   }
 
-  // 3. 种子数据（仅 users 表为空时）
-  const [rows] = await pool.execute('SELECT COUNT(*) as cnt FROM users');
-  if (rows[0].cnt === 0) {
-    await seedData();
+  // 4. 初始化种子角色权限（幂等：每次 initDB 都执行，清空后重建）
+  const permRows = await all('SELECT id, code FROM permissions ORDER BY id');
+  const permMap = {};
+  permRows.forEach(p => { permMap[p.code] = p.id; });
+  await run('DELETE FROM role_permissions WHERE role_id IN (1, 2, 3)');
+  const rolePermMap = {
+    1: permRows.map(p => p.id), // admin: 全部 16 项
+    2: ['view-dashboard', 'user-view', 'user-create', 'user-edit', 'user-reset-pwd',
+        'dept-view', 'dept-create', 'dept-edit', 'role-view'].map(c => permMap[c]).filter(Boolean),
+    3: ['view-dashboard', 'user-view', 'dept-view'].map(c => permMap[c]).filter(Boolean),
+  };
+  for (const [roleId, permIds] of Object.entries(rolePermMap)) {
+    for (const pid of permIds) {
+      await run('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)', [parseInt(roleId), pid]);
+    }
   }
 
   return pool;
@@ -244,21 +255,24 @@ async function seedData() {
     );
   }
 
-  // 角色权限分配
-  const permRows = await all('SELECT id, code FROM permissions');
+  // 角色权限分配（幂等：先清空种子角色的权限再重建）
+  const permRows = await all('SELECT id, code FROM permissions ORDER BY id');
   const permMap = {};
   permRows.forEach(p => { permMap[p.code] = p.id; });
 
+  // 先清空种子角色 id 1-3 的权限，再重建
+  await run('DELETE FROM role_permissions WHERE role_id IN (1, 2, 3)');
+
   const rolePermMap = {
-    1: permRows.map(p => p.id), // admin: 全部
-    2: ['view-dashboard', 'user-view', 'user-create', 'user-edit',
-        'dept-view', 'dept-create', 'dept-edit', 'role-view', 'role-delete', 'role-restore'].map(c => permMap[c]).filter(Boolean),
+    1: permRows.map(p => p.id), // admin: 全部 16 项
+    2: ['view-dashboard', 'user-view', 'user-create', 'user-edit', 'user-reset-pwd',
+        'dept-view', 'dept-create', 'dept-edit', 'role-view'].map(c => permMap[c]).filter(Boolean),
     3: ['view-dashboard', 'user-view', 'dept-view'].map(c => permMap[c]).filter(Boolean),
   };
 
   for (const [roleId, permIds] of Object.entries(rolePermMap)) {
     for (const pid of permIds) {
-      await run('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)', [roleId, pid]);
+      await run('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)', [parseInt(roleId), pid]);
     }
   }
 
