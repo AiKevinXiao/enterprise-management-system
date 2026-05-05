@@ -13,6 +13,7 @@
                   @click="currentView = 'active'; handleViewChange()"
                 >角色列表</span>
                 <span
+                  v-permission="'role-restore'"
                   class="view-tab"
                   :class="{ active: currentView === 'deleted' }"
                   @click="currentView = 'deleted'; handleViewChange()"

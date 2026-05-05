@@ -10,6 +10,7 @@
               @click="currentView = 'active'; loadData()"
             >部门列表</span>
             <span
+              v-permission="'dept-restore'"
               class="view-tab"
               :class="{ active: currentView === 'deleted' }"
               @click="currentView = 'deleted'; loadData()"
