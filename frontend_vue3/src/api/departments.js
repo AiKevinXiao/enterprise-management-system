@@ -19,3 +19,7 @@ export function updateDepartment(id, data) {
 export function deleteDepartment(id) {
   return api.delete(`/departments/${id}`)
 }
+
+export function restoreDepartment(id) {
+  return api.put(`/departments/${id}/restore`)
+}

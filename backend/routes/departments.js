@@ -8,8 +8,15 @@ router.use(authMiddleware);
 
 // 部门列表
 router.get('/', async (req, res) => {
-  const departments = await all('SELECT * FROM departments WHERE deleted_at IS NULL ORDER BY id');
-  res.json({ code: 200, data: departments });
+  const { deleted } = req.query
+  let sql;
+  if (deleted === 'true') {
+    sql = 'SELECT * FROM departments WHERE deleted_at IS NOT NULL ORDER BY id'
+  } else {
+    sql = 'SELECT * FROM departments WHERE deleted_at IS NULL ORDER BY id'
+  }
+  const departments = await all(sql)
+  res.json({ code: 200, data: departments })
 });
 
 // 新增部门
@@ -45,6 +52,16 @@ router.delete('/:id', async (req, res) => {
   if (!existing) return res.status(404).json({ code: 404, message: '部门不存在' });
   await run('UPDATE departments SET deleted_at = NOW() WHERE id = ?', [id]);
   res.json({ code: 200, message: '删除成功' });
+});
+
+// 恢复部门
+router.put('/:id/restore', async (req, res) => {
+  const { id } = req.params;
+  const existing = await get('SELECT * FROM departments WHERE id = ? AND deleted_at IS NOT NULL', [id]);
+  if (!existing) return res.status(404).json({ code: 404, message: '部门不存在或未被删除' });
+  await run('UPDATE departments SET deleted_at = NULL WHERE id = ?', [id]);
+  const dept = await get('SELECT * FROM departments WHERE id = ?', [id]);
+  res.json({ code: 200, data: dept, message: '恢复成功' });
 });
 
 module.exports = router;
