@@ -135,14 +135,23 @@ describe('ROLES 角色模块', () => {
 
   describe('PUT /api/roles/:id/permissions', () => {
     test('更新角色权限', async () => {
-      const res = await authPut(token, '/api/roles/1/permissions', {
-        permission_ids: [1, 2, 3]
+      // 创建一个临时角色来测试权限更新，不修改 seed 角色
+      const created = await authPost(token, '/api/roles', {
+        name: '权限测试' + ts(),
+        code: 'permtest_' + ts(),
+        type: 'custom',
+        data_scope: 'self'
+      });
+      const roleId = created.body.data.id;
+
+      const res = await authPut(token, `/api/roles/${roleId}/permissions`, {
+        permission_ids: [1, 2, 8]
       });
       expect(res.status).toBe(200);
       expect(res.body.message).toContain('成功');
 
       // 验证权限已更新
-      const detail = await authGet(token, '/api/roles/1');
+      const detail = await authGet(token, `/api/roles/${roleId}`);
       expect(detail.body.data.permissions.length).toBe(3);
     });
   });
