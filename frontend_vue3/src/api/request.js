@@ -23,14 +23,19 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   response => {
     const res = response.data
+    const hasCode = typeof res.code === 'number'
+    if (hasCode) {
+      if (res.code !== 200) {
+        return { success: false, message: res.message || `请求失败(${res.code})`, data: null }
+      }
+      // 兼容 { code, data, total, page, pageSize } 格式
+      // data 为数组（列表）或对象（单条）
+      return { success: true, data: res.data, total: res.total, page: res.page, pageSize: res.pageSize, message: res.message }
+    }
     if (res.success === false) {
       return { success: false, message: res.message || '请求失败', data: null }
     }
-    // 保留分页信息（data/total/page/pageSize）
-    if (res.data !== undefined && res.total !== undefined) {
-      return { success: true, data: res.data, total: res.total, page: res.page, pageSize: res.pageSize, message: res.message }
-    }
-    return { success: true, data: res.data || res, message: res.message }
+    return { success: true, data: res.data, total: res.total, page: res.page, pageSize: res.pageSize, message: res.message }
   },
   error => {
     if (error.response) {
