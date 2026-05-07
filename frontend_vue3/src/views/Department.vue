@@ -3,14 +3,26 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>部门管理</span>
+          <div class="view-tabs">
+            <span
+              class="view-tab"
+              :class="{ active: currentView === 'active' }"
+              @click="currentView = 'active'; loadData()"
+            >部门列表</span>
+            <span
+              v-permission="'dept-restore'"
+              class="view-tab"
+              :class="{ active: currentView === 'deleted' }"
+              @click="currentView = 'deleted'; loadData()"
+            >回收站</span>
+          </div>
           <el-button type="primary" size="small" v-permission="'dept-create'" @click="handleAdd">
             <el-icon><Plus /></el-icon> 新增部门
           </el-button>
         </div>
       </template>
 
-      <el-table :data="tableData" v-loading="loading" row-key="id" default-expand-all>
+      <el-table :data="currentView === 'active' ? tableData : deletedList" v-loading="loading" row-key="id" default-expand-all>
         <el-table-column prop="name" label="部门名称" min-width="200" />
         <el-table-column prop="code" label="部门编码" width="150" />
         <el-table-column label="状态" width="100">
@@ -21,10 +33,16 @@
           </template>
         </el-table-column>
         <el-table-column prop="created_at" label="创建时间" width="180" />
+        <el-table-column v-if="currentView === 'deleted'" prop="deleted_at" label="删除时间" width="180" />
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" v-permission="'dept-edit'" @click="handleEdit(row)">编辑</el-button>
-            <el-button link type="danger" v-permission="'dept-delete'" @click="handleDelete(row)">删除</el-button>
+            <template v-if="currentView === 'active'">
+              <el-button link type="primary" v-permission="'dept-edit'" @click="handleEdit(row)">编辑</el-button>
+              <el-button link type="danger" v-permission="'dept-delete'" @click="handleDelete(row)">删除</el-button>
+            </template>
+            <template v-else>
+              <el-button link type="success" v-permission="'dept-restore'" @click="handleRestore(row)">恢复</el-button>
+            </template>
           </template>
         </el-table-column>
       </el-table>
@@ -68,7 +86,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import { getDepartmentList, createDepartment, updateDepartment, deleteDepartment } from '../api/departments'
+import { getDepartmentList, createDepartment, updateDepartment, deleteDepartment, restoreDepartment } from '../api/departments'
 
 const loading = ref(false)
 const tableData = ref([])
@@ -92,13 +110,20 @@ const rules = {
   name: [{ required: true, message: '请输入部门名称', trigger: 'blur' }]
 }
 
+const currentView = ref('active')
+const deletedList = ref([])
+
 async function loadData() {
   loading.value = true
   try {
-    const res = await getDepartmentList()
+    const res = await getDepartmentList({ deleted: currentView.value === 'deleted' ? 'true' : undefined })
     if (res.success) {
-      tableData.value = buildTree(res.data)
-      deptTree.value = tableData.value
+      if (currentView.value === 'active') {
+        tableData.value = buildTree(res.data)
+        deptTree.value = res.data
+      } else {
+        deletedList.value = res.data
+      }
     }
   } catch (e) {
     ElMessage.error('加载数据失败')
@@ -169,7 +194,7 @@ async function handleSubmit() {
 
 async function handleDelete(row) {
   try {
-    await ElMessageBox.confirm(`确定要删除部门 "${row.name}" 吗？`, '提示', {
+    await ElMessageBox.confirm(`确定要删除部门 "${row.name}" 吗？删除后可从回收站恢复。`, '提示', {
       type: 'warning'
     })
     const res = await deleteDepartment(row.id)
@@ -184,12 +209,50 @@ async function handleDelete(row) {
   }
 }
 
+async function handleRestore(row) {
+  try {
+    const res = await restoreDepartment(row.id)
+    if (res.success) {
+      ElMessage.success('恢复成功')
+      loadData()
+    } else {
+      ElMessage.error(res.message || '恢复失败')
+    }
+  } catch (e) {
+    ElMessage.error('网络错误')
+  }
+}
+
 onMounted(() => {
   loadData()
 })
 </script>
 
 <style scoped>
+.view-tabs {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.view-tab {
+  font-size: 13px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.view-tab:hover {
+  color: #64748b;
+}
+
+.view-tab.active {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;

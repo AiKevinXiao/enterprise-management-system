@@ -6,18 +6,23 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-router.get('/stats', (req, res) => {
-  const totalUsers = get('SELECT COUNT(*) as count FROM users');
-  const activeUsers = get('SELECT COUNT(*) as count FROM users WHERE status = \'active\'');
-  const totalDepts = get('SELECT COUNT(*) as count FROM departments');
-  const recentLogs = all('SELECT * FROM login_logs ORDER BY created_at DESC LIMIT 5');
+router.get('/stats', async (req, res) => {
+  try {
+    const totalUsers = await get('SELECT COUNT(*) as count FROM users WHERE deleted_at IS NULL');
+    const activeUsers = await get('SELECT COUNT(*) as count FROM users WHERE status = \'active\' AND deleted_at IS NULL');
+    const totalDepts = await get('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL');
+    const recentLogs = await all('SELECT * FROM login_logs ORDER BY created_at DESC LIMIT 5');
 
-  res.json({
-    totalUsers: totalUsers ? totalUsers.count : 0,
-    activeUsers: activeUsers ? activeUsers.count : 0,
-    totalDepts: totalDepts ? totalDepts.count : 0,
-    recentLogs
-  });
+    res.json({
+      totalUsers: totalUsers ? totalUsers.count : 0,
+      activeUsers: activeUsers ? activeUsers.count : 0,
+      totalDepts: totalDepts ? totalDepts.count : 0,
+      recentLogs
+    });
+  } catch (err) {
+    console.error('GET /dashboard/stats error:', err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 });
 
 module.exports = router;

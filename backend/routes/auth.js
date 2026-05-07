@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { getDB, all, get, run } = require('../db');
+const { all, get, run } = require('../db');
 
 const router = express.Router();
 
@@ -11,98 +11,103 @@ const JWT_EXPIRES = '24h';
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 300;
 
-router.post('/login', (req, res) => {
-  const { username, password } = req.body;
+router.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ message: '请输入用户名和密码' });
-  }
+    if (!username || !password) {
+      return res.status(400).json({ message: '请输入用户名和密码' });
+    }
 
-  const user = get('SELECT * FROM users WHERE username = ?', [username]);
+    const user = await get('SELECT * FROM users WHERE username = ?', [username]);
 
-  if (!user) {
-    logLogin(username, req.ip, false, '用户不存在');
-    return res.status(401).json({ message: '用户名或密码错误' });
-  }
+    if (!user) {
+      await logLogin(username, req.ip, false, '用户不存在');
+      return res.status(401).json({ message: '用户名或密码错误' });
+    }
 
-  if (user.status === 'disabled') {
-    return res.status(403).json({ message: '账号已被禁用，请联系管理员' });
-  }
+    if (user.status === 'disabled') {
+      return res.status(403).json({ message: '账号已被禁用，请联系管理员' });
+    }
 
-  if (user.status === 'pending') {
-    return res.status(403).json({ message: '账号待激活，请联系管理员' });
-  }
+    if (user.status === 'pending') {
+      return res.status(403).json({ message: '账号待激活，请联系管理员' });
+    }
 
-  const isValid = bcrypt.compareSync(password, user.password);
+    const isValid = bcrypt.compareSync(password, user.password);
 
-  if (!isValid) {
-    logLogin(username, req.ip, false, '密码错误');
+    if (!isValid) {
+      await logLogin(username, req.ip, false, '密码错误');
 
-    const attempts = getFailedAttempts(username);
-    const newAttempts = attempts + 1;
+      const attempts = await getFailedAttempts(username);
+      const newAttempts = attempts + 1;
 
-    if (newAttempts >= MAX_ATTEMPTS) {
-      return res.status(423).json({
-        message: `登录失败次数过多，账号已锁定${LOCKOUT_DURATION / 60}分钟`,
-        locked: true,
-        remaining: LOCKOUT_DURATION
+      if (newAttempts >= MAX_ATTEMPTS) {
+        return res.status(423).json({
+          message: `登录失败次数过多，账号已锁定${LOCKOUT_DURATION / 60}分钟`,
+          locked: true,
+          remaining: LOCKOUT_DURATION
+        });
+      }
+
+      const remaining = MAX_ATTEMPTS - newAttempts;
+      return res.status(401).json({
+        message: `用户名或密码错误，还剩${remaining}次尝试机会`,
+        attempts: newAttempts,
+        remaining
       });
     }
 
-    const remaining = MAX_ATTEMPTS - newAttempts;
-    return res.status(401).json({
-      message: `用户名或密码错误，还剩${remaining}次尝试机会`,
-      attempts: newAttempts,
-      remaining
+    await run('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id]);
+
+    await logLogin(username, req.ip, true, '登录成功');
+
+    // 查询用户权限码列表
+    const permissions = await all(
+      'SELECT p.code FROM permissions p JOIN role_permissions rp ON p.id = rp.permission_id WHERE rp.role_id = ?',
+      [user.role_id]
+    );
+    const permCodes = permissions.map(p => p.code);
+
+    const role = await get('SELECT * FROM roles WHERE id = ?', [user.role_id]);
+    const dept = await get('SELECT * FROM departments WHERE id = ?', [user.dept_id]);
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        username: user.username,
+        role_id: user.role_id,
+        dept_id: user.dept_id,
+        data_scope: role ? role.data_scope : 'self',
+        permissions: permCodes
+      },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES }
+    );
+
+    res.json({
+      message: '登录成功',
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        status: user.status,
+        role: role ? { id: role.id, name: role.name, code: role.code, data_scope: role.data_scope } : null,
+        dept: dept ? { id: dept.id, name: dept.name } : null,
+        permissions: permCodes,
+        last_login: user.last_login
+      }
     });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ message: '登录失败' });
   }
-
-  run('UPDATE users SET last_login = datetime(\'now\', \'localtime\') WHERE id = ?', [user.id]);
-
-  logLogin(username, req.ip, true, '登录成功');
-
-  // 查询用户权限码列表
-  const permissions = all(
-    'SELECT p.code FROM permissions p JOIN role_permissions rp ON p.id = rp.permission_id WHERE rp.role_id = ?',
-    [user.role_id]
-  );
-  const permCodes = permissions.map(p => p.code);
-
-  const role = get('SELECT * FROM roles WHERE id = ?', [user.role_id]);
-  const dept = get('SELECT * FROM departments WHERE id = ?', [user.dept_id]);
-
-  const token = jwt.sign(
-    {
-      id: user.id,
-      username: user.username,
-      role_id: user.role_id,
-      dept_id: user.dept_id,
-      data_scope: role ? role.data_scope : 'self',
-      permissions: permCodes
-    },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRES }
-  );
-
-  res.json({
-    message: '登录成功',
-    token,
-    user: {
-      id: user.id,
-      username: user.username,
-      name: user.name,
-      phone: user.phone,
-      email: user.email,
-      status: user.status,
-      role: role ? { id: role.id, name: role.name, code: role.code, data_scope: role.data_scope } : null,
-      dept: dept ? { id: dept.id, name: dept.name } : null,
-      permissions: permCodes,
-      last_login: user.last_login
-    }
-  });
 });
 
-router.get('/me', (req, res) => {
+router.get('/me', async (req, res) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ message: '未登录' });
@@ -110,14 +115,14 @@ router.get('/me', (req, res) => {
 
   try {
     const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
-    const user = get('SELECT * FROM users WHERE id = ?', [decoded.id]);
+    const user = await get('SELECT * FROM users WHERE id = ?', [decoded.id]);
 
     if (!user) {
       return res.status(401).json({ message: '用户不存在' });
     }
 
-    const role = get('SELECT * FROM roles WHERE id = ?', [user.role_id]);
-    const permissions = all(
+    const role = await get('SELECT * FROM roles WHERE id = ?', [user.role_id]);
+    const permissions = await all(
       'SELECT p.* FROM permissions p JOIN role_permissions rp ON p.id = rp.permission_id WHERE rp.role_id = ?',
       [user.role_id]
     );
@@ -141,16 +146,16 @@ router.post('/logout', (req, res) => {
   res.json({ message: '退出成功' });
 });
 
-function getFailedAttempts(username) {
-  const result = get(
-    'SELECT COUNT(*) as count FROM login_logs WHERE username = ? AND success = 0 AND created_at > datetime(\'now\', \'-5 minutes\', \'localtime\')',
+async function getFailedAttempts(username) {
+  const result = await get(
+    'SELECT COUNT(*) as count FROM login_logs WHERE username = ? AND success = 0 AND created_at > DATE_SUB(NOW(), INTERVAL 5 MINUTE)',
     [username]
   );
   return result ? result.count : 0;
 }
 
-function logLogin(username, ip, success, message) {
-  run(
+async function logLogin(username, ip, success, message) {
+  await run(
     'INSERT INTO login_logs (username, ip, success, message) VALUES (?, ?, ?, ?)',
     [username, ip, success ? 1 : 0, message]
   );

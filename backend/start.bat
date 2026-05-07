@@ -1,6 +1,2 @@
-@echo off
-chcp 65001 >nul
-cd /d "E:\ems-backend"
-del /q data\ems.db 2>nul
-echo Starting server...
+cd /d E:\AI_Project\企业管理系统\backend
 node app.js

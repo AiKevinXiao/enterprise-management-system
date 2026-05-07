@@ -458,6 +458,8 @@ async function handleBatchRestore() {
     const res = await batchAction('restore', ids)
     if (res.success) {
       ElMessage.success('批量恢复成功')
+      // 显式切换到用户列表视图，确保加载已恢复的数据
+      currentView.value = 'active'
       loadData()
     } else {
       ElMessage.error(res.message || '批量恢复失败')
