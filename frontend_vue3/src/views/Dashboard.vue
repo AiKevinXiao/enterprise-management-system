@@ -91,8 +91,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '../stores/user'
-import { getUserList } from '../api/users'
-import { getDepartmentList } from '../api/departments'
+import { getDashboardStats } from '../api/dashboard'
 import { getRoleList } from '../api/roles'
 import { User, OfficeBuilding, Key, CircleCheck } from '@element-plus/icons-vue'
 
@@ -123,26 +122,23 @@ function hasPermission(code) {
 }
 
 onMounted(async () => {
-  // 加载统计数据
   try {
-    const [usersRes, deptsRes, rolesRes] = await Promise.all([
-      getUserList({ page: 1, pageSize: 1 }),
-      getDepartmentList(),
+    const [statsRes, rolesRes] = await Promise.all([
+      getDashboardStats(),
       getRoleList()
     ])
     
-    if (usersRes.success) {
-      stats.value.totalUsers = usersRes.data.total || 0
-    }
-    if (deptsRes.success) {
-      stats.value.totalDepts = deptsRes.data.length || 0
+    if (statsRes.success) {
+      const d = statsRes.data
+      stats.value.totalUsers = d.totalUsers ?? 0
+      stats.value.activeUsers = d.activeUsers ?? 0
+      stats.value.totalDepts = d.totalDepts ?? 0
     }
     if (rolesRes.success) {
       stats.value.totalRoles = rolesRes.data.length || 0
     }
-    stats.value.activeUsers = Math.floor(stats.value.totalUsers * 0.8)
   } catch (e) {
-    // ignore
+    console.error('加载仪表盘数据失败:', e)
   }
 })
 </script>
