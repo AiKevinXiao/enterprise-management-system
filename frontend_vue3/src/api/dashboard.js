@@ -1,5 +1,5 @@
-import request from '../utils/request'
+import api from './request'
 
 export function getDashboardStats() {
-  return request.get('/dashboard/stats')
+  return api.get('/dashboard/stats')
 }
