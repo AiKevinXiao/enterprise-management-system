@@ -9,7 +9,9 @@ router.use(authMiddleware);
 router.get('/stats', async (req, res) => {
   try {
     const totalUsers = await get('SELECT COUNT(*) as count FROM users WHERE deleted_at IS NULL');
-    const activeUsers = await get('SELECT COUNT(*) as count FROM users WHERE status = \'active\' AND deleted_at IS NULL');
+    const activeUsers = await get(
+      'SELECT COUNT(DISTINCT username) as count FROM login_logs WHERE success = 1 AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)'
+    );
     const totalDepts = await get('SELECT COUNT(*) as count FROM departments WHERE deleted_at IS NULL');
     const recentLogs = await all('SELECT * FROM login_logs ORDER BY created_at DESC LIMIT 5');
 
