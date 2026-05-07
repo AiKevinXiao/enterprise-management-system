@@ -4,6 +4,7 @@
  */
 const request = require('supertest');
 const app = require('../app');
+const { getPool } = require('../db');
 
 describe('AUTH 认证模块', () => {
   describe('POST /api/auth/login', () => {
@@ -44,21 +45,30 @@ describe('AUTH 认证模块', () => {
     });
 
     test('被禁用账号返回 403', async () => {
+      const pool = await getPool();
+      // 先把 wangwu 设为禁用，测完恢复
+      await pool.query(`UPDATE users SET status = 'disabled' WHERE username = 'wangwu'`);
       const res = await request(app)
         .post('/api/auth/login')
         .send({ username: 'wangwu', password: '123456' });
 
       expect(res.status).toBe(403);
       expect(res.body.message).toContain('禁用');
+
+      await pool.query(`UPDATE users SET status = 'active' WHERE username = 'wangwu'`);
     });
 
     test('待激活账号返回 403', async () => {
+      const pool = await getPool();
+      await pool.query(`UPDATE users SET status = 'pending' WHERE username = 'wangwu'`);
       const res = await request(app)
         .post('/api/auth/login')
-        .send({ username: 'zhaoliu', password: '123456' });
+        .send({ username: 'wangwu', password: '123456' });
 
       expect(res.status).toBe(403);
       expect(res.body.message).toContain('激活');
+
+      await pool.query(`UPDATE users SET status = 'active' WHERE username = 'wangwu'`);
     });
   });
 

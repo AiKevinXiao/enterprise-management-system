@@ -19,6 +19,9 @@ module.exports = async () => {
     // 等待后端所有写入落盘
     await new Promise(r => setTimeout(r, 500));
 
+    // 0. 关闭外键检查（允许清理存在引用关系的测试数据）
+    await pool.query(`SET FOREIGN_KEY_CHECKS = 0`);
+
     // 1. 清理 departments（保留 id 1-8）
     await pool.query(`DELETE FROM departments WHERE id > 8`);
 
@@ -33,7 +36,13 @@ module.exports = async () => {
     // 4. 重置 login_logs（全部清空）
     await pool.query(`DELETE FROM login_logs`);
 
-    // 5. 关闭连接池
+    // 4.5 重置 operation_logs（全部清空，无种子数据）
+    await pool.query(`DELETE FROM operation_logs`);
+
+    // 5. 重新开启外键检查
+    await pool.query(`SET FOREIGN_KEY_CHECKS = 1`);
+
+    // 6. 关闭连接池
     if (pool && pool.end) {
       await pool.end();
     }

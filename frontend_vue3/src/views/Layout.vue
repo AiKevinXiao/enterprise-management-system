@@ -30,6 +30,10 @@
           <el-icon><User /></el-icon>
           <span>用户管理</span>
         </el-menu-item>
+        <el-menu-item index="/operation-logs" v-if="hasPermission('log-view')">
+          <el-icon><Document /></el-icon>
+          <span>操作日志</span>
+        </el-menu-item>
       </el-menu>
     </aside>
 
@@ -77,7 +81,7 @@ import { useUserStore } from '../stores/user'
 import { ElMessageBox } from 'element-plus'
 import { 
   Odometer, User, OfficeBuilding, Key, 
-  ArrowDown, SwitchButton 
+  ArrowDown, SwitchButton, Document
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

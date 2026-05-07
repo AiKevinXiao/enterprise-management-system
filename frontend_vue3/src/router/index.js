@@ -38,6 +38,12 @@ const routes = [
         component: () => import('../views/RolePermission.vue'),
         meta: { title: '角色权限', permission: 'role-view' }
       },
+      {
+        path: 'operation-logs',
+        name: 'OperationLog',
+        component: () => import('../views/OperationLog.vue'),
+        meta: { title: '操作日志', permission: 'log-view' }
+      },
 
     ]
   }

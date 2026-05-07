@@ -102,6 +102,24 @@ const CREATE_TABLES = [
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS operation_logs (
+    id INT NOT NULL AUTO_INCREMENT,
+    user_id INT DEFAULT NULL,
+    username VARCHAR(50) DEFAULT NULL,
+    module VARCHAR(50) NOT NULL COMMENT '操作模块: role/department/user',
+    action VARCHAR(50) NOT NULL COMMENT '操作类型: create/update/delete/restore/update-permissions',
+    target_id INT DEFAULT NULL COMMENT '操作目标ID',
+    target_name VARCHAR(100) DEFAULT NULL COMMENT '操作目标名称',
+    detail TEXT COMMENT '操作详情(JSON)',
+    ip VARCHAR(45) DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_module (module),
+    KEY idx_action (action),
+    KEY idx_user_id (user_id),
+    KEY idx_created_at (created_at)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 ];
 
 // ─── 迁移：检查并补充缺失的列 ──────────────────────────
@@ -142,13 +160,25 @@ async function initDB() {
     }
   }
 
+  // 3. 确保操作日志权限存在（幂等）
+  const logPerms = [
+    ['操作日志', 'log-view', '查看操作日志', '查看系统操作日志'],
+  ];
+  for (const lp of logPerms) {
+    const exists = await get('SELECT id FROM permissions WHERE code = ?', [lp[1]]);
+    if (!exists) {
+      await run('INSERT INTO permissions (module, code, name, description) VALUES (?, ?, ?, ?)', lp);
+      console.log(`Permission added: ${lp[1]}`);
+    }
+  }
+
   // 4. 初始化种子角色权限（幂等：每次 initDB 都执行，清空后重建）
   const permRows = await all('SELECT id, code FROM permissions ORDER BY id');
   const permMap = {};
   permRows.forEach(p => { permMap[p.code] = p.id; });
   await run('DELETE FROM role_permissions WHERE role_id IN (1, 2, 3)');
   const rolePermMap = {
-    1: permRows.map(p => p.id), // admin: 全部 16 项
+    1: permRows.map(p => p.id), // admin: 全部权限
     2: ['view-dashboard', 'user-view', 'user-create', 'user-edit', 'user-reset-pwd',
         'dept-view', 'dept-create', 'dept-edit', 'role-view'].map(c => permMap[c]).filter(Boolean),
     3: ['view-dashboard', 'user-view', 'dept-view'].map(c => permMap[c]).filter(Boolean),

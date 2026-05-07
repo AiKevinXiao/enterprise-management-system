@@ -1,6 +1,7 @@
 const express = require('express');
 const { all, get, run } = require('../db');
 const { authMiddleware } = require('../middleware/auth');
+const { logOperation } = require('../middleware/operationLog');
 
 const router = express.Router();
 
@@ -85,6 +86,17 @@ router.post('/', async (req, res) => {
     }
     
     const role = await get('SELECT * FROM roles WHERE id = ?', [roleId]);
+    
+    // 记录操作日志
+    await logOperation({
+      module: 'role',
+      action: 'create',
+      targetId: roleId,
+      targetName: name,
+      detail: { name, code, description, type, data_scope, permission_ids },
+      req
+    });
+    
     res.status(201).json({ code: 200, data: role, message: '角色创建成功' });
   } catch (err) {
     res.status(500).json({ code: 500, message: err.message });
@@ -153,6 +165,17 @@ router.put('/:id', async (req, res) => {
     }
     
     const updatedRole = await get('SELECT * FROM roles WHERE id = ?', [id]);
+    
+    // 记录操作日志
+    await logOperation({
+      module: 'role',
+      action: 'update',
+      targetId: id,
+      targetName: name || role.name,
+      detail: { name, description, type, data_scope, permission_ids: finalPermIds },
+      req
+    });
+    
     res.json({ code: 200, data: updatedRole, message: '角色更新成功' });
   } catch (err) {
     res.status(500).json({ code: 500, message: err.message });
@@ -182,6 +205,15 @@ router.delete('/:id', async (req, res) => {
     // 软删除
     await run('UPDATE roles SET deleted_at = NOW() WHERE id = ?', [id]);
     
+    // 记录操作日志
+    await logOperation({
+      module: 'role',
+      action: 'delete',
+      targetId: id,
+      targetName: role.name,
+      req
+    });
+    
     res.json({ code: 200, message: '角色删除成功' });
   } catch (err) {
     res.status(500).json({ code: 500, message: err.message });
@@ -206,6 +238,16 @@ router.put('/:id/restore', async (req, res) => {
     await run('UPDATE roles SET deleted_at = NULL WHERE id = ?', [id]);
     
     const restored = await get('SELECT * FROM roles WHERE id = ?', [id]);
+    
+    // 记录操作日志
+    await logOperation({
+      module: 'role',
+      action: 'restore',
+      targetId: id,
+      targetName: role.name,
+      req
+    });
+    
     res.json({ code: 200, data: restored, message: '角色恢复成功' });
   } catch (err) {
     res.status(500).json({ code: 500, message: err.message });
@@ -232,6 +274,16 @@ router.put('/:id/permissions', async (req, res) => {
         await run('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)', [id, pid]);
       }
     }
+    
+    // 记录操作日志
+    await logOperation({
+      module: 'role',
+      action: 'update-permissions',
+      targetId: id,
+      targetName: role.name,
+      detail: { permission_ids },
+      req
+    });
     
     res.json({ code: 200, message: '权限更新成功' });
   } catch (err) {
