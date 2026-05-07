@@ -463,9 +463,10 @@ async function handleSavePermissions() {
   }
 }
 
-onMounted(() => {
-  loadAllPermissions()
-  loadRoleList()
+onMounted(async () => {
+  await loadAllPermissions()
+  await loadRoleList()
+  loadRolePermissions()
 })
 </script>
 
