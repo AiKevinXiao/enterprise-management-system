@@ -42,9 +42,9 @@ test.describe('角色权限', () => {
     await expect(page.locator('.el-col:last-child .el-card')).toBeVisible()
     await expect(page.locator('.el-col:last-child .el-card').locator('.el-card__header')).toContainText(roleName?.trim() || '')
 
-    // 权限模块应有数据（至少有 4 个模块：首页、角色权限、部门架构、用户管理）
+    // 权限模块应有数据（至少有 5 个模块：首页、角色权限、部门架构、用户管理、操作日志）
     const modules = page.locator('.permission-module')
-    await expect(modules).toHaveCount(4, { timeout: 10000 })
+    await expect(modules).toHaveCount(5, { timeout: 10000 })
 
     // 每个模块下应有 checkbox 子项
     const firstModuleChecks = modules.first().locator('.module-permissions .el-checkbox')
@@ -60,7 +60,7 @@ test.describe('角色权限', () => {
 
   test('切换角色 - 权限数据跟随更新', async ({ page }) => {
     // 等待权限加载完成
-    await expect(page.locator('.permission-module')).toHaveCount(4, { timeout: 10000 })
+    await expect(page.locator('.permission-module')).toHaveCount(5, { timeout: 10000 })
     const modules = page.locator('.permission-module')
 
     // 记录第一个角色的勾选数
@@ -86,7 +86,7 @@ test.describe('角色权限', () => {
   // ---------- 模块全选/取消 ----------
 
   test('模块全选/取消 - checkbox 联动正确', async ({ page }) => {
-    await expect(page.locator('.permission-module')).toHaveCount(4, { timeout: 10000 })
+    await expect(page.locator('.permission-module')).toHaveCount(5, { timeout: 10000 })
     const firstModule = page.locator('.permission-module').first()
     const moduleCheckbox = firstModule.locator('.module-header .el-checkbox')
     const childCheckboxes = firstModule.locator('.module-permissions .el-checkbox')
