@@ -167,11 +167,19 @@ function formatDetail(row) {
     if (obj.code) parts.push(`编码: ${obj.code}`)
     if (obj.data_scope) parts.push(`数据权限: ${obj.data_scope}`)
     
-    // 优先显示权限名称（人类可读）
-    if (obj.permission_names && obj.permission_names.length > 0) {
+    // 权限变化记录（人类可读）
+    if (obj.addedNames && obj.addedNames.length > 0) {
+      parts.push(`+ ${obj.addedNames.join('、')}`)
+    }
+    if (obj.removedNames && obj.removedNames.length > 0) {
+      parts.push(`- ${obj.removedNames.join('、')}`)
+    }
+    
+    // 兼容旧日志：只有 permission_ids 或 permission_names
+    if (obj.permission_names && obj.permission_names.length > 0 && !obj.addedNames) {
       const permNames = obj.permission_names.map(p => p.name).join('、')
       parts.push(`权限: ${permNames}`)
-    } else if (obj.permission_ids) {
+    } else if (obj.permission_ids && !obj.addedNames) {
       parts.push(`权限ID: [${obj.permission_ids.join(', ')}]`)
     }
     

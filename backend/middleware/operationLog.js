@@ -38,6 +38,13 @@ async function enrichPermissionIds(permissionIds) {
 }
 
 /**
+ * 获取权限 ID 对应的名称映射（供其他模块使用）
+ */
+async function getPermissionNames(permissionIds) {
+  return enrichPermissionIds(permissionIds);
+}
+
+/**
  * 操作日志记录中间件
  * 用法：在路由处理成功后调用 res._logOperation() 或直接在路由中间件中使用
  */
@@ -104,4 +111,4 @@ function operationLogMiddleware(module, action, getTarget) {
   };
 }
 
-module.exports = { logOperation, operationLogMiddleware };
+module.exports = { logOperation, operationLogMiddleware, getPermissionNames };

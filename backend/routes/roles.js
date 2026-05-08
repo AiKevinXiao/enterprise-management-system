@@ -1,9 +1,38 @@
 const express = require('express');
 const { all, get, run } = require('../db');
 const { authMiddleware } = require('../middleware/auth');
-const { logOperation } = require('../middleware/operationLog');
+const { logOperation, getPermissionNames } = require('../middleware/operationLog');
 
 const router = express.Router();
+
+/**
+ * 获取角色当前权限 ID 列表
+ */
+async function getRolePermissionIds(roleId) {
+  const perms = await all('SELECT permission_id FROM role_permissions WHERE role_id = ?', [roleId]);
+  return perms.map(p => p.permission_id);
+}
+
+/**
+ * 计算权限差异
+ * @returns {{ added: number[], removed: number[], addedNames: string[], removedNames: string[] }}
+ */
+async function computePermissionDiff(oldIds, newIds) {
+  const oldSet = new Set(oldIds || []);
+  const newSet = new Set(newIds || []);
+  
+  const added = [...newSet].filter(id => !oldSet.has(id));
+  const removed = [...oldSet].filter(id => !newSet.has(id));
+  
+  // 获取权限名称
+  const permMap = await getPermissionNames([...added, ...removed]);
+  const permNameMap = new Map(permMap.map(p => [p.id, p.name]));
+  
+  const addedNames = added.map(id => permNameMap.get(id) || `权限${id}`);
+  const removedNames = removed.map(id => permNameMap.get(id) || `权限${id}`);
+  
+  return { added, removed, addedNames, removedNames };
+}
 
 router.use(authMiddleware);
 
@@ -147,6 +176,7 @@ router.put('/:id', async (req, res) => {
     
     // 更新权限关联
     let finalPermIds = permission_ids;
+    let diff = null;
     
     // 如果提供了 permission_codes，转换为 IDs
     if (permission_codes !== undefined && !permission_ids) {
@@ -158,10 +188,16 @@ router.put('/:id', async (req, res) => {
     }
     
     if (finalPermIds !== undefined) {
+      // 变更前查询当前权限
+      const oldIds = await getRolePermissionIds(id);
+      
       await run('DELETE FROM role_permissions WHERE role_id = ?', [id]);
       for (const pid of finalPermIds) {
         await run('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)', [id, pid]);
       }
+      
+      // 计算权限变化
+      diff = await computePermissionDiff(oldIds, finalPermIds);
     }
     
     const updatedRole = await get('SELECT * FROM roles WHERE id = ?', [id]);
@@ -172,7 +208,18 @@ router.put('/:id', async (req, res) => {
       action: 'update',
       targetId: id,
       targetName: name || role.name,
-      detail: { name, description, type, data_scope, permission_ids: finalPermIds },
+      detail: {
+        name: name || undefined,
+        description: description || undefined,
+        type: type || undefined,
+        data_scope: data_scope || undefined,
+        ...(diff ? {
+          added: diff.added,
+          removed: diff.removed,
+          addedNames: diff.addedNames,
+          removedNames: diff.removedNames
+        } : {})
+      },
       req
     });
     
@@ -265,6 +312,9 @@ router.put('/:id/permissions', async (req, res) => {
       return res.status(404).json({ code: 404, message: '角色不存在' });
     }
     
+    // 变更前查询当前权限
+    const oldIds = await getRolePermissionIds(id);
+    
     // 删除旧权限
     await run('DELETE FROM role_permissions WHERE role_id = ?', [id]);
     
@@ -275,13 +325,21 @@ router.put('/:id/permissions', async (req, res) => {
       }
     }
     
-    // 记录操作日志
+    // 计算权限变化
+    const diff = await computePermissionDiff(oldIds, permission_ids || []);
+    
+    // 记录操作日志（记录变化内容）
     await logOperation({
       module: 'role',
       action: 'update-permissions',
       targetId: id,
       targetName: role.name,
-      detail: { permission_ids },
+      detail: {
+        added: diff.added,
+        removed: diff.removed,
+        addedNames: diff.addedNames,
+        removedNames: diff.removedNames
+      },
       req
     });
     
