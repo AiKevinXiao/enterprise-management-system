@@ -166,7 +166,15 @@ function formatDetail(row) {
     if (obj.name) parts.push(`名称: ${obj.name}`)
     if (obj.code) parts.push(`编码: ${obj.code}`)
     if (obj.data_scope) parts.push(`数据权限: ${obj.data_scope}`)
-    if (obj.permission_ids) parts.push(`权限ID: [${obj.permission_ids.join(', ')}]`)
+    
+    // 优先显示权限名称（人类可读）
+    if (obj.permission_names && obj.permission_names.length > 0) {
+      const permNames = obj.permission_names.map(p => p.name).join('、')
+      parts.push(`权限: ${permNames}`)
+    } else if (obj.permission_ids) {
+      parts.push(`权限ID: [${obj.permission_ids.join(', ')}]`)
+    }
+    
     return parts.join(' | ') || JSON.stringify(obj)
   } catch {
     return row.detail

@@ -1,4 +1,41 @@
-const { run } = require('../db');
+const { run, all } = require('../db');
+
+/**
+ * 权限映射缓存（进程内缓存，避免频繁查询）
+ */
+let permissionCache = null;
+let cacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5分钟缓存
+
+/**
+ * 获取权限映射表
+ */
+async function getPermissionMap() {
+  const now = Date.now();
+  if (permissionCache && (now - cacheTime) < CACHE_TTL) {
+    return permissionCache;
+  }
+  
+  const rows = await all('SELECT id, code, name FROM permissions');
+  permissionCache = new Map(rows.map(r => [r.id, { code: r.code, name: r.name }]));
+  cacheTime = now;
+  return permissionCache;
+}
+
+/**
+ * 丰富权限 ID 信息，返回包含名称的数组
+ */
+async function enrichPermissionIds(permissionIds) {
+  if (!permissionIds || !Array.isArray(permissionIds) || permissionIds.length === 0) {
+    return [];
+  }
+  
+  const map = await getPermissionMap();
+  return permissionIds.map(id => {
+    const perm = map.get(id);
+    return perm ? { id, code: perm.code, name: perm.name } : { id, code: 'unknown', name: '未知权限' };
+  });
+}
 
 /**
  * 操作日志记录中间件
@@ -13,6 +50,12 @@ async function logOperation({ module, action, targetId, targetName, detail, req 
   try {
     const user = req.user || {};
     const ip = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.ip || null;
+    
+    // 如果 detail 包含 permission_ids，自动补充权限名称（人类可读）
+    if (detail && detail.permission_ids) {
+      detail.permission_names = await enrichPermissionIds(detail.permission_ids);
+    }
+    
     const detailStr = detail ? JSON.stringify(detail) : null;
 
     await run(
