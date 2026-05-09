@@ -81,7 +81,7 @@ router.post('/users', upload.single('file'), permissionMiddleware('user-create')
       const rowNum = i + 2; // Excel 行号（从2开始，第1行是表头）
 
       // 必填校验
-      const missing = requireFields(row, ['用户名', '姓名', '密码']);
+      const missing = requireFields(row, ['用户名', '姓名']);
       if (missing) {
         errors.push({ row: rowNum, 错误: `缺少必填字段: ${missing.join(', ')}` });
         continue;
@@ -91,19 +91,19 @@ router.post('/users', upload.single('file'), permissionMiddleware('user-create')
       const name = trim(row['姓名']);
       const password = trim(row['密码']);
 
-      if (!username || !name || !password) {
-        errors.push({ row: rowNum, 错误: '用户名、姓名、密码不能为空' });
+      if (!username || !name) {
+        errors.push({ row: rowNum, 错误: '用户名、姓名不能为空' });
         continue;
       }
-      if (password.length < 8) {
-        errors.push({ row: rowNum, 错误: '密码至少8位' });
+      if (password && password.length < 8) {
+        errors.push({ row: rowNum, 错误: '密码长度不能少于8位' });
         continue;
       }
 
       // 检查用户名是否已存在
       const exist = await get('SELECT id FROM users WHERE username = ?', [username]);
       if (exist) {
-        existSkip.push({ row: rowNum, 用户名, 原因: '用户名已存在，跳过' });
+        existSkip.push({ row: rowNum, 用户名: username, 原因: '用户名已存在，跳过' });
         continue;
       }
 
@@ -117,9 +117,9 @@ router.post('/users', upload.single('file'), permissionMiddleware('user-create')
       const phone = trim(row['手机号']);
       const status = (trim(row['状态']) || 'active').toLowerCase() === '禁用' ? 'disabled' : 'active';
 
-      // 密码加密
+      // 密码加密（未提供密码时使用默认密码）
       const bcrypt = require('bcryptjs');
-      const hash = bcrypt.hashSync(password, 10);
+      const hash = bcrypt.hashSync(password || '123456', 10);
 
       const result = await run(
         `INSERT INTO users (username, password, name, email, phone, dept_id, role_id, status)
@@ -127,7 +127,7 @@ router.post('/users', upload.single('file'), permissionMiddleware('user-create')
         [username, hash, name, email, phone, deptId, roleId, status]
       );
 
-      success.push({ row: rowNum, 用户名, 新ID: result.lastID });
+      success.push({ row: rowNum, 用户名: username, 姓名: name, 新ID: result.lastID });
     }
 
     res.json({
