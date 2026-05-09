@@ -16,14 +16,11 @@ export function exportOperationLogs(params) {
 
 // ─── 导入 ────────────────────────────────────────────────
 export function importUsers(formData) {
-  return request({ url: '/import/users', method: 'post', data: formData,
-    headers: { 'Content-Type': 'multipart/form-data' } })
+  return request({ url: '/import/users', method: 'post', data: formData })
 }
 export function importDepartments(formData) {
-  return request({ url: '/import/departments', method: 'post', data: formData,
-    headers: { 'Content-Type': 'multipart/form-data' } })
+  return request({ url: '/import/departments', method: 'post', data: formData })
 }
 export function importRoles(formData) {
-  return request({ url: '/import/roles', method: 'post', data: formData,
-    headers: { 'Content-Type': 'multipart/form-data' } })
+  return request({ url: '/import/roles', method: 'post', data: formData })
 }
