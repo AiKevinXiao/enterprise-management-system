@@ -44,6 +44,12 @@ const routes = [
         component: () => import('../views/OperationLog.vue'),
         meta: { title: '操作日志', permission: 'log-view' }
       },
+      {
+        path: 'import-export',
+        name: 'ImportExport',
+        component: () => import('../views/ImportExport.vue'),
+        meta: { title: '数据导入导出', permission: 'user-view' }
+      },
 
     ]
   }

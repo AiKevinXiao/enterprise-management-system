@@ -13,6 +13,8 @@ app.use('/api/departments', require('./routes/departments'));
 app.use('/api/roles', require('./routes/roles'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/operation-logs', require('./routes/operation_logs'));
+app.use('/api/export', require('./routes/export'));
+app.use('/api/import', require('./routes/import'));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
