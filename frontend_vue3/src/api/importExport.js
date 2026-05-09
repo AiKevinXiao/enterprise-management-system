@@ -1,4 +1,4 @@
-import request from '../utils/request'
+import request from './request'
 
 // ─── 导出 ────────────────────────────────────────────────
 export function exportUsers() {

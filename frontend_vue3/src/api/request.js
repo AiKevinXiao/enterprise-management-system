@@ -22,6 +22,10 @@ api.interceptors.request.use(
 // 响应拦截器
 api.interceptors.response.use(
   response => {
+    // 处理 blob 响应（文件下载）
+    if (response.config.responseType === 'blob' || response.data instanceof Blob) {
+      return response.data
+    }
     const res = response.data
     const hasCode = typeof res.code === 'number'
     if (hasCode) {
