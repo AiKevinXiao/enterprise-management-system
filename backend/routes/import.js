@@ -50,7 +50,7 @@ function trim(v) {
 }
 
 // ─── 导入用户 ────────────────────────────────────────────────────────────────
-router.post('/users', permissionMiddleware('user-create'), async (req, res) => {
+router.post('/users', upload.single('file'), permissionMiddleware('user-create'), async (req, res) => {
   try {
     const file = req.file;
     if (!file) return res.status(400).json({ message: '请上传 Excel 文件' });
@@ -143,7 +143,7 @@ router.post('/users', permissionMiddleware('user-create'), async (req, res) => {
 });
 
 // ─── 导入部门 ────────────────────────────────────────────────────────────────
-router.post('/departments', permissionMiddleware('dept-create'), async (req, res) => {
+router.post('/departments', upload.single('file'), permissionMiddleware('dept-create'), async (req, res) => {
   try {
     const file = req.file;
     if (!file) return res.status(400).json({ message: '请上传 Excel 文件' });
@@ -213,7 +213,7 @@ router.post('/departments', permissionMiddleware('dept-create'), async (req, res
 });
 
 // ─── 导入角色 ────────────────────────────────────────────────────────────────
-router.post('/roles', permissionMiddleware('role-create'), async (req, res) => {
+router.post('/roles', upload.single('file'), permissionMiddleware('role-create'), async (req, res) => {
   try {
     const file = req.file;
     if (!file) return res.status(400).json({ message: '请上传 Excel 文件' });
