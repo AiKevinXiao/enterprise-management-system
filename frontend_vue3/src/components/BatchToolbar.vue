@@ -181,8 +181,20 @@ const moduleMap = {
 
 const moduleLabel = computed(() => moduleMap[props.module]?.label || '')
 
+// 权限码映射：按钮 action -> 数据库权限码
+const ACTION_PERM_MAP = {
+  'add': 'create',
+  'batch-delete': 'delete',
+  'batch-disable': 'edit', // 禁用视为编辑权限
+  'batch-enable': 'edit',
+  'batch-restore': 'restore',
+  'import': 'import',
+  'export': 'export',
+}
+
 function hasPermission(action) {
-  const code = props.permissionPrefix + action
+  const permCode = ACTION_PERM_MAP[action] || action
+  const code = props.permissionPrefix + permCode
   return userStore.hasPermission(code)
 }
 
