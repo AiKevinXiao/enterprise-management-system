@@ -35,3 +35,7 @@ export function getRolePermissions(id) {
 export function updateRolePermissions(id, permissionIds) {
   return api.put(`/roles/${id}/permissions`, { permission_ids: permissionIds })
 }
+
+export function batchAction(action, ids) {
+  return api.put('/roles/batch', { action, ids })
+}

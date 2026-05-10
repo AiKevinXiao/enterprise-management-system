@@ -133,6 +133,32 @@ router.post('/', async (req, res) => {
 });
 
 // 获取角色详情（含权限，不区分是否已删除，回收站也需要查看）
+
+
+// 批量操作
+router.put('/batch', async (req, res) => {
+  const { action, ids } = req.body;
+  if (!ids || !Array.isArray(ids) || !ids.length) {
+    return res.status(400).json({ code: 400, message: '请选择要操作的角色' });
+  }
+  const placeholders = ids.map(() => '?').join(',');
+  let sql;
+  if (action === 'delete') {
+    sql = `UPDATE roles SET deleted_at = NOW() WHERE id IN (${placeholders}) AND deleted_at IS NULL`;
+  } else if (action === 'restore') {
+    sql = `UPDATE roles SET deleted_at = NULL WHERE id IN (${placeholders}) AND deleted_at IS NOT NULL`;
+  } else if (action === 'enable') {
+    sql = `UPDATE roles SET status = 'active' WHERE id IN (${placeholders})`;
+  } else if (action === 'disable') {
+    sql = `UPDATE roles SET status = 'disabled' WHERE id IN (${placeholders})`;
+  } else {
+    return res.status(400).json({ code: 400, message: '不支持的操作' });
+  }
+  await run(sql, ids);
+  res.json({ code: 200, message: '操作成功' });
+});
+
+
 router.get('/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -348,5 +374,6 @@ router.put('/:id/permissions', async (req, res) => {
     res.status(500).json({ code: 500, message: err.message });
   }
 });
+
 
 module.exports = router;

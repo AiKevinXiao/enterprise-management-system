@@ -35,6 +35,7 @@ const CREATE_TABLES = [
     status VARCHAR(20) DEFAULT 'active',
     deleted_at DATETIME DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE KEY code (code),
     KEY parent_id (parent_id),
@@ -69,6 +70,7 @@ const CREATE_TABLES = [
     user_count INT DEFAULT 0,
     deleted_at DATETIME DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE KEY name (name),
     UNIQUE KEY code (code)
@@ -131,6 +133,14 @@ const MIGRATIONS = [
             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'departments' AND COLUMN_NAME = 'status'`,
     apply: `ALTER TABLE departments ADD COLUMN status VARCHAR(20) DEFAULT 'active' AFTER quota`,
     post: `UPDATE departments SET status = 'active' WHERE status IS NULL`,
+  },
+  {
+    table: 'roles',
+    column: 'status',
+    check: `SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'roles' AND COLUMN_NAME = 'status'`,
+    apply: `ALTER TABLE roles ADD COLUMN status VARCHAR(20) DEFAULT 'active' AFTER data_scope`,
+    post: `UPDATE roles SET status = 'active' WHERE status IS NULL`,
   },
 ];
 

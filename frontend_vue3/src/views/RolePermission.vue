@@ -19,18 +19,22 @@
                   @click="currentView = 'deleted'; handleViewChange()"
                 >回收站</span>
               </div>
-              <el-button
+              <BatchToolbar
                 v-if="currentView === 'active'"
-                type="primary"
-                size="small"
-                v-permission="'role-create'"
-                @click="handleAddRole"
-              >
-                <el-icon><Plus /></el-icon> 新增
-              </el-button>
+                module="roles"
+                :selection="selectedRoleIds"
+                :current-view="currentView"
+                permission-prefix="role-"
+                add-label="新增角色"
+                @add="handleAddRole"
+                @batch-delete="handleBatchDelete"
+                @batch-disable="handleBatchDisable"
+                @batch-enable="handleBatchEnable"
+              />
             </div>
           </template>
 
+          <!-- 正常角色列表 -->
           <!-- 正常角色列表 -->
           <div v-if="currentView === 'active'" class="role-list">
             <div
@@ -82,7 +86,14 @@
                   恢复
                 </el-button>
               </div>
+             <div v-if="currentView === 'deleted' && selectedRoleIds.length > 0"
+                 style="padding: 10px 12px; border-top: 1px solid var(--el-border-color-light); display: flex; align-items: center; gap: 8px;">
+              <span style="color: var(--el-text-color-secondary); font-size: 13px;">已选 {{ selectedRoleIds.length }} 项</span>
+              <el-button type="success" size="small" v-permission="'role-restore'" @click="handleBatchRestore">
+                <el-icon><RefreshRight /></el-icon> 批量恢复
+              </el-button>
             </div>
+           </div>
             <el-empty v-if="deletedRoles.length === 0" description="回收站为空" />
           </div>
         </el-card>
@@ -164,8 +175,9 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
-import { getRoleList, createRole, updateRole, deleteRole, restoreRole, getAllPermissions, getRolePermissions, updateRolePermissions } from '../api/roles'
+import { Plus, RefreshRight } from '@element-plus/icons-vue'
+import BatchToolbar from '../components/BatchToolbar.vue'
+import { getRoleList, createRole, updateRole, deleteRole, restoreRole, getAllPermissions, getRolePermissions, updateRolePermissions, batchAction } from '../api/roles'
 import { useUserStore } from '../stores/user'
 
 const userStore = useUserStore()
@@ -185,6 +197,7 @@ const permissionTreeRef = ref(null)
 const saving = ref(false)
 const currentView = ref('active')
 const deletedRoles = ref([])
+const selectedRoleIds = ref([])
 
 const treeProps = computed(() => ({
   label: 'name',
@@ -463,6 +476,63 @@ async function handleSavePermissions() {
   }
 }
 
+function toggleRoleSelection(id) {
+  const idx = selectedRoleIds.value.indexOf(id)
+  if (idx >= 0) {
+    selectedRoleIds.value.splice(idx, 1)
+  } else {
+    selectedRoleIds.value.push(id)
+  }
+}
+
+async function handleBatchDelete(ids) {
+  try {
+    await ElMessageBox.confirm(`确定批量删除选中的 ${ids.length} 个角色吗？`, '批量删除', { type: 'warning' })
+    const res = await batchAction('delete', ids)
+    if (res.success) {
+      ElMessage.success('批量删除成功')
+      selectedRoleIds.value = []
+      if (ids.includes(currentRoleId.value)) currentRoleId.value = null
+      handleViewChange()
+    } else {
+      ElMessage.error(res.message || '批量删除失败')
+    }
+  } catch {}
+}
+
+async function handleBatchDisable(ids) {
+  const res = await batchAction('disable', ids)
+  if (res.success) {
+    ElMessage.success('批量禁用成功')
+    selectedRoleIds.value = []
+    handleViewChange()
+  } else {
+    ElMessage.error(res.message || '批量禁用失败')
+  }
+}
+
+async function handleBatchEnable(ids) {
+  const res = await batchAction('enable', ids)
+  if (res.success) {
+    ElMessage.success('批量启用成功')
+    selectedRoleIds.value = []
+    handleViewChange()
+  } else {
+    ElMessage.error(res.message || '批量启用失败')
+  }
+}
+
+async function handleBatchRestore() {
+  const res = await batchAction('restore', selectedRoleIds.value)
+  if (res.success) {
+    ElMessage.success('批量恢复成功')
+    selectedRoleIds.value = []
+    handleViewChange()
+  } else {
+    ElMessage.error(res.message || '批量恢复失败')
+  }
+}
+
 onMounted(async () => {
   await loadAllPermissions()
   await loadRoleList()
@@ -534,6 +604,10 @@ onMounted(async () => {
 .role-actions {
   flex-shrink: 0;
   margin-left: 12px;
+}
+
+.role-checkbox {
+  flex-shrink: 0;
 }
 
 .role-item.deleted {

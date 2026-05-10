@@ -31,6 +31,29 @@ router.post('/', async (req, res) => {
   res.json({ code: 200, data: dept });
 });
 
+// 批量操作（必须在 /:id 之前定义）
+router.put('/batch', async (req, res) => {
+  const { action, ids } = req.body;
+  if (!ids || !Array.isArray(ids) || !ids.length) {
+    return res.status(400).json({ code: 400, message: '请选择要操作的部门' });
+  }
+  const placeholders = ids.map(() => '?').join(',');
+  let sql;
+  if (action === 'delete') {
+    sql = `UPDATE departments SET deleted_at = NOW() WHERE id IN (${placeholders}) AND deleted_at IS NULL`;
+  } else if (action === 'restore') {
+    sql = `UPDATE departments SET deleted_at = NULL WHERE id IN (${placeholders}) AND deleted_at IS NOT NULL`;
+  } else if (action === 'enable') {
+    sql = `UPDATE departments SET status = 'active' WHERE id IN (${placeholders})`;
+  } else if (action === 'disable') {
+    sql = `UPDATE departments SET status = 'disabled' WHERE id IN (${placeholders})`;
+  } else {
+    return res.status(400).json({ code: 400, message: '不支持的操作' });
+  }
+  await run(sql, ids);
+  res.json({ code: 200, message: '操作成功' });
+});
+
 // 更新部门
 router.put('/:id', async (req, res) => {
   const { id } = req.params;

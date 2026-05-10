@@ -40,7 +40,7 @@
     <!-- 表格 -->
     <el-card class="table-card">
       <template #header>
-        <div class="table-header">
+        <div class="toolbar-wrapper">
           <div class="view-tabs">
             <span
               v-for="opt in viewOptions"
@@ -50,54 +50,29 @@
               @click="currentView = opt.value; handleViewChange()"
             >{{ opt.label }}</span>
           </div>
-          <div class="table-actions" v-if="currentView === 'active'">
-            <template v-if="selectedRows.length">
-              <el-button type="danger" v-permission="'user-delete'" @click="handleBatchAction('delete')">
-                批量删除
-              </el-button>
-              <el-button v-permission="'user-delete'" @click="handleBatchAction('disable')">
-                批量禁用
-              </el-button>
-              <el-button v-permission="'user-delete'" @click="handleBatchAction('enable')">
-                批量启用
-              </el-button>
-            </template>
-            <el-button type="primary" v-permission="'user-create'" @click="handleAdd">
-              <el-icon><Plus /></el-icon> 新增用户
-            </el-button>
-            <el-button v-permission="'user-view'" @click="handleExport">
-              <el-icon><Download /></el-icon> 导出
-            </el-button>
-            <el-popover v-permission="'user-create'" placement="bottom-end" :width="300" trigger="click">
-              <template #reference>
-                <el-button>
-                  <el-icon><Upload /></el-icon> 导入
-                </el-button>
-              </template>
-              <div class="import-popover">
-                <p style="margin:0 0 12px;color:var(--el-text-color-secondary);font-size:12px;">请下载模板，填写后上传</p>
-                <el-button size="small" @click="downloadTemplate" style="width:100%;margin-bottom:8px;">下载模板</el-button>
-                <el-upload
-                  ref="uploadRef"
-                  :auto-upload="false"
-                  :limit="1"
-                  accept=".xlsx,.xls"
-                  :on-change="handleFileChange"
-                  :on-exceed="() => ElMessage.warning('每次只能上传1个文件')"
-                >
-                  <el-button size="small" type="primary" style="width:100%;">选择文件</el-button>
-                </el-upload>
-                <el-button v-if="uploadFile" size="small" type="success" @click="submitUpload" :loading="uploading" style="width:100%;margin-top:8px;">
-                  开始导入
-                </el-button>
-              </div>
-            </el-popover>
-          </div>
-          <div class="table-actions" v-else>
-            <el-button type="success" v-permission="'user-restore'" v-if="selectedRows.length" @click="handleBatchRestore">
-              <el-icon><Refresh /></el-icon> 批量恢复
-            </el-button>
-          </div>
+          <BatchToolbar
+            v-if="currentView === 'active'"
+            module="users"
+            :selection="selectedRows"
+            :current-view="currentView"
+            permission-prefix="user-"
+            add-label="新增用户"
+            ref="batchToolbarRef"
+            @add="handleAdd"
+            @batch-delete="() => handleBatchAction('delete')"
+            @batch-disable="() => handleBatchAction('disable')"
+            @batch-enable="() => handleBatchAction('enable')"
+            @import="handleImportOpen"
+            @import-success="loadData"
+          />
+          <el-button
+            v-if="currentView === 'deleted' && selectedRows.length"
+            type="success"
+            v-permission="'user-restore'"
+            @click="handleBatchRestore"
+          >
+            <el-icon><Refresh /></el-icon> 批量恢复
+          </el-button>
         </div>
       </template>
 
@@ -219,11 +194,11 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Refresh, Plus, Download, Upload } from '@element-plus/icons-vue'
+import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import { getUserList, createUser, updateUser, deleteUser, restoreUser, resetPassword, batchAction } from '../api/users'
 import { getDepartmentList } from '../api/departments'
 import { getRoleList } from '../api/roles'
-import { exportUsers, importUsers } from '../api/importExport'
+import BatchToolbar from '../components/BatchToolbar.vue'
 import { useUserStore } from '../stores/user'
 
 // 数据状态
@@ -233,6 +208,7 @@ const deptTree = ref([])
 const roleList = ref([])
 const currentView = ref('active')
 const selectedRows = ref([])
+const batchToolbarRef = ref(null)
 
 // 视图选项（根据权限动态生成）
 const viewOptions = computed(() => {
@@ -296,10 +272,6 @@ const resetPwdRules = {
   password: [{ required: true, message: '请输入新密码', trigger: 'blur' }]
 }
 
-// 导入相关
-const uploadRef = ref(null)
-const uploadFile = ref(null)
-const uploading = ref(false)
 
 // 方法
 function getStatusType(status) {
@@ -547,59 +519,19 @@ async function handleResetPwdSubmit() {
   }
 }
 
-async function handleExport() {
-  try {
-    const res = await exportUsers()
-    const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `用户列表_${new Date().toLocaleDateString()}.xlsx`
-    a.click()
-    URL.revokeObjectURL(url)
-    ElMessage.success('导出成功')
-  } catch (e) {
-    ElMessage.error('导出失败')
+function handleImportOpen() {
+  if (batchToolbarRef.value) {
+    batchToolbarRef.value.openImport()
   }
 }
 
-function downloadTemplate() {
-  const headers = ['username', 'name', 'password', 'dept_id', 'role_id', 'phone', 'email', 'status']
-  const example = ['zhangsan', '张三', '请填写密码', 1, 1, '13800138000', 'zhangsan@example.com', 'active']
-  const data = [headers, example]
-  // 用前端XLSX生成模板（如果已安装可在这里引入）
-  // 简化版：下载默认模板字符串提示
-  ElMessage.info('请使用导出功能获取最新数据格式模板')
-}
 
-function handleFileChange(file) {
-  uploadFile.value = file.raw
-}
 
-async function submitUpload() {
-  if (!uploadFile.value) {
-    ElMessage.warning('请先选择文件')
-    return
-  }
-  uploading.value = true
-  try {
-    const formData = new FormData()
-    formData.append('file', uploadFile.value)
-    const res = await importUsers(formData)
-    if (res.success) {
-      ElMessage.success(`导入成功：${res.data.success} 条，失败：${res.data.failed} 条`)
-      uploadRef.value?.clearFiles()
-      uploadFile.value = null
-      loadData()
-    } else {
-      ElMessage.error(res.message || '导入失败')
-    }
-  } catch (e) {
-    ElMessage.error('网络错误')
-  } finally {
-    uploading.value = false
-  }
-}
+
+
+
+
+
 
 onMounted(() => {
   loadData()

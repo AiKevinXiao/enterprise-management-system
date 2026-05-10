@@ -16,13 +16,23 @@
               @click="currentView = 'deleted'; loadData()"
             >回收站</span>
           </div>
-          <el-button type="primary" size="small" v-permission="'dept-create'" @click="handleAdd">
-            <el-icon><Plus /></el-icon> 新增部门
-          </el-button>
+          <BatchToolbar
+            v-if="currentView === 'active'"
+            module="departments"
+            :selection="selectedRows"
+            :current-view="currentView"
+            permission-prefix="dept-"
+            add-label="新增部门"
+            @add="handleAdd"
+            @batch-delete="handleBatchDelete"
+            @batch-disable="handleBatchDisable"
+            @batch-enable="handleBatchEnable"
+            @batch-restore="handleBatchRestore"
+          />
         </div>
       </template>
 
-      <el-table :data="currentView === 'active' ? tableData : deletedList" v-loading="loading" row-key="id" default-expand-all>
+      <el-table :data="currentView === 'active' ? tableData : deletedList" v-loading="loading" row-key="id" default-expand-all @selection-change="handleSelectionChange">
         <el-table-column prop="name" label="部门名称" min-width="200" />
         <el-table-column prop="code" label="部门编码" width="150" />
         <el-table-column label="状态" width="100">
@@ -85,8 +95,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
-import { getDepartmentList, createDepartment, updateDepartment, deleteDepartment, restoreDepartment } from '../api/departments'
+import { Plus, Delete, Upload, Download, RefreshRight } from '@element-plus/icons-vue'
+import BatchToolbar from '../components/BatchToolbar.vue'
+import { getDepartmentList, createDepartment, updateDepartment, deleteDepartment, restoreDepartment, batchAction } from '../api/departments'
 
 const loading = ref(false)
 const tableData = ref([])
@@ -112,6 +123,7 @@ const rules = {
 
 const currentView = ref('active')
 const deletedList = ref([])
+const selectedRows = ref([])
 
 async function loadData() {
   loading.value = true
@@ -220,6 +232,58 @@ async function handleRestore(row) {
     }
   } catch (e) {
     ElMessage.error('网络错误')
+  }
+}
+
+
+function handleSelectionChange(rows) {
+  selectedRows.value = rows.map(r => r.id)
+}
+
+async function handleBatchDelete(ids) {
+  try {
+    await ElMessageBox.confirm(`确定批量删除选中的 ${ids.length} 个部门吗？`, '批量删除', { type: 'warning' })
+    const res = await batchAction('delete', ids)
+    if (res.success) {
+      ElMessage.success('批量删除成功')
+      selectedRows.value = []
+      loadData()
+    } else {
+      ElMessage.error(res.message || '批量删除失败')
+    }
+  } catch {}
+}
+
+async function handleBatchDisable(ids) {
+  const res = await batchAction('disable', ids)
+  if (res.success) {
+    ElMessage.success('批量禁用成功')
+    selectedRows.value = []
+    loadData()
+  } else {
+    ElMessage.error(res.message || '批量禁用失败')
+  }
+}
+
+async function handleBatchEnable(ids) {
+  const res = await batchAction('enable', ids)
+  if (res.success) {
+    ElMessage.success('批量启用成功')
+    selectedRows.value = []
+    loadData()
+  } else {
+    ElMessage.error(res.message || '批量启用失败')
+  }
+}
+
+async function handleBatchRestore() {
+  const res = await batchAction('restore', selectedRows.value)
+  if (res.success) {
+    ElMessage.success('批量恢复成功')
+    selectedRows.value = []
+    loadData()
+  } else {
+    ElMessage.error(res.message || '批量恢复失败')
   }
 }
 

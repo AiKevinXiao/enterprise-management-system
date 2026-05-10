@@ -23,3 +23,7 @@ export function deleteDepartment(id) {
 export function restoreDepartment(id) {
   return api.put(`/departments/${id}/restore`)
 }
+
+export function batchAction(action, ids) {
+  return api.put('/departments/batch', { action, ids })
+}
