@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { initDB } = require('./db');
+const { initDB, seedData } = require('./db');
 
 const app = express();
 
@@ -29,6 +29,7 @@ const PORT = process.env.PORT || 3000;
 
 async function start() {
   await initDB();
+  await seedData();
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
